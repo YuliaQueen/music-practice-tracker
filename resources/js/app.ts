@@ -6,6 +6,8 @@ import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 import { createApp, DefineComponent, h } from 'vue';
 import { ZiggyVue } from 'ziggy-js';
 import { useTheme } from './composables/useTheme';
+import { useSimpleI18n } from './composables/useSimpleI18n';
+import i18n from './i18n';
 
 const appName = import.meta.env.VITE_APP_NAME || 'Music Practice Tracker';
 
@@ -21,9 +23,18 @@ createInertiaApp({
 
         // Инициализируем тему
         useTheme();
+        
+        // Инициализируем i18n
+        try {
+            const { loadLocale } = useSimpleI18n();
+            loadLocale();
+        } catch (error) {
+            console.warn('Error initializing i18n:', error);
+        }
 
         app.use(plugin)
             .use(ZiggyVue)
+            .use(i18n)
             .mount(el);
     },
     progress: {

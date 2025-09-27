@@ -6,9 +6,12 @@ import DropdownLink from '@/Components/DropdownLink.vue';
 import NavLink from '@/Components/NavLink.vue';
 import ResponsiveNavLink from '@/Components/ResponsiveNavLink.vue';
 import ThemeToggle from '@/Components/ThemeToggle.vue';
+import LanguageSwitcher from '@/Components/LanguageSwitcher.vue';
 import { Link } from '@inertiajs/vue3';
+import { useSimpleI18n } from '@/composables/useSimpleI18n';
 
 const showingNavigationDropdown = ref(false);
+const { t } = useSimpleI18n();
 </script>
 
 <template>
@@ -38,12 +41,17 @@ const showingNavigationDropdown = ref(false);
                                     :href="route('dashboard')"
                                     :active="route().current('dashboard')"
                                 >
-                                    Дашборд
+                                    {{ t('navigation.dashboard') }}
                                 </NavLink>
                             </div>
                         </div>
 
                         <div class="hidden sm:ms-6 sm:flex sm:items-center">
+                            <!-- Language Switcher -->
+                            <div class="relative me-3">
+                                <LanguageSwitcher />
+                            </div>
+                            
                             <!-- Theme Toggle -->
                             <div class="relative me-3">
                                 <ThemeToggle />
@@ -80,14 +88,14 @@ const showingNavigationDropdown = ref(false);
                                         <DropdownLink
                                             :href="route('profile.edit')"
                                         >
-                                            Профиль
+                                            {{ t('navigation.profile') }}
                                         </DropdownLink>
                                         <DropdownLink
                                             :href="route('logout')"
                                             method="post"
                                             as="button"
                                         >
-                                            Выйти
+                                            {{ t('navigation.logout') }}
                                         </DropdownLink>
                                     </template>
                                 </Dropdown>

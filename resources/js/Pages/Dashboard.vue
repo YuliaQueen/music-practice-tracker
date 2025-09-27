@@ -2,6 +2,7 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import { Head, router, useForm } from '@inertiajs/vue3';
+import { useSimpleI18n } from '@/composables/useSimpleI18n';
 
 interface Exercise {
     id: number
@@ -21,6 +22,7 @@ interface Props {
 
 const props = defineProps<Props>()
 const form = useForm({})
+const { t } = useSimpleI18n()
 
 // Функции для управления упражнениями
 const getTypeIcon = (type: string): string => {
@@ -52,14 +54,14 @@ const getStatusBadgeClass = (status: string): string => {
 </script>
 
 <template>
-    <Head title="Дашборд" />
+    <Head :title="t('dashboard.title')" />
 
     <AuthenticatedLayout>
         <template #header>
             <h2
                 class="text-xl font-semibold leading-tight text-gray-800 dark:text-gray-200"
             >
-                Дашборд
+                {{ t('dashboard.title') }}
             </h2>
         </template>
 
@@ -186,7 +188,7 @@ const getStatusBadgeClass = (status: string): string => {
                             
                             <div v-if="exercises.length > 5" class="text-center pt-4">
                                 <PrimaryButton @click="router.visit('/exercises')" size="sm">
-                                    Показать все ({{ exercises.length }})
+                                    {{ t('dashboard.showAll') }} ({{ exercises.length }})
                                 </PrimaryButton>
                             </div>
                         </div>
@@ -196,29 +198,27 @@ const getStatusBadgeClass = (status: string): string => {
                 <!-- Добро пожаловать -->
                 <div class="mt-8 bg-white overflow-hidden shadow-sm sm:rounded-lg dark:bg-gray-800 dark:shadow-gray-900/20">
                     <div class="p-6">
-                        <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">Добро пожаловать в Music Practice Tracker!</h3>
+                        <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">{{ t('dashboard.welcome') }}</h3>
                         <p class="text-gray-600 dark:text-gray-300 mb-4">
-                            Это ваш личный помощник для планирования и отслеживания музыкальных занятий. 
-                            Здесь вы можете создавать структурированные занятия, использовать таймеры для упражнений 
-                            и отслеживать свой прогресс.
+                            {{ t('dashboard.description') }}
                         </p>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-500 dark:text-gray-400">
                             <div>
-                                <h4 class="font-medium text-gray-900 dark:text-gray-100 mb-2">Возможности:</h4>
+                                <h4 class="font-medium text-gray-900 dark:text-gray-100 mb-2">{{ t('dashboard.features') }}:</h4>
                                 <ul class="space-y-1">
-                                    <li>• Создание структурированных занятий</li>
-                                    <li>• Таймеры для каждого упражнения</li>
-                                    <li>• Отслеживание прогресса</li>
-                                    <li>• Шаблоны занятий</li>
+                                    <li>• {{ t('dashboard.feature1') }}</li>
+                                    <li>• {{ t('dashboard.feature2') }}</li>
+                                    <li>• {{ t('dashboard.feature3') }}</li>
+                                    <li>• {{ t('dashboard.feature4') }}</li>
                                 </ul>
                             </div>
                             <div>
-                                <h4 class="font-medium text-gray-900 dark:text-gray-100 mb-2">Как начать:</h4>
+                                <h4 class="font-medium text-gray-900 dark:text-gray-100 mb-2">{{ t('dashboard.howToStart') }}:</h4>
                                 <ul class="space-y-1">
-                                    <li>• Создайте ваше первое занятие</li>
-                                    <li>• Добавьте упражнения с таймерами</li>
-                                    <li>• Начните занятие и следите за прогрессом</li>
-                                    <li>• Создавайте шаблоны для повторного использования</li>
+                                    <li>• {{ t('dashboard.step1') }}</li>
+                                    <li>• {{ t('dashboard.step2') }}</li>
+                                    <li>• {{ t('dashboard.step3') }}</li>
+                                    <li>• {{ t('dashboard.step4') }}</li>
                                 </ul>
                             </div>
                         </div>
