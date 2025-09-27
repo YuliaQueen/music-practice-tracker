@@ -7,7 +7,7 @@ import { createApp, DefineComponent, h } from 'vue';
 import { ZiggyVue } from '../../vendor/tightenco/ziggy';
 import { useTheme } from './composables/useTheme';
 
-const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
+const appName = import.meta.env.VITE_APP_NAME || 'Music Practice Tracker';
 
 createInertiaApp({
     title: (title) => `${title} - ${appName}`,

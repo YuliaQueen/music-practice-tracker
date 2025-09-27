@@ -52,7 +52,7 @@ const getStatusBadgeClass = (status: string): string => {
 </script>
 
 <template>
-    <Head title="Dashboard" />
+    <Head title="Дашборд" />
 
     <AuthenticatedLayout>
         <template #header>
