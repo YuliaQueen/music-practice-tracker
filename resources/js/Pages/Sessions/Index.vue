@@ -114,6 +114,14 @@
                                         >
                                             Начать
                                         </SecondaryButton>
+                                        
+                                        <DangerButton
+                                            @click="deleteSession(session)"
+                                            size="sm"
+                                            class="text-xs"
+                                        >
+                                            🗑️ Удалить
+                                        </DangerButton>
                                     </div>
                                 </div>
                             </div>
@@ -178,11 +186,12 @@
 </template>
 
 <script setup lang="ts">
-import { useForm } from '@inertiajs/vue3'
+import { useForm, router } from '@inertiajs/vue3'
 import { Link } from '@inertiajs/vue3'
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
 import PrimaryButton from '@/Components/PrimaryButton.vue'
 import SecondaryButton from '@/Components/SecondaryButton.vue'
+import DangerButton from '@/Components/DangerButton.vue'
 
 interface SessionBlock {
     id: number
@@ -275,5 +284,18 @@ const startSession = (session: Session) => {
     form.post(route('sessions.start', session.id), {
         preserveScroll: true,
     })
+}
+
+const deleteSession = (session: Session) => {
+    if (confirm(`Вы уверены, что хотите удалить сессию "${session.title}"? Это действие нельзя отменить.`)) {
+        router.delete(route('sessions.destroy', session.id), {
+            onSuccess: () => {
+                // Успешно удалено
+            },
+            onError: () => {
+                alert('Ошибка при удалении сессии')
+            }
+        })
+    }
 }
 </script>

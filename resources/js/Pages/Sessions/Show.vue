@@ -7,6 +7,13 @@
                 </h2>
                 <div class="flex space-x-2">
                     <span :class="statusBadgeClass">{{ statusLabel }}</span>
+                    <DangerButton
+                        @click="deleteSession"
+                        size="sm"
+                        class="text-xs"
+                    >
+                        🗑️ Удалить
+                    </DangerButton>
                 </div>
             </div>
         </template>
@@ -319,7 +326,7 @@
 
 <script setup lang="ts">
 import { computed, ref, onMounted, onUnmounted, watch } from 'vue'
-import { useForm } from '@inertiajs/vue3'
+import { useForm, router } from '@inertiajs/vue3'
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
 import PrimaryButton from '@/Components/PrimaryButton.vue'
 import SecondaryButton from '@/Components/SecondaryButton.vue'
@@ -654,4 +661,17 @@ watch(() => props.session.blocks, (newBlocks, oldBlocks) => {
         pauseTimer()
     }
 }, { deep: true })
+
+const deleteSession = () => {
+    if (confirm(`Вы уверены, что хотите удалить сессию "${props.session.title}"? Это действие нельзя отменить.`)) {
+        router.delete(route('sessions.destroy', props.session.id), {
+            onSuccess: () => {
+                // Успешно удалено
+            },
+            onError: () => {
+                alert('Ошибка при удалении сессии')
+            }
+        })
+    }
+}
 </script>

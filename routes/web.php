@@ -3,6 +3,7 @@
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SessionController;
 use App\Http\Controllers\StatisticsController;
+use App\Http\Controllers\ExerciseController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -17,7 +18,14 @@ Route::get('/', function () {
 });
 
 Route::get('/dashboard', function () {
-    return Inertia::render('Dashboard');
+    $exercises = \App\Domains\Planning\Models\Exercise::forUser(auth()->id())
+        ->orderBy('created_at', 'desc')
+        ->limit(10)
+        ->get();
+        
+    return Inertia::render('Dashboard', [
+        'exercises' => $exercises,
+    ]);
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware('auth')->group(function () {
@@ -34,6 +42,9 @@ Route::middleware('auth')->group(function () {
     
     // Статистика
     Route::get('/statistics', [StatisticsController::class, 'index'])->name('statistics.index');
+    
+    // Упражнения
+    Route::resource('exercises', ExerciseController::class);
 });
 
 require __DIR__.'/auth.php';

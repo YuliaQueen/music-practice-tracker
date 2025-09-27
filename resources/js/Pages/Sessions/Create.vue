@@ -15,6 +15,25 @@
                             <div class="mb-6">
                                 <h3 class="text-lg font-medium text-gray-900 mb-4">Основная информация</h3>
                                 
+                                <!-- Уведомление о добавленном упражнении -->
+                                <div v-if="exerciseData" class="mb-4 p-4 bg-green-50 border border-green-200 rounded-lg">
+                                    <div class="flex items-center">
+                                        <div class="flex-shrink-0">
+                                            <svg class="h-5 w-5 text-green-400" fill="currentColor" viewBox="0 0 20 20">
+                                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                                            </svg>
+                                        </div>
+                                        <div class="ml-3">
+                                            <h4 class="text-sm font-medium text-green-800">
+                                                Упражнение "{{ exerciseData.title }}" добавлено в занятие
+                                            </h4>
+                                            <p class="text-sm text-green-700 mt-1">
+                                                Вы можете добавить еще упражнения или изменить параметры этого упражнения ниже.
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                                
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div>
                                         <div class="flex items-center justify-between mb-2">
@@ -369,7 +388,7 @@ interface Block {
     title: string
     description: string
     type: string
-    duration: number
+    duration: number | string
 }
 
 interface PreviousExercise {
@@ -380,9 +399,18 @@ interface PreviousExercise {
     usage_count: number
 }
 
+interface ExerciseData {
+    id: number
+    title: string
+    type: string
+    duration: number
+    description?: string
+}
+
 interface Props {
     templates: Template[]
     previousExercises: PreviousExercise[]
+    exerciseData?: ExerciseData
 }
 
 const props = defineProps<Props>()
@@ -401,7 +429,10 @@ const exerciseSearchQuery = ref('')
 const exerciseSortBy = ref<'name' | 'usage' | 'duration'>('usage')
 
 const totalDuration = computed(() => {
-    return form.blocks.reduce((total, block) => total + (block.duration || 0), 0)
+    return form.blocks.reduce((total, block) => {
+        const duration = typeof block.duration === 'string' ? parseInt(block.duration) || 0 : block.duration || 0
+        return total + duration
+    }, 0)
 })
 
 // Фильтрация и сортировка упражнений
@@ -470,7 +501,7 @@ const addSelectedExercises = () => {
             title: exercise.title,
             description: exercise.description,
             type: exercise.type,
-            duration: exercise.duration,
+            duration: typeof exercise.duration === 'string' ? parseInt(exercise.duration) : exercise.duration,
         })
     })
     
@@ -592,7 +623,7 @@ const loadTemplate = (templateId: number | null) => {
             title: block.title,
             description: '',
             type: block.type,
-            duration: block.duration,
+            duration: typeof block.duration === 'string' ? parseInt(block.duration) : block.duration,
         }))
     }
 }
@@ -613,4 +644,19 @@ watch(() => form.blocks, () => {
         generateAutoTitle()
     }
 }, { deep: true })
+
+// Автоматически добавляем упражнение, если данные переданы
+if (props.exerciseData) {
+    form.blocks.push({
+        title: props.exerciseData.title,
+        description: props.exerciseData.description || '',
+        type: props.exerciseData.type,
+        duration: typeof props.exerciseData.duration === 'string' ? parseInt(props.exerciseData.duration) : props.exerciseData.duration,
+    })
+    
+    // Автоматически генерируем название
+    if (!form.title.trim()) {
+        generateAutoTitle()
+    }
+}
 </script>
