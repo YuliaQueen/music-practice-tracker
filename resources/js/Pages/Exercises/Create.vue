@@ -2,7 +2,7 @@
     <AuthenticatedLayout>
         <template #header>
             <div class="flex justify-between items-center">
-                <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+                <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
                     Создать упражнение
                 </h2>
                 <PrimaryButton @click="router.visit('/exercises')">
@@ -13,8 +13,8 @@
 
         <div class="py-12">
             <div class="max-w-2xl mx-auto sm:px-6 lg:px-8">
-                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                    <div class="p-6 text-gray-900">
+                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg dark:bg-gray-800 dark:shadow-gray-900/20">
+                    <div class="p-6 text-gray-900 dark:text-gray-100">
                         <form @submit.prevent="submit">
                             <div class="space-y-6">
                                 <!-- Название -->
@@ -38,7 +38,7 @@
                                     <textarea
                                         id="description"
                                         v-model="form.description"
-                                        class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm"
+                                        class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 dark:focus:border-indigo-400 dark:focus:ring-indigo-400"
                                         rows="3"
                                         placeholder="Дополнительные детали или цели упражнения"
                                     ></textarea>
@@ -51,7 +51,7 @@
                                     <select
                                         id="type"
                                         v-model="form.type"
-                                        class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm"
+                                        class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 dark:focus:border-indigo-400 dark:focus:ring-indigo-400"
                                         required
                                     >
                                         <option value="warmup">🔥 Разминка</option>
@@ -79,7 +79,7 @@
                                         required
                                         placeholder="5"
                                     />
-                                    <p class="mt-1 text-sm text-gray-500">От 1 до 480 минут (8 часов)</p>
+                                    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">От 1 до 480 минут (8 часов)</p>
                                     <InputError class="mt-2" :message="form.errors.planned_duration" />
                                 </div>
 
@@ -92,7 +92,7 @@
                                         type="datetime-local"
                                         class="mt-1 block w-full"
                                     />
-                                    <p class="mt-1 text-sm text-gray-500">Если не указано, упражнение можно начать в любое время</p>
+                                    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Если не указано, упражнение можно начать в любое время</p>
                                     <InputError class="mt-2" :message="form.errors.scheduled_for" />
                                 </div>
                             </div>
