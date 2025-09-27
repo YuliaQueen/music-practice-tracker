@@ -4,16 +4,15 @@ declare(strict_types=1);
 
 namespace App\Domains\Planning\Models;
 
-use App\Domains\Journal\Models\Note;
 use App\Domains\Shared\Models\BaseModel;
 use App\Domains\User\Models\User;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Database\Factories\SessionFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
@@ -40,7 +39,6 @@ use Spatie\Activitylog\Traits\LogsActivity;
  * @property User           $user
  * @property Template|null  $template
  * @property SessionBlock[] $blocks
- * @property Note[]         $notes
  */
 class Session extends BaseModel
 {
@@ -120,19 +118,11 @@ class Session extends BaseModel
         return $this->hasMany(SessionBlock::class, 'practice_session_id')->orderBy('sort_order');
     }
 
-    /**
-     * Связь с заметками
-     */
-    public function notes(): MorphMany
-    {
-        return $this->morphMany(Note::class, 'noteable');
-    }
 
     /**
      * Scope: активные сессии
      */
-    #[Scope]
-    protected function active(Builder $query): Builder
+    public function scopeActive(Builder $query): Builder
     {
         return $query->where('status', self::STATUS_ACTIVE);
     }
@@ -140,8 +130,7 @@ class Session extends BaseModel
     /**
      * Scope: завершенные сессии
      */
-    #[Scope]
-    protected function completed(Builder $query): Builder
+    public function scopeCompleted(Builder $query): Builder
     {
         return $query->where('status', self::STATUS_COMPLETED);
     }
@@ -149,8 +138,7 @@ class Session extends BaseModel
     /**
      * Scope: запланированные сессии
      */
-    #[Scope]
-    protected function planned(Builder $query): Builder
+    public function scopePlanned(Builder $query): Builder
     {
         return $query->where('status', self::STATUS_PLANNED);
     }
@@ -158,8 +146,7 @@ class Session extends BaseModel
     /**
      * Scope: сессии пользователя
      */
-    #[Scope]
-    protected function forUser(Builder $query, int $userId): Builder
+    public function scopeForUser(Builder $query, int $userId): Builder
     {
         return $query->where('user_id', $userId);
     }
@@ -167,8 +154,7 @@ class Session extends BaseModel
     /**
      * Scope: сессии за период
      */
-    #[Scope]
-    protected function inPeriod(Builder $query, Carbon $from, Carbon $to): Builder
+    public function scopeInPeriod(Builder $query, Carbon $from, Carbon $to): Builder
     {
         return $query->whereBetween('started_at', [$from, $to]);
     }
@@ -294,5 +280,13 @@ class Session extends BaseModel
             ->logOnly(['title', 'status', 'planned_duration', 'actual_duration'])
             ->logOnlyDirty()
             ->dontSubmitEmptyLogs();
+    }
+
+    /**
+     * Create a new factory instance for the model.
+     */
+    protected static function newFactory()
+    {
+        return SessionFactory::new();
     }
 }

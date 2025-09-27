@@ -4,13 +4,12 @@ declare(strict_types=1);
 
 namespace App\Domains\Planning\Models;
 
-use App\Domains\Journal\Models\Note;
 use App\Domains\Shared\Models\BaseModel;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Database\Factories\SessionBlockFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
@@ -37,7 +36,6 @@ use Spatie\Activitylog\Traits\LogsActivity;
  *
  * @property Session       $session
  * @property TemplateBlock $templateBlock
- * @property Note[]        $notes
  */
 class SessionBlock extends BaseModel
 {
@@ -136,13 +134,6 @@ class SessionBlock extends BaseModel
         return $this->belongsTo(TemplateBlock::class, 'practice_template_block_id');
     }
 
-    /**
-     * Связь с заметками
-     */
-    public function notes(): MorphMany
-    {
-        return $this->morphMany(Note::class, 'noteable');
-    }
 
     /**
      * Scope: активные блоки
@@ -319,5 +310,13 @@ class SessionBlock extends BaseModel
             ->logOnly(['title', 'status', 'type', 'planned_duration', 'actual_duration'])
             ->logOnlyDirty()
             ->dontSubmitEmptyLogs();
+    }
+
+    /**
+     * Create a new factory instance for the model.
+     */
+    protected static function newFactory()
+    {
+        return SessionBlockFactory::new();
     }
 }

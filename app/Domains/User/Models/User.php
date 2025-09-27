@@ -7,9 +7,9 @@ namespace App\Domains\User\Models;
 use Carbon\Carbon;
 use App\Domains\Planning\Models\Session;
 use App\Domains\Planning\Models\Template;
-use App\Domains\Journal\Models\Note;
 use App\Domains\Shared\Models\BaseModel;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -80,13 +80,6 @@ class User extends Authenticatable
         return $this->hasMany(Template::class);
     }
 
-    /**
-     * Получить все заметки пользователя
-     */
-    public function notes(): HasMany
-    {
-        return $this->hasMany(Note::class);
-    }
 
     /**
      * Получить предпочтения пользователя с значениями по умолчанию
@@ -134,7 +127,6 @@ class User extends Authenticatable
             'total_sessions'      => $this->sessions()->count(),
             'total_practice_time' => $this->sessions()->sum('actual_duration'),
             'active_templates'    => $this->templates()->count(),
-            'notes_count'         => $this->notes()->count(),
         ];
     }
 
@@ -147,5 +139,13 @@ class User extends Authenticatable
             ->logOnly(['name', 'email', 'preferences'])
             ->logOnlyDirty()
             ->dontSubmitEmptyLogs();
+    }
+
+    /**
+     * Create a new factory instance for the model.
+     */
+    protected static function newFactory()
+    {
+        return UserFactory::new();
     }
 }
