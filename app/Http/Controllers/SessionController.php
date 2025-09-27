@@ -32,7 +32,7 @@ class SessionController extends Controller
     /**
      * Показать форму создания сессии
      */
-    public function create(): Response
+    public function create(Request $request): Response
     {
         $templates = Template::availableFor(auth()->id())
             ->with('blocks')
@@ -61,9 +61,22 @@ class SessionController extends Controller
             })
             ->values();
 
+        // Получаем данные об упражнении, если они переданы
+        $exerciseData = null;
+        if ($request->has('exercise_id')) {
+            $exerciseData = [
+                'id' => $request->get('exercise_id'),
+                'title' => $request->get('exercise_title'),
+                'type' => $request->get('exercise_type'),
+                'duration' => $request->get('exercise_duration'),
+                'description' => $request->get('exercise_description'),
+            ];
+        }
+
         return Inertia::render('Sessions/Create', [
             'templates' => $templates,
             'previousExercises' => $previousExercises,
+            'exerciseData' => $exerciseData,
         ]);
     }
 
@@ -206,5 +219,22 @@ class SessionController extends Controller
         $block->update($updateData);
 
         return back()->with('success', 'Блок обновлен');
+    }
+
+    /**
+     * Удалить сессию
+     */
+    public function destroy(Session $session): RedirectResponse
+    {
+        $this->authorize('delete', $session);
+
+        // Удаляем все блоки сессии
+        $session->blocks()->delete();
+        
+        // Удаляем саму сессию
+        $session->delete();
+
+        return redirect()->route('sessions.index')
+            ->with('success', 'Сессия успешно удалена');
     }
 }

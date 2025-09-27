@@ -4,9 +4,12 @@ import './bootstrap';
 import { createInertiaApp } from '@inertiajs/vue3';
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 import { createApp, DefineComponent, h } from 'vue';
-import { ZiggyVue } from '../../vendor/tightenco/ziggy';
+import { ZiggyVue } from 'ziggy-js';
+import { useTheme } from './composables/useTheme';
+import { useSimpleI18n } from './composables/useSimpleI18n';
+import i18n from './i18n';
 
-const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
+const appName = import.meta.env.VITE_APP_NAME || 'Music Practice Tracker';
 
 createInertiaApp({
     title: (title) => `${title} - ${appName}`,
@@ -16,9 +19,22 @@ createInertiaApp({
             import.meta.glob<DefineComponent>('./Pages/**/*.vue'),
         ),
     setup({ el, App, props, plugin }) {
-        createApp({ render: () => h(App, props) })
-            .use(plugin)
+        const app = createApp({ render: () => h(App, props) });
+
+        // Инициализируем тему
+        useTheme();
+        
+        // Инициализируем i18n
+        try {
+            const { loadLocale } = useSimpleI18n();
+            loadLocale();
+        } catch (error) {
+            console.warn('Error initializing i18n:', error);
+        }
+
+        app.use(plugin)
             .use(ZiggyVue)
+            .use(i18n)
             .mount(el);
     },
     progress: {

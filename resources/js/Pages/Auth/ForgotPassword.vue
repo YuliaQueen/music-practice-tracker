@@ -21,12 +21,12 @@ const submit = () => {
 
 <template>
     <GuestLayout>
-        <Head title="Forgot Password" />
+        <Head title="Восстановление пароля" />
 
-        <div class="mb-4 text-sm text-gray-600">
-            Forgot your password? No problem. Just let us know your email
-            address and we will email you a password reset link that will allow
-            you to choose a new one.
+        <div class="mb-4 text-sm text-gray-600 dark:text-gray-400">
+            Забыли пароль? Не проблема. Просто укажите ваш email
+            адрес и мы отправим вам ссылку для сброса пароля, которая позволит
+            вам выбрать новый.
         </div>
 
         <div
@@ -58,7 +58,7 @@ const submit = () => {
                     :class="{ 'opacity-25': form.processing }"
                     :disabled="form.processing"
                 >
-                    Email Password Reset Link
+                    Отправить ссылку для сброса пароля
                 </PrimaryButton>
             </div>
         </form>

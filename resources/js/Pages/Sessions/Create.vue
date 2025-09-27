@@ -1,19 +1,38 @@
 <template>
     <AuthenticatedLayout>
         <template #header>
-            <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+            <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
                 Создать занятие
             </h2>
         </template>
 
         <div class="py-12">
             <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                    <div class="p-6 text-gray-900">
+                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg dark:bg-gray-800 dark:shadow-gray-900/20">
+                    <div class="p-6 text-gray-900 dark:text-gray-100">
                         <form @submit.prevent="submit">
                             <!-- Основная информация -->
                             <div class="mb-6">
-                                <h3 class="text-lg font-medium text-gray-900 mb-4">Основная информация</h3>
+                                <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">Основная информация</h3>
+                                
+                                <!-- Уведомление о добавленном упражнении -->
+                                <div v-if="exerciseData" class="mb-4 p-4 bg-green-50 border border-green-200 rounded-lg dark:bg-green-900/20 dark:border-green-800">
+                                    <div class="flex items-center">
+                                        <div class="flex-shrink-0">
+                                            <svg class="h-5 w-5 text-green-400" fill="currentColor" viewBox="0 0 20 20">
+                                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                                            </svg>
+                                        </div>
+                                        <div class="ml-3">
+                                            <h4 class="text-sm font-medium text-green-800 dark:text-green-200">
+                                                Упражнение "{{ exerciseData.title }}" добавлено в занятие
+                                            </h4>
+                                            <p class="text-sm text-green-700 dark:text-green-300 mt-1">
+                                                Вы можете добавить еще упражнения или изменить параметры этого упражнения ниже.
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
                                 
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div>
@@ -23,7 +42,7 @@
                                                 <button
                                                     type="button"
                                                     @click="generateSimpleTitle"
-                                                    class="text-xs px-2 py-1 bg-gray-100 text-gray-600 rounded hover:bg-gray-200 transition-colors"
+                                                    class="text-xs px-2 py-1 bg-gray-100 text-gray-600 rounded hover:bg-gray-200 transition-colors dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
                                                     title="Генерировать название с датой и временем"
                                                 >
                                                     🕐 Дата и время
@@ -31,7 +50,7 @@
                                                 <button
                                                     type="button"
                                                     @click="generateAutoTitle"
-                                                    class="text-xs px-2 py-1 bg-indigo-100 text-indigo-600 rounded hover:bg-indigo-200 transition-colors"
+                                                    class="text-xs px-2 py-1 bg-indigo-100 text-indigo-600 rounded hover:bg-indigo-200 transition-colors dark:bg-indigo-900/50 dark:text-indigo-300 dark:hover:bg-indigo-800/50"
                                                     title="Генерировать название с упражнениями, датой и временем"
                                                 >
                                                     🎯 С упражнениями
@@ -54,7 +73,7 @@
                                         <select
                                             id="template_id"
                                             v-model="form.template_id"
-                                            class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm"
+                                            class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 dark:focus:border-indigo-400 dark:focus:ring-indigo-400"
                                         >
                                             <option value="">Без шаблона</option>
                                         <option
@@ -74,7 +93,7 @@
                                     <textarea
                                         id="description"
                                         v-model="form.description"
-                                        class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm"
+                                        class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 dark:focus:border-indigo-400 dark:focus:ring-indigo-400"
                                         rows="3"
                                     ></textarea>
                                     <InputError class="mt-2" :message="form.errors.description" />
@@ -84,7 +103,7 @@
                             <!-- Блоки упражнений -->
                             <div class="mb-6">
                                 <div class="flex justify-between items-center mb-4">
-                                    <h3 class="text-lg font-medium text-gray-900">Упражнения</h3>
+                                    <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">Упражнения</h3>
                                     <div class="flex space-x-2">
                                         <SecondaryButton
                                             v-if="previousExercises.length > 0"
@@ -105,9 +124,9 @@
                                 </div>
 
                                 <!-- Список упражнений из предыдущих сессий -->
-                                <div v-if="showExercisesList && previousExercises.length > 0" class="mb-6 p-4 bg-gray-50 rounded-lg">
+                                <div v-if="showExercisesList && previousExercises.length > 0" class="mb-6 p-4 bg-gray-50 rounded-lg dark:bg-gray-700">
                                     <div class="flex justify-between items-center mb-4">
-                                        <h4 class="font-medium text-gray-900">Выберите упражнения из предыдущих сессий</h4>
+                                        <h4 class="font-medium text-gray-900 dark:text-gray-100">Выберите упражнения из предыдущих сессий</h4>
                                         <div class="flex space-x-2">
                                             <SecondaryButton
                                                 type="button"
@@ -149,7 +168,7 @@
                                             <div class="sm:w-48">
                                                 <select
                                                     v-model="exerciseSortBy"
-                                                    class="w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm"
+                                                    class="w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 dark:focus:border-indigo-400 dark:focus:ring-indigo-400"
                                                 >
                                                     <option value="usage">По популярности</option>
                                                     <option value="name">По названию</option>
@@ -157,7 +176,7 @@
                                                 </select>
                                             </div>
                                         </div>
-                                        <p class="text-xs text-gray-500">
+                                        <p class="text-xs text-gray-500 dark:text-gray-400">
                                             Найдено: {{ filteredExercises.length }} из {{ previousExercises.length }} упражнений
                                         </p>
                                     </div>
@@ -170,22 +189,22 @@
                                             :class="[
                                                 'p-3 border rounded-lg cursor-pointer transition-all duration-200',
                                                 selectedExercises.has(exercise.title)
-                                                    ? 'border-indigo-500 bg-indigo-50 ring-2 ring-indigo-200'
-                                                    : 'border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50'
+                                                    ? 'border-indigo-500 bg-indigo-50 ring-2 ring-indigo-200 dark:border-indigo-400 dark:bg-indigo-900/20 dark:ring-indigo-400'
+                                                    : 'border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-800 dark:hover:border-gray-500 dark:hover:bg-gray-700'
                                             ]"
                                         >
                                             <div class="flex items-start justify-between">
                                                 <div class="flex-1">
-                                                    <h5 class="font-medium text-gray-900 text-sm">{{ exercise.title }}</h5>
-                                                    <p class="text-xs text-gray-500 mt-1">{{ exercise.description || 'Без описания' }}</p>
+                                                    <h5 class="font-medium text-gray-900 dark:text-gray-100 text-sm">{{ exercise.title }}</h5>
+                                                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ exercise.description || 'Без описания' }}</p>
                                                     <div class="flex items-center space-x-2 mt-2">
-                                                        <span class="text-xs px-2 py-1 bg-gray-100 text-gray-600 rounded">
+                                                        <span class="text-xs px-2 py-1 bg-gray-100 text-gray-600 rounded dark:bg-gray-600 dark:text-gray-300">
                                                             {{ getTypeLabel(exercise.type) }}
                                                         </span>
-                                                        <span class="text-xs px-2 py-1 bg-blue-100 text-blue-600 rounded">
+                                                        <span class="text-xs px-2 py-1 bg-blue-100 text-blue-600 rounded dark:bg-blue-900/50 dark:text-blue-300">
                                                             {{ exercise.duration }} мин
                                                         </span>
-                                                        <span class="text-xs px-2 py-1 bg-green-100 text-green-600 rounded">
+                                                        <span class="text-xs px-2 py-1 bg-green-100 text-green-600 rounded dark:bg-green-900/50 dark:text-green-300">
                                                             {{ exercise.usage_count }} раз
                                                         </span>
                                                     </div>
@@ -203,7 +222,7 @@
                                     </div>
                                 </div>
 
-                                <div v-if="form.blocks.length === 0" class="text-gray-500 text-center py-8">
+                                <div v-if="form.blocks.length === 0" class="text-gray-500 dark:text-gray-400 text-center py-8">
                                     Добавьте упражнения для вашего занятия
                                 </div>
 
@@ -211,10 +230,10 @@
                                     <div
                                         v-for="(block, index) in form.blocks"
                                         :key="index"
-                                        class="border border-gray-200 rounded-lg p-4"
+                                        class="border border-gray-200 rounded-lg p-4 dark:border-gray-600 dark:bg-gray-700"
                                     >
                                         <div class="flex justify-between items-start mb-3">
-                                            <h4 class="font-medium text-gray-900">
+                                            <h4 class="font-medium text-gray-900 dark:text-gray-100">
                                                 Упражнение {{ index + 1 }}
                                             </h4>
                                             <DangerButton
@@ -243,7 +262,7 @@
                                                 <select
                                                     :id="`block_${index}_type`"
                                                     v-model="block.type"
-                                                    class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm"
+                                                    class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 dark:focus:border-indigo-400 dark:focus:ring-indigo-400"
                                                     required
                                                 >
                                                     <option value="warmup">🔥 Разминка</option>
@@ -264,7 +283,7 @@
                                                     v-model.number="block.duration"
                                                     type="number"
                                                     min="1"
-                                                    class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm"
+                                                    class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 dark:focus:border-indigo-400 dark:focus:ring-indigo-400"
                                                     required
                                                 />
                                             </div>
@@ -286,21 +305,21 @@
                             </div>
 
                             <!-- Краткий список текущих упражнений -->
-                            <div v-if="form.blocks.length > 0" class="mb-6 p-4 bg-blue-50 rounded-lg">
-                                <h4 class="font-medium text-gray-900 mb-3">Текущие упражнения ({{ form.blocks.length }})</h4>
+                            <div v-if="form.blocks.length > 0" class="mb-6 p-4 bg-blue-50 rounded-lg dark:bg-blue-900/20">
+                                <h4 class="font-medium text-gray-900 dark:text-gray-100 mb-3">Текущие упражнения ({{ form.blocks.length }})</h4>
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
                                     <div
                                         v-for="(block, index) in form.blocks"
                                         :key="index"
-                                        class="flex items-center justify-between p-2 bg-white rounded border"
+                                        class="flex items-center justify-between p-2 bg-white rounded border dark:bg-gray-800 dark:border-gray-600"
                                     >
                                         <div class="flex items-center space-x-2">
-                                            <span class="text-sm font-medium text-gray-900">{{ index + 1 }}.</span>
-                                            <span class="text-sm text-gray-700">{{ block.title }}</span>
-                                            <span class="text-xs px-2 py-1 bg-gray-100 text-gray-600 rounded">
+                                            <span class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ index + 1 }}.</span>
+                                            <span class="text-sm text-gray-700 dark:text-gray-300">{{ block.title }}</span>
+                                            <span class="text-xs px-2 py-1 bg-gray-100 text-gray-600 rounded dark:bg-gray-600 dark:text-gray-300">
                                                 {{ getTypeLabel(block.type) }}
                                             </span>
-                                            <span class="text-xs px-2 py-1 bg-blue-100 text-blue-600 rounded">
+                                            <span class="text-xs px-2 py-1 bg-blue-100 text-blue-600 rounded dark:bg-blue-900/50 dark:text-blue-300">
                                                 {{ block.duration }} мин
                                             </span>
                                         </div>
@@ -316,10 +335,10 @@
                             </div>
 
                             <!-- Итого -->
-                            <div v-if="totalDuration > 0" class="mb-6 p-4 bg-gray-50 rounded-lg">
+                            <div v-if="totalDuration > 0" class="mb-6 p-4 bg-gray-50 rounded-lg dark:bg-gray-700">
                                 <div class="flex justify-between items-center">
-                                    <span class="text-lg font-medium text-gray-900">Общая длительность:</span>
-                                    <span class="text-lg font-bold text-indigo-600">{{ totalDuration }} минут</span>
+                                    <span class="text-lg font-medium text-gray-900 dark:text-gray-100">Общая длительность:</span>
+                                    <span class="text-lg font-bold text-indigo-600 dark:text-indigo-400">{{ totalDuration }} минут</span>
                                 </div>
                             </div>
 
@@ -369,7 +388,7 @@ interface Block {
     title: string
     description: string
     type: string
-    duration: number
+    duration: number | string
 }
 
 interface PreviousExercise {
@@ -380,9 +399,18 @@ interface PreviousExercise {
     usage_count: number
 }
 
+interface ExerciseData {
+    id: number
+    title: string
+    type: string
+    duration: number
+    description?: string
+}
+
 interface Props {
     templates: Template[]
     previousExercises: PreviousExercise[]
+    exerciseData?: ExerciseData
 }
 
 const props = defineProps<Props>()
@@ -401,7 +429,10 @@ const exerciseSearchQuery = ref('')
 const exerciseSortBy = ref<'name' | 'usage' | 'duration'>('usage')
 
 const totalDuration = computed(() => {
-    return form.blocks.reduce((total, block) => total + (block.duration || 0), 0)
+    return form.blocks.reduce((total, block) => {
+        const duration = typeof block.duration === 'string' ? parseInt(block.duration) || 0 : block.duration || 0
+        return total + duration
+    }, 0)
 })
 
 // Фильтрация и сортировка упражнений
@@ -470,7 +501,7 @@ const addSelectedExercises = () => {
             title: exercise.title,
             description: exercise.description,
             type: exercise.type,
-            duration: exercise.duration,
+            duration: typeof exercise.duration === 'string' ? parseInt(exercise.duration) : exercise.duration,
         })
     })
     
@@ -592,7 +623,7 @@ const loadTemplate = (templateId: number | null) => {
             title: block.title,
             description: '',
             type: block.type,
-            duration: block.duration,
+            duration: typeof block.duration === 'string' ? parseInt(block.duration) : block.duration,
         }))
     }
 }
@@ -613,4 +644,19 @@ watch(() => form.blocks, () => {
         generateAutoTitle()
     }
 }, { deep: true })
+
+// Автоматически добавляем упражнение, если данные переданы
+if (props.exerciseData) {
+    form.blocks.push({
+        title: props.exerciseData.title,
+        description: props.exerciseData.description || '',
+        type: props.exerciseData.type,
+        duration: typeof props.exerciseData.duration === 'string' ? parseInt(props.exerciseData.duration) : props.exerciseData.duration,
+    })
+    
+    // Автоматически генерируем название
+    if (!form.title.trim()) {
+        generateAutoTitle()
+    }
+}
 </script>

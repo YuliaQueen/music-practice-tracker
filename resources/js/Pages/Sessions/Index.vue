@@ -2,7 +2,7 @@
     <AuthenticatedLayout>
         <template #header>
             <div class="flex justify-between items-center">
-                <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+                <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
                     Мои занятия
                 </h2>
                 <PrimaryButton @click="$inertia.visit(route('sessions.create'))">
@@ -13,16 +13,16 @@
 
         <div class="py-12">
             <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                    <div class="p-6 text-gray-900">
+                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg dark:bg-gray-800 dark:shadow-gray-900/20">
+                    <div class="p-6 text-gray-900 dark:text-gray-100">
                         <div v-if="sessions.data.length === 0" class="text-center py-12">
                             <div class="text-gray-500 mb-4">
-                                <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <svg class="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
                                 </svg>
                             </div>
-                            <h3 class="text-lg font-medium text-gray-900 mb-2">У вас пока нет занятий</h3>
-                            <p class="text-gray-500 mb-4">Создайте ваше первое занятие, чтобы начать отслеживать прогресс</p>
+                            <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">У вас пока нет занятий</h3>
+                            <p class="text-gray-500 dark:text-gray-400 mb-4">Создайте ваше первое занятие, чтобы начать отслеживать прогресс</p>
                             <PrimaryButton @click="$inertia.visit(route('sessions.create'))">
                                 Создать первое занятие
                             </PrimaryButton>
@@ -32,12 +32,12 @@
                             <div
                                 v-for="session in sessions.data"
                                 :key="session.id"
-                                class="border border-gray-200 rounded-lg p-6 hover:shadow-md transition-shadow"
+                                class="border border-gray-200 dark:border-gray-700 rounded-lg p-6 hover:shadow-md dark:hover:shadow-gray-900/20 transition-shadow"
                             >
                                 <div class="flex justify-between items-start">
                                     <div class="flex-1">
                                         <div class="flex items-center space-x-3 mb-2">
-                                            <h3 class="text-lg font-medium text-gray-900">
+                                            <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">
                                                 {{ session.title }}
                                             </h3>
                                             <span :class="getStatusBadgeClass(session.status)">
@@ -45,11 +45,11 @@
                                             </span>
                                         </div>
                                         
-                                        <p v-if="session.description" class="text-gray-600 mb-3">
+                                        <p v-if="session.description" class="text-gray-600 dark:text-gray-300 mb-3">
                                             {{ session.description }}
                                         </p>
                                         
-                                        <div class="flex items-center space-x-6 text-sm text-gray-500">
+                                        <div class="flex items-center space-x-6 text-sm text-gray-500 dark:text-gray-400">
                                             <div class="flex items-center space-x-1">
                                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -82,17 +82,17 @@
                                         <div class="mt-3">
                                             <div class="flex items-center justify-between">
                                                 <div class="flex items-center space-x-2">
-                                                    <span class="text-sm text-gray-500">Прогресс:</span>
-                                                    <div class="w-32 bg-gray-200 rounded-full h-2">
+                                                    <span class="text-sm text-gray-500 dark:text-gray-400">Прогресс:</span>
+                                                    <div class="w-32 bg-gray-200 dark:bg-gray-600 rounded-full h-2">
                                                         <div
-                                                            class="bg-indigo-600 h-2 rounded-full"
+                                                            class="bg-indigo-600 dark:bg-indigo-400 h-2 rounded-full"
                                                             :style="{ width: getProgressPercentage(session) + '%' }"
                                                         ></div>
                                                     </div>
-                                                    <span class="text-sm text-gray-500">{{ getProgressPercentage(session) }}%</span>
+                                                    <span class="text-sm text-gray-500 dark:text-gray-400">{{ getProgressPercentage(session) }}%</span>
                                                 </div>
                                                 
-                                                <div class="text-sm text-gray-500">
+                                                <div class="text-sm text-gray-500 dark:text-gray-400">
                                                     {{ formatDate(session.created_at) }}
                                                 </div>
                                             </div>
@@ -114,6 +114,14 @@
                                         >
                                             Начать
                                         </SecondaryButton>
+                                        
+                                        <DangerButton
+                                            @click="deleteSession(session)"
+                                            size="sm"
+                                            class="text-xs"
+                                        >
+                                            🗑️ Удалить
+                                        </DangerButton>
                                     </div>
                                 </div>
                             </div>
@@ -126,21 +134,21 @@
                                     <Link
                                         v-if="sessions.prev_page_url"
                                         :href="sessions.prev_page_url"
-                                        class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+                                        class="relative inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 text-sm font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700"
                                     >
                                         Предыдущая
                                     </Link>
                                     <Link
                                         v-if="sessions.next_page_url"
                                         :href="sessions.next_page_url"
-                                        class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+                                        class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 text-sm font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700"
                                     >
                                         Следующая
                                     </Link>
                                 </div>
                                 <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
                                     <div>
-                                        <p class="text-sm text-gray-700">
+                                        <p class="text-sm text-gray-700 dark:text-gray-300">
                                             Показано
                                             <span class="font-medium">{{ sessions.from }}</span>
                                             -
@@ -159,8 +167,8 @@
                                                 :class="[
                                                     'relative inline-flex items-center px-4 py-2 border text-sm font-medium',
                                                     link.active
-                                                        ? 'z-10 bg-indigo-50 border-indigo-500 text-indigo-600'
-                                                        : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50',
+                                                        ? 'z-10 bg-indigo-50 dark:bg-indigo-900 border-indigo-500 dark:border-indigo-400 text-indigo-600 dark:text-indigo-300'
+                                                        : 'bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700',
                                                     link.url === null ? 'cursor-not-allowed opacity-50' : ''
                                                 ]"
                                                 v-html="link.label"
@@ -178,11 +186,12 @@
 </template>
 
 <script setup lang="ts">
-import { useForm } from '@inertiajs/vue3'
+import { useForm, router } from '@inertiajs/vue3'
 import { Link } from '@inertiajs/vue3'
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
 import PrimaryButton from '@/Components/PrimaryButton.vue'
 import SecondaryButton from '@/Components/SecondaryButton.vue'
+import DangerButton from '@/Components/DangerButton.vue'
 
 interface SessionBlock {
     id: number
@@ -246,13 +255,13 @@ const getStatusLabel = (status: string) => {
 const getStatusBadgeClass = (status: string) => {
     const baseClass = 'px-2 py-1 rounded-full text-xs font-medium'
     const statusClasses = {
-        planned: 'bg-gray-100 text-gray-800',
-        active: 'bg-green-100 text-green-800',
-        paused: 'bg-yellow-100 text-yellow-800',
-        completed: 'bg-blue-100 text-blue-800',
-        cancelled: 'bg-red-100 text-red-800',
+        planned: 'bg-gray-100 text-gray-800 dark:bg-gray-600 dark:text-gray-200',
+        active: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
+        paused: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200',
+        completed: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
+        cancelled: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200',
     }
-    return `${baseClass} ${statusClasses[status as keyof typeof statusClasses] || 'bg-gray-100 text-gray-800'}`
+    return `${baseClass} ${statusClasses[status as keyof typeof statusClasses] || 'bg-gray-100 text-gray-800 dark:bg-gray-600 dark:text-gray-200'}`
 }
 
 const getProgressPercentage = (session: Session) => {
@@ -275,5 +284,18 @@ const startSession = (session: Session) => {
     form.post(route('sessions.start', session.id), {
         preserveScroll: true,
     })
+}
+
+const deleteSession = (session: Session) => {
+    if (confirm(`Вы уверены, что хотите удалить сессию "${session.title}"? Это действие нельзя отменить.`)) {
+        router.delete(route('sessions.destroy', session.id), {
+            onSuccess: () => {
+                // Успешно удалено
+            },
+            onError: () => {
+                alert('Ошибка при удалении сессии')
+            }
+        })
+    }
 }
 </script>
