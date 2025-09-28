@@ -105,7 +105,7 @@ class GoalProgressService
         
         $sessions = $this->getSessionsInPeriod($user, $weekStart, $weekEnd);
         
-        return $sessions->where('status', Session::STATUS_COMPLETED)->count();
+        return $sessions->count();
     }
 
     /**
@@ -120,7 +120,6 @@ class GoalProgressService
         
         // Группируем сессии по дням
         $daysWithPractice = $sessions
-            ->where('status', Session::STATUS_COMPLETED)
             ->groupBy(function (Session $session) {
                 return $session->created_at->format('Y-m-d');
             })
@@ -246,6 +245,7 @@ class GoalProgressService
     {
         return $user->sessions()
             ->whereBetween('created_at', [$fromDate, $toDate])
+            ->where('status', Session::STATUS_COMPLETED)
             ->with(['blocks'])
             ->get();
     }

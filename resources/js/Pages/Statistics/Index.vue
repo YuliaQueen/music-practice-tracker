@@ -4,11 +4,11 @@
     <AuthenticatedLayout>
         <template #header>
             <div class="flex items-center justify-between">
-                <h2 class="text-xl font-semibold leading-tight text-gray-800 dark:text-gray-200">
+                <h2 class="text-xl font-semibold leading-tight text-amber-800 dark:text-gray-200">
                     Статистика занятий
                 </h2>
                 <div class="flex gap-2">
-                    <select v-model="selectedPeriod" @change="updatePeriod" class="text-sm border-gray-300 dark:border-gray-600 focus:border-indigo-500 dark:focus:border-indigo-400 focus:ring-indigo-500 dark:focus:ring-indigo-400 rounded-md shadow-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100">
+                    <select v-model="selectedPeriod" @change="updatePeriod" class="text-sm border-amber-300 dark:border-gray-600 focus:border-orange-500 dark:focus:border-indigo-400 focus:ring-orange-500 dark:focus:ring-indigo-400 rounded-md shadow-sm bg-orange-50 dark:bg-gray-800 text-amber-900 dark:text-gray-100">
                         <option value="day">День</option>
                         <option value="week">Неделя</option>
                         <option value="month">Месяц</option>
@@ -23,28 +23,28 @@
                 <!-- Общая статистика -->
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                     <!-- Общее время практики -->
-                    <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg dark:bg-gray-800 dark:shadow-gray-900/20">
+                    <div class="bg-yellow-50 overflow-hidden shadow-sm sm:rounded-lg dark:bg-gray-800 dark:shadow-gray-900/20">
                         <div class="p-6">
                             <div class="flex items-center">
                                 <div class="flex-shrink-0">
-                                    <svg class="h-8 w-8 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <svg class="h-8 w-8 text-yellow-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                                     </svg>
                                 </div>
                                 <div class="ml-4">
-                                    <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">Время практики</h3>
-                                    <p class="text-2xl font-bold text-blue-600 dark:text-blue-400">{{ formatMinutes(currentStats.total_minutes) }}</p>
+                                    <h3 class="text-lg font-medium text-amber-900 dark:text-gray-100">Время практики</h3>
+                                    <p class="text-2xl font-bold text-yellow-600 dark:text-blue-400">{{ formatMinutes(currentStats.total_minutes) }}</p>
                                 </div>
                             </div>
                         </div>
                     </div>
 
                     <!-- Количество сессий -->
-                    <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg dark:bg-gray-800 dark:shadow-gray-900/20">
+                    <div class="bg-red-50 overflow-hidden shadow-sm sm:rounded-lg dark:bg-gray-800 dark:shadow-gray-900/20">
                         <div class="p-6">
                             <div class="flex items-center">
                                 <div class="flex-shrink-0">
-                                    <svg class="h-8 w-8 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <svg class="h-8 w-8 text-red-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                                     </svg>
                                 </div>

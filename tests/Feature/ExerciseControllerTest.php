@@ -141,7 +141,11 @@ class ExerciseControllerTest extends TestCase
 
         $response = $this->get(route('exercises.show', $exercise));
 
-        $response->assertStatus(500); // Expected since Show.vue doesn't exist
+        $response->assertStatus(200);
+        $response->assertInertia(fn ($page) => 
+            $page->component('Exercises/Show')
+                ->has('exercise')
+        );
     }
 
     /** @test */
@@ -153,7 +157,11 @@ class ExerciseControllerTest extends TestCase
 
         $response = $this->get(route('exercises.edit', $exercise));
 
-        $response->assertStatus(500); // Expected since Edit.vue doesn't exist
+        $response->assertStatus(200);
+        $response->assertInertia(fn ($page) => 
+            $page->component('Exercises/Edit')
+                ->has('exercise')
+        );
     }
 
     /** @test */

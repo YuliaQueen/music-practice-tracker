@@ -2,12 +2,12 @@
     <AuthenticatedLayout>
         <template #header>
             <div class="flex justify-between items-center">
-                <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
+                <h2 class="font-semibold text-xl text-amber-800 dark:text-gray-200 leading-tight">
                     Мои цели
                 </h2>
                 <Link
                     :href="route('goals.create')"
-                    class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+                    class="bg-orange-500 hover:bg-orange-700 text-white font-bold py-2 px-4 rounded"
                 >
                     Создать цель
                 </Link>
@@ -16,23 +16,23 @@
 
         <div class="py-12">
             <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-                <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
-                    <div class="p-6 text-gray-900 dark:text-gray-100">
+                <div class="bg-orange-50 dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
+                    <div class="p-6 text-amber-900 dark:text-gray-100">
                         <div v-if="goals.length === 0" class="text-center py-8">
-                            <div class="text-gray-500 dark:text-gray-400 mb-4">
+                            <div class="text-amber-500 dark:text-gray-400 mb-4">
                                 <svg class="mx-auto h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                                 </svg>
                             </div>
-                            <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">
+                            <h3 class="text-lg font-medium text-amber-900 dark:text-gray-100 mb-2">
                                 У вас пока нет целей
                             </h3>
-                            <p class="text-gray-500 dark:text-gray-400 mb-4">
+                            <p class="text-amber-600 dark:text-gray-400 mb-4">
                                 Создайте свою первую цель для отслеживания прогресса в музыке
                             </p>
                             <Link
                                 :href="route('goals.create')"
-                                class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+                                class="bg-orange-500 hover:bg-orange-700 text-white font-bold py-2 px-4 rounded"
                             >
                                 Создать цель
                             </Link>
@@ -42,7 +42,7 @@
                             <div
                                 v-for="goal in goals"
                                 :key="goal.id"
-                                class="bg-white dark:bg-gray-700 rounded-lg shadow-md p-6 border border-gray-200 dark:border-gray-600"
+                                class="bg-orange-50 dark:bg-gray-700 rounded-lg shadow-md p-6 border border-amber-200 dark:border-gray-600"
                             >
                                 <div class="flex items-start justify-between mb-4">
                                     <div class="flex items-center">

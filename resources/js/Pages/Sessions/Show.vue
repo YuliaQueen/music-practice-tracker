@@ -2,7 +2,7 @@
     <AuthenticatedLayout>
         <template #header>
             <div class="flex justify-between items-center">
-                <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+                <h2 class="font-semibold text-xl text-amber-800 dark:text-gray-200 leading-tight">
                     {{ session.title }}
                 </h2>
                 <div class="flex space-x-2">
@@ -21,50 +21,50 @@
         <div class="py-4 sm:py-6">
             <div class="max-w-7xl mx-auto sm:px-4 lg:px-6">
                 <!-- Информация о сессии -->
-                <div class="bg-gradient-to-br from-white to-gray-50 overflow-hidden shadow-lg sm:rounded-xl mb-4 border border-gray-100">
-                    <div class="p-4 sm:p-6 text-gray-900">
+                <div class="bg-gradient-to-br from-amber-50 to-orange-50 dark:from-gray-800 dark:to-gray-900 overflow-hidden shadow-lg sm:rounded-xl mb-4 border border-amber-200 dark:border-gray-700">
+                    <div class="p-4 sm:p-6 text-amber-900 dark:text-gray-100">
                         <!-- Статистика сессии -->
                         <div class="grid grid-cols-3 gap-4 sm:gap-6 mb-4">
                             <div class="text-center">
-                                <div class="inline-flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 bg-blue-100 rounded-xl mb-2">
-                                    <svg class="w-5 h-5 sm:w-6 sm:h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <div class="inline-flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 bg-amber-100 dark:bg-blue-900 rounded-xl mb-2 shadow-sm">
+                                    <svg class="w-5 h-5 sm:w-6 sm:h-6 text-amber-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                                     </svg>
                                 </div>
-                                <h3 class="text-xs sm:text-sm font-medium text-gray-500 mb-1">Запланировано</h3>
-                                <p class="text-lg sm:text-xl font-bold text-gray-900">{{ session.planned_duration }} мин</p>
+                                <h3 class="text-xs sm:text-sm font-medium text-amber-700 dark:text-gray-400 mb-1">Запланировано</h3>
+                                <p class="text-lg sm:text-xl font-bold text-amber-900 dark:text-gray-100">{{ session.planned_duration }} мин</p>
                             </div>
                             <div class="text-center">
-                                <div class="inline-flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 bg-green-100 rounded-xl mb-2">
-                                    <svg class="w-5 h-5 sm:w-6 sm:h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <div class="inline-flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 bg-orange-100 dark:bg-green-900 rounded-xl mb-2 shadow-sm">
+                                    <svg class="w-5 h-5 sm:w-6 sm:h-6 text-orange-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                                     </svg>
                                 </div>
-                                <h3 class="text-xs sm:text-sm font-medium text-gray-500 mb-1">Фактически</h3>
-                                <p class="text-lg sm:text-xl font-bold text-gray-900">
+                                <h3 class="text-xs sm:text-sm font-medium text-amber-700 dark:text-gray-400 mb-1">Фактически</h3>
+                                <p class="text-lg sm:text-xl font-bold text-amber-900 dark:text-gray-100">
                                     {{ session.actual_duration || '—' }} мин
                                 </p>
                             </div>
                             <div class="text-center">
-                                <div class="inline-flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 bg-purple-100 rounded-xl mb-2">
-                                    <svg class="w-5 h-5 sm:w-6 sm:h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <div class="inline-flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 bg-red-100 dark:bg-purple-900 rounded-xl mb-2 shadow-sm">
+                                    <svg class="w-5 h-5 sm:w-6 sm:h-6 text-red-500 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
                                     </svg>
                                 </div>
-                                <h3 class="text-xs sm:text-sm font-medium text-gray-500 mb-1">Прогресс</h3>
-                                <p class="text-lg sm:text-xl font-bold text-gray-900">{{ progressPercentage }}%</p>
+                                <h3 class="text-xs sm:text-sm font-medium text-amber-700 dark:text-gray-400 mb-1">Прогресс</h3>
+                                <p class="text-lg sm:text-xl font-bold text-amber-900 dark:text-gray-100">{{ progressPercentage }}%</p>
                             </div>
                         </div>
 
                         <!-- Описание сессии -->
-                        <div v-if="session.description" class="mb-8 p-6 bg-white rounded-2xl border border-gray-100">
-                            <h3 class="text-lg font-semibold text-gray-900 mb-3 flex items-center">
-                                <svg class="w-5 h-5 mr-2 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <div v-if="session.description" class="mb-8 p-6 bg-orange-50/80 dark:bg-gray-800 rounded-2xl border border-orange-200 dark:border-gray-700 shadow-sm">
+                            <h3 class="text-lg font-semibold text-amber-800 dark:text-gray-100 mb-3 flex items-center">
+                                <svg class="w-5 h-5 mr-2 text-amber-600 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                                 </svg>
                                 Описание
                             </h3>
-                            <p class="text-gray-700 leading-relaxed">{{ session.description }}</p>
+                            <p class="text-amber-700 dark:text-gray-300 leading-relaxed">{{ session.description }}</p>
                         </div>
 
                         <!-- Управление сессией -->
@@ -129,21 +129,21 @@
                 </div>
 
                 <!-- Таймер и текущий блок -->
-                <div v-if="currentBlock" class="bg-gradient-to-br from-indigo-50 to-purple-50 overflow-hidden shadow-lg sm:rounded-xl mb-4 border border-indigo-100">
+                <div v-if="currentBlock" class="bg-gradient-to-br from-orange-50/80 to-red-50/80 dark:from-indigo-900 dark:to-purple-900 overflow-hidden shadow-lg sm:rounded-xl mb-4 border border-orange-200 dark:border-indigo-800">
                     <div class="p-4 sm:p-6">
                         <div class="flex items-center justify-between">
                             <!-- Информация о блоке -->
                             <div class="flex-1">
                                 <div class="flex items-center space-x-3 mb-2">
                                     <span class="text-2xl">{{ getTypeIcon(currentBlock.type) }}</span>
-                                    <h3 class="text-lg sm:text-xl font-bold text-gray-900">
+                                    <h3 class="text-lg sm:text-xl font-bold text-orange-800 dark:text-gray-100">
                                         {{ currentBlock.title }}
                                     </h3>
                                 </div>
-                                <p v-if="currentBlock.description" class="text-sm text-gray-600 mb-2">
+                                <p v-if="currentBlock.description" class="text-sm text-orange-600 dark:text-gray-300 mb-2">
                                     {{ currentBlock.description }}
                                 </p>
-                                <div class="text-sm text-gray-500">
+                                <div class="text-sm text-orange-500 dark:text-gray-400">
                                     {{ currentBlock.planned_duration }} мин запланировано
                                 </div>
                             </div>
@@ -158,7 +158,7 @@
                                         stroke="currentColor"
                                         stroke-width="6"
                                         fill="none"
-                                        class="text-gray-200"
+                                        class="text-orange-200 dark:text-gray-700"
                                     />
                                     <circle
                                         cx="50"
@@ -179,11 +179,11 @@
                                 <div class="absolute inset-0 flex flex-col items-center justify-center">
                                     <div 
                                         class="text-sm sm:text-lg font-bold transition-colors duration-300"
-                                        :class="currentBlockProgress >= 100 ? 'text-red-600' : 'text-indigo-600'"
+                                        :class="currentBlockProgress >= 100 ? 'text-red-500 dark:text-red-400' : 'text-orange-500 dark:text-indigo-400'"
                                     >
                                         {{ formatTime(currentBlockTime) }}
                                     </div>
-                                    <div class="text-xs text-gray-500">
+                                    <div class="text-xs text-orange-500 dark:text-gray-400">
                                         {{ Math.round(currentBlockProgress) }}%
                                     </div>
                                 </div>
@@ -192,13 +192,13 @@
                         
                         <!-- Линейный прогресс-бар -->
                         <div class="mt-4">
-                            <div class="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
+                            <div class="w-full bg-orange-200 dark:bg-gray-700 rounded-full h-2 overflow-hidden shadow-inner">
                                 <div
                                     class="h-2 rounded-full transition-all duration-1000 ease-out relative"
-                                    :class="currentBlockProgress >= 100 ? 'bg-gradient-to-r from-red-400 to-red-600' : 'bg-gradient-to-r from-indigo-400 to-indigo-600'"
+                                    :class="currentBlockProgress >= 100 ? 'bg-gradient-to-r from-red-400 to-red-500' : 'bg-gradient-to-r from-orange-400 to-red-500'"
                                     :style="{ width: Math.min(currentBlockProgress, 100) + '%' }"
                                 >
-                                    <div class="absolute inset-0 bg-white opacity-20 animate-pulse"></div>
+                                    <div class="absolute inset-0 bg-white dark:bg-gray-300 opacity-30 animate-pulse"></div>
                                 </div>
                             </div>
                         </div>
@@ -229,15 +229,26 @@
                             >
                                 ✓ Завершить
                             </button>
+                            
+                            <!-- Кнопка управления звуками -->
+                            <button
+                                @click="toggleSoundSettings"
+                                @dblclick="showSoundSettings = true"
+                                :class="soundSettings.enabled ? 'bg-blue-500 hover:bg-blue-600' : 'bg-gray-500 hover:bg-gray-600'"
+                                class="px-3 py-2 text-white font-medium rounded-lg shadow transition-colors text-sm"
+                                :title="soundSettings.enabled ? 'Звуки включены (двойной клик для настроек)' : 'Звуки выключены (двойной клик для настроек)'"
+                            >
+                                {{ soundSettings.enabled ? '🔊' : '🔇' }}
+                            </button>
                         </div>
                     </div>
                 </div>
 
                 <!-- Список блоков -->
-                <div class="bg-white overflow-hidden shadow-lg sm:rounded-xl border border-gray-100">
+                <div class="bg-orange-50/90 dark:bg-gray-800 overflow-hidden shadow-lg sm:rounded-xl border border-orange-200 dark:border-gray-700">
                     <div class="p-4 sm:p-6">
-                        <h3 class="text-lg sm:text-xl font-bold text-gray-900 mb-4 flex items-center">
-                            <svg class="w-5 h-5 mr-2 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <h3 class="text-lg sm:text-xl font-bold text-orange-800 dark:text-gray-100 mb-4 flex items-center">
+                            <svg class="w-5 h-5 mr-2 text-orange-500 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
                             </svg>
                             Упражнения
@@ -264,17 +275,17 @@
                                             <span class="text-lg sm:text-xl">{{ getTypeIcon(block.type) }}</span>
                                         </div>
                                         <div class="flex-1 min-w-0">
-                                            <h4 class="text-sm sm:text-base font-semibold text-gray-900 truncate">
+                                            <h4 class="text-sm sm:text-base font-semibold text-orange-800 dark:text-gray-100 truncate">
                                                 {{ block.title }}
                                             </h4>
                                             <div class="flex items-center space-x-2 mt-1">
                                                 <span :class="getBlockBadgeClass(block.status)">
                                                     {{ getBlockStatusLabel(block.status) }}
                                                 </span>
-                                                <span class="text-xs text-gray-500">
+                                                <span class="text-xs text-orange-500 dark:text-gray-400">
                                                     {{ block.planned_duration }} мин
                                                 </span>
-                                                <span v-if="block.actual_duration" class="text-xs text-gray-500">
+                                                <span v-if="block.actual_duration" class="text-xs text-orange-500 dark:text-gray-400">
                                                     ({{ block.actual_duration }} мин)
                                                 </span>
                                             </div>
@@ -321,6 +332,104 @@
                 </div>
             </div>
         </div>
+        
+        <!-- Модальное окно настроек звука -->
+        <div v-if="showSoundSettings" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div class="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-md w-full mx-4">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Настройки звука</h3>
+                    <button @click="showSoundSettings = false" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                        ✕
+                    </button>
+                </div>
+                
+                <div class="space-y-4">
+                    <!-- Общее включение/выключение звуков -->
+                    <div class="flex items-center justify-between">
+                        <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Включить звуки</label>
+                        <input
+                            type="checkbox"
+                            v-model="soundSettings.enabled"
+                            class="rounded border-gray-300 dark:border-gray-600 text-indigo-600 dark:text-indigo-400 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 dark:bg-gray-700"
+                        />
+                    </div>
+                    
+                    <!-- Громкость -->
+                    <div class="flex items-center justify-between">
+                        <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Громкость</label>
+                        <input
+                            type="range"
+                            min="0"
+                            max="1"
+                            step="0.1"
+                            v-model="soundSettings.volume"
+                            :disabled="!soundSettings.enabled"
+                            class="w-24"
+                        />
+                        <span class="text-sm text-gray-500 dark:text-gray-400 w-8">{{ Math.round(soundSettings.volume * 100) }}%</span>
+                    </div>
+                    
+                    <!-- Звук начала -->
+                    <div class="flex items-center justify-between">
+                        <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Звук начала</label>
+                        <input
+                            type="checkbox"
+                            v-model="soundSettings.startSound"
+                            :disabled="!soundSettings.enabled"
+                            class="rounded border-gray-300 dark:border-gray-600 text-indigo-600 dark:text-indigo-400 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 dark:bg-gray-700"
+                        />
+                    </div>
+                    
+                    <!-- Звук паузы -->
+                    <div class="flex items-center justify-between">
+                        <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Звук паузы</label>
+                        <input
+                            type="checkbox"
+                            v-model="soundSettings.pauseSound"
+                            :disabled="!soundSettings.enabled"
+                            class="rounded border-gray-300 dark:border-gray-600 text-indigo-600 dark:text-indigo-400 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 dark:bg-gray-700"
+                        />
+                    </div>
+                    
+                    <!-- Звук завершения -->
+                    <div class="flex items-center justify-between">
+                        <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Звук завершения</label>
+                        <input
+                            type="checkbox"
+                            v-model="soundSettings.completeSound"
+                            :disabled="!soundSettings.enabled"
+                            class="rounded border-gray-300 dark:border-gray-600 text-indigo-600 dark:text-indigo-400 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 dark:bg-gray-700"
+                        />
+                    </div>
+                    
+                    <!-- Звук предупреждения -->
+                    <div class="flex items-center justify-between">
+                        <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Звук предупреждения</label>
+                        <input
+                            type="checkbox"
+                            v-model="soundSettings.warningSound"
+                            :disabled="!soundSettings.enabled"
+                            class="rounded border-gray-300 dark:border-gray-600 text-indigo-600 dark:text-indigo-400 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 dark:bg-gray-700"
+                        />
+                    </div>
+                </div>
+                
+                <div class="flex justify-end gap-2 mt-6">
+                    <button
+                        @click="showSoundSettings = false"
+                        class="px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 transition-colors"
+                    >
+                        Отмена
+                    </button>
+                    <button
+                        @click="saveSoundSettings"
+                        class="px-4 py-2 bg-indigo-500 dark:bg-indigo-600 text-white rounded-lg hover:bg-indigo-600 dark:hover:bg-indigo-700 transition-colors"
+                    >
+                        Сохранить
+                    </button>
+                </div>
+            </div>
+        </div>
     </AuthenticatedLayout>
 </template>
 
@@ -331,6 +440,7 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
 import PrimaryButton from '@/Components/PrimaryButton.vue'
 import SecondaryButton from '@/Components/SecondaryButton.vue'
 import DangerButton from '@/Components/DangerButton.vue'
+import { useTimerSounds } from '@/composables/useTimerSounds'
 
 interface SessionBlock {
     id: number
@@ -364,16 +474,154 @@ const props = defineProps<Props>()
 
 const form = useForm({})
 
+// Звуки таймера
+const {
+  settings: soundSettings,
+  playStartSound,
+  playPauseSound,
+  playCompleteSound,
+  playWarningSound,
+  playTimeUpSound,
+  playBlockSwitchSound,
+  loadSettings: loadSoundSettings,
+} = useTimerSounds()
+
 // Таймер
 const timerRunning = ref(false)
 const currentBlockTime = ref(0) // Оставшееся время в секундах
 const timerInterval = ref<number | null>(null)
 const startTime = ref<number | null>(null)
 const blockStartTime = ref<number | null>(null) // Время начала блока
+const warningPlayed = ref(false) // Флаг для предотвращения повторного воспроизведения предупреждения
+const showSoundSettings = ref(false) // Показать модальное окно настроек звука
 
 const currentBlock = computed(() => {
     return props.session.blocks.find(block => block.status === 'active')
 })
+
+// Ключи для localStorage
+const TIMER_STATE_KEY = 'timer-state'
+const TIMER_SESSION_KEY = 'timer-session-id'
+
+// Сохранение состояния таймера
+const saveTimerState = () => {
+    if (!currentBlock.value || !timerRunning.value) return
+    
+    const timerState = {
+        sessionId: props.session.id,
+        blockId: currentBlock.value.id,
+        startTime: startTime.value,
+        blockStartTime: blockStartTime.value,
+        remainingTime: currentBlockTime.value,
+        plannedDuration: currentBlock.value.planned_duration,
+        timestamp: Date.now()
+    }
+    
+    localStorage.setItem(TIMER_STATE_KEY, JSON.stringify(timerState))
+    localStorage.setItem(TIMER_SESSION_KEY, props.session.id.toString())
+}
+
+// Восстановление состояния таймера
+const restoreTimerState = () => {
+    try {
+        const savedState = localStorage.getItem(TIMER_STATE_KEY)
+        const savedSessionId = localStorage.getItem(TIMER_SESSION_KEY)
+        
+        if (!savedState || !savedSessionId) return false
+        
+        const timerState = JSON.parse(savedState)
+        
+        // Проверяем, что это та же сессия
+        if (timerState.sessionId !== props.session.id) {
+            clearTimerState()
+            return false
+        }
+        
+        // Проверяем, что блок все еще активен
+        const savedBlock = props.session.blocks.find(block => block.id === timerState.blockId)
+        if (!savedBlock || savedBlock.status !== 'active') {
+            clearTimerState()
+            return false
+        }
+        
+        // Проверяем, что состояние не слишком старое (максимум 24 часа)
+        const maxAge = 24 * 60 * 60 * 1000 // 24 часа в миллисекундах
+        if (Date.now() - timerState.timestamp > maxAge) {
+            clearTimerState()
+            return false
+        }
+        
+        // Восстанавливаем состояние
+        startTime.value = timerState.startTime
+        blockStartTime.value = timerState.blockStartTime
+        
+        // Вычисляем оставшееся время с учетом прошедшего времени
+        const now = Date.now()
+        const elapsed = Math.floor((now - timerState.startTime) / 1000)
+        const plannedSeconds = timerState.plannedDuration * 60
+        const remaining = Math.max(0, plannedSeconds - elapsed)
+        
+        currentBlockTime.value = remaining
+        
+        // Если время еще не истекло, запускаем таймер
+        if (remaining > 0) {
+            timerRunning.value = true
+            startTimerInterval()
+            return true
+        } else {
+            // Время истекло, завершаем блок
+            clearTimerState()
+            completeCurrentBlock()
+            return false
+        }
+        
+    } catch (error) {
+        console.warn('Ошибка при восстановлении состояния таймера:', error)
+        clearTimerState()
+        return false
+    }
+}
+
+// Очистка состояния таймера
+const clearTimerState = () => {
+    localStorage.removeItem(TIMER_STATE_KEY)
+    localStorage.removeItem(TIMER_SESSION_KEY)
+}
+
+// Запуск интервала таймера (отдельная функция)
+const startTimerInterval = () => {
+    if (timerInterval.value) {
+        clearInterval(timerInterval.value)
+    }
+    
+    timerInterval.value = setInterval(() => {
+        if (!currentBlock.value) return
+        
+        const now = Date.now()
+        const elapsed = Math.floor((now - (startTime.value || 0)) / 1000)
+        const plannedSeconds = currentBlock.value.planned_duration * 60
+        const remaining = Math.max(0, plannedSeconds - elapsed)
+        
+        currentBlockTime.value = remaining
+        
+        // Звук предупреждения за 30 секунд до окончания
+        if (remaining <= 30 && remaining > 0 && !warningPlayed.value) {
+            playWarningSound()
+            warningPlayed.value = true
+        }
+        
+        // Автоматически завершаем блок при достижении нуля
+        if (remaining <= 0) {
+            playTimeUpSound()
+            completeCurrentBlock()
+        }
+        
+        // Сохраняем состояние каждые 5 секунд
+        if (elapsed % 5 === 0) {
+            saveTimerState()
+        }
+    }, 100) // Обновляем каждые 100мс для более плавного отображения
+}
 
 const currentBlockProgress = computed(() => {
     if (!currentBlock.value) return 0
@@ -399,15 +647,15 @@ const statusLabel = computed(() => {
 })
 
 const statusBadgeClass = computed(() => {
-    const baseClass = 'px-3 py-1 rounded-full text-sm font-medium'
+    const baseClass = 'px-3 py-1 rounded-full text-sm font-medium shadow-sm'
     const statusClasses = {
-        planned: 'bg-gray-100 text-gray-800',
-        active: 'bg-green-100 text-green-800',
-        paused: 'bg-yellow-100 text-yellow-800',
-        completed: 'bg-blue-100 text-blue-800',
-        cancelled: 'bg-red-100 text-red-800',
+        planned: 'bg-amber-100 dark:bg-gray-700 text-amber-700 dark:text-gray-200',
+        active: 'bg-orange-100 dark:bg-green-900 text-orange-700 dark:text-green-200',
+        paused: 'bg-yellow-100 dark:bg-yellow-900 text-yellow-700 dark:text-yellow-200',
+        completed: 'bg-red-100 dark:bg-blue-900 text-red-700 dark:text-blue-200',
+        cancelled: 'bg-red-200 dark:bg-red-900 text-red-800 dark:text-red-200',
     }
-    return `${baseClass} ${statusClasses[props.session.status as keyof typeof statusClasses] || 'bg-gray-100 text-gray-800'}`
+    return `${baseClass} ${statusClasses[props.session.status as keyof typeof statusClasses] || 'bg-amber-100 dark:bg-gray-700 text-amber-700 dark:text-gray-200'}`
 })
 
 const progressPercentage = computed(() => {
@@ -421,6 +669,7 @@ const startTimer = () => {
     if (!currentBlock.value) return
     
     timerRunning.value = true
+    warningPlayed.value = false // Сбрасываем флаг предупреждения
     
     // Если таймер запускается впервые для этого блока
     if (!startTime.value || !blockStartTime.value) {
@@ -428,6 +677,8 @@ const startTimer = () => {
         blockStartTime.value = Date.now()
         // Инициализируем таймер с запланированным временем
         currentBlockTime.value = currentBlock.value.planned_duration * 60
+        // Воспроизводим звук начала
+        playStartSound()
     } else {
         // При возобновлении сохраняем уже прошедшее время
         // Таймер продолжит отсчет с того места, где остановился
@@ -435,23 +686,15 @@ const startTimer = () => {
         const plannedSeconds = currentBlock.value.planned_duration * 60
         const remaining = Math.max(0, plannedSeconds - elapsed)
         currentBlockTime.value = remaining
+        // Воспроизводим звук возобновления
+        playStartSound()
     }
     
-    timerInterval.value = setInterval(() => {
-        if (!currentBlock.value) return
-        
-        const now = Date.now()
-        const elapsed = Math.floor((now - (startTime.value || 0)) / 1000)
-        const plannedSeconds = currentBlock.value.planned_duration * 60
-        const remaining = Math.max(0, plannedSeconds - elapsed)
-        
-        currentBlockTime.value = remaining
-        
-        // Автоматически завершаем блок при достижении нуля
-        if (remaining <= 0) {
-            completeCurrentBlock()
-        }
-    }, 100) // Обновляем каждые 100мс для более плавного отображения
+    // Запускаем интервал таймера
+    startTimerInterval()
+    
+    // Сохраняем состояние
+    saveTimerState()
 }
 
 const pauseTimer = () => {
@@ -460,6 +703,10 @@ const pauseTimer = () => {
         clearInterval(timerInterval.value)
         timerInterval.value = null
     }
+    // Воспроизводим звук паузы
+    playPauseSound()
+    // Сохраняем состояние при паузе
+    saveTimerState()
     // Просто останавливаем таймер, время паузы будет учтено при возобновлении
 }
 
@@ -468,6 +715,8 @@ const resetTimer = () => {
     currentBlockTime.value = 0
     startTime.value = null
     blockStartTime.value = null
+    // Очищаем сохраненное состояние
+    clearTimerState()
 }
 
 const formatTime = (seconds: number) => {
@@ -503,6 +752,8 @@ const pauseBlock = (block: SessionBlock) => {
         onSuccess: () => {
             // После успешного обновления останавливаем таймер
             pauseTimer()
+            // Очищаем сохраненное состояние
+            clearTimerState()
         }
     })
 }
@@ -524,14 +775,31 @@ const completeBlock = (block: SessionBlock) => {
         onSuccess: () => {
             // После успешного обновления сбрасываем таймер
             resetTimer()
+            // Воспроизводим звук переключения блока
+            playBlockSwitchSound()
         }
     })
 }
 
 const completeCurrentBlock = () => {
     if (currentBlock.value) {
+        // Воспроизводим звук завершения блока
+        playCompleteSound()
         completeBlock(currentBlock.value)
     }
+}
+
+// Управление настройками звука
+const toggleSoundSettings = () => {
+    soundSettings.value.enabled = !soundSettings.value.enabled
+    // Сохраняем настройки
+    localStorage.setItem('timer-sound-settings', JSON.stringify(soundSettings.value))
+}
+
+const saveSoundSettings = () => {
+    // Сохраняем настройки
+    localStorage.setItem('timer-sound-settings', JSON.stringify(soundSettings.value))
+    showSoundSettings.value = false
 }
 
 // Методы управления сессией
@@ -581,13 +849,13 @@ const getBlockStatusLabel = (status: string) => {
 
 const getBlockStatusClass = (status: string) => {
     const classes = {
-        planned: 'border-gray-200 bg-gray-50 hover:border-gray-300',
-        active: 'border-indigo-300 bg-gradient-to-r from-indigo-50 to-purple-50 hover:border-indigo-400',
-        paused: 'border-yellow-300 bg-gradient-to-r from-yellow-50 to-orange-50 hover:border-yellow-400',
-        completed: 'border-green-300 bg-gradient-to-r from-green-50 to-emerald-50 hover:border-green-400',
-        skipped: 'border-gray-200 bg-gray-100 hover:border-gray-300',
+        planned: 'border-amber-200 dark:border-gray-600 bg-amber-50/80 dark:bg-gray-800 hover:border-amber-300 dark:hover:border-gray-500',
+        active: 'border-orange-200 dark:border-indigo-600 bg-gradient-to-r from-orange-50/80 to-red-50/80 dark:from-indigo-900 dark:to-purple-900 hover:border-orange-300 dark:hover:border-indigo-500',
+        paused: 'border-yellow-200 dark:border-yellow-600 bg-gradient-to-r from-yellow-50/80 to-orange-50/80 dark:from-yellow-900 dark:to-orange-900 hover:border-yellow-300 dark:hover:border-yellow-500',
+        completed: 'border-red-200 dark:border-green-600 bg-gradient-to-r from-red-50/80 to-orange-50/80 dark:from-green-900 dark:to-emerald-900 hover:border-red-300 dark:hover:border-green-500',
+        skipped: 'border-amber-200 dark:border-gray-600 bg-amber-100/80 dark:bg-gray-800 hover:border-amber-300 dark:hover:border-gray-500',
     }
-    return classes[status as keyof typeof classes] || 'border-gray-200 bg-gray-50'
+    return classes[status as keyof typeof classes] || 'border-amber-200 dark:border-gray-600 bg-amber-50/80 dark:bg-gray-800'
 }
 
 const getBlockProgressClass = (status: string) => {
@@ -603,37 +871,45 @@ const getBlockProgressClass = (status: string) => {
 
 const getBlockIconBgClass = (status: string) => {
     const classes = {
-        planned: 'bg-gray-100',
-        active: 'bg-gradient-to-br from-indigo-100 to-purple-100',
-        paused: 'bg-gradient-to-br from-yellow-100 to-orange-100',
-        completed: 'bg-gradient-to-br from-green-100 to-emerald-100',
-        skipped: 'bg-gray-100',
+        planned: 'bg-amber-100 dark:bg-gray-700 shadow-sm',
+        active: 'bg-gradient-to-br from-orange-100 to-red-100 dark:from-indigo-800 dark:to-purple-800 shadow-sm',
+        paused: 'bg-gradient-to-br from-yellow-100 to-orange-100 dark:from-yellow-800 dark:to-orange-800 shadow-sm',
+        completed: 'bg-gradient-to-br from-red-100 to-orange-100 dark:from-green-800 dark:to-emerald-800 shadow-sm',
+        skipped: 'bg-amber-100 dark:bg-gray-700 shadow-sm',
     }
-    return classes[status as keyof typeof classes] || 'bg-gray-100'
+    return classes[status as keyof typeof classes] || 'bg-amber-100 dark:bg-gray-700 shadow-sm'
 }
 
 const getBlockBadgeClass = (status: string) => {
-    const baseClass = 'px-2 py-1 rounded-full text-xs font-medium'
+    const baseClass = 'px-2 py-1 rounded-full text-xs font-medium shadow-sm'
     const statusClasses = {
-        planned: 'bg-gray-100 text-gray-800',
-        active: 'bg-indigo-100 text-indigo-800',
-        paused: 'bg-yellow-100 text-yellow-800',
-        completed: 'bg-green-100 text-green-800',
-        skipped: 'bg-gray-100 text-gray-600',
+        planned: 'bg-amber-100 dark:bg-gray-700 text-amber-700 dark:text-gray-200',
+        active: 'bg-orange-100 dark:bg-indigo-900 text-orange-700 dark:text-indigo-200',
+        paused: 'bg-yellow-100 dark:bg-yellow-900 text-yellow-700 dark:text-yellow-200',
+        completed: 'bg-red-100 dark:bg-green-900 text-red-700 dark:text-green-200',
+        skipped: 'bg-amber-100 dark:bg-gray-700 text-amber-500 dark:text-gray-400',
     }
-    return `${baseClass} ${statusClasses[status as keyof typeof statusClasses] || 'bg-gray-100 text-gray-800'}`
+    return `${baseClass} ${statusClasses[status as keyof typeof statusClasses] || 'bg-amber-100 dark:bg-gray-700 text-amber-700 dark:text-gray-200'}`
 }
 
 // Жизненный цикл
 onMounted(() => {
-    // Если есть активный блок, запускаем таймер
-    if (currentBlock.value && props.session.status === 'active') {
+    // Загружаем настройки звука
+    loadSoundSettings()
+    
+    // Пытаемся восстановить состояние таймера
+    const timerRestored = restoreTimerState()
+    
+    // Если таймер не был восстановлен и есть активный блок, запускаем новый таймер
+    if (!timerRestored && currentBlock.value && props.session.status === 'active') {
         startTimer()
     }
 })
 
 onUnmounted(() => {
     pauseTimer()
+    // Сохраняем состояние перед размонтированием
+    saveTimerState()
 })
 
 // Следим за изменениями активного блока
