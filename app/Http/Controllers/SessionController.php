@@ -124,8 +124,9 @@ class SessionController extends Controller
             'status' => Session::STATUS_PLANNED,
         ]);
 
-        // Создаем блоки сессии
+        // Создаем блоки сессии и упражнения
         foreach ($request->blocks as $index => $blockData) {
+            // Создаем блок сессии
             $session->blocks()->create([
                 'title' => $blockData['title'],
                 'description' => $blockData['description'],
@@ -134,6 +135,24 @@ class SessionController extends Controller
                 'status' => SessionBlock::STATUS_PLANNED,
                 'sort_order' => $index + 1,
             ]);
+
+            // Проверяем, существует ли уже такое упражнение у пользователя
+            $existingExercise = Exercise::where('user_id', auth()->id())
+                ->where('title', $blockData['title'])
+                ->where('type', $blockData['type'])
+                ->first();
+
+            // Если упражнение не существует, создаем его
+            if (!$existingExercise) {
+                Exercise::create([
+                    'user_id' => auth()->id(),
+                    'title' => $blockData['title'],
+                    'description' => $blockData['description'],
+                    'type' => $blockData['type'],
+                    'planned_duration' => $blockData['duration'],
+                    'status' => Exercise::STATUS_PLANNED,
+                ]);
+            }
         }
 
         return redirect()->route('sessions.show', $session)
