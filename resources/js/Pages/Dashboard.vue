@@ -42,11 +42,11 @@ const getTypeIcon = (type: string): string => {
 const getStatusBadgeClass = (status: string): string => {
     const baseClass = 'px-2 py-1 text-xs font-medium rounded-full'
     const statusClasses = {
-        planned: 'bg-gray-100 text-gray-800 dark:bg-gray-600 dark:text-gray-200',
-        active: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
+        planned: 'bg-amber-100 text-amber-800 dark:bg-gray-600 dark:text-gray-200',
+        active: 'bg-orange-100 text-orange-800 dark:bg-green-900 dark:text-green-200',
         paused: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200',
-        completed: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
-        cancelled: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200',
+        completed: 'bg-red-100 text-red-800 dark:bg-blue-900 dark:text-blue-200',
+        cancelled: 'bg-red-200 text-red-800 dark:bg-red-900 dark:text-red-200',
     }
     return `${baseClass} ${statusClasses[status as keyof typeof statusClasses] || 'bg-gray-100 text-gray-800 dark:bg-gray-600 dark:text-gray-200'}`
 }
@@ -59,7 +59,7 @@ const getStatusBadgeClass = (status: string): string => {
     <AuthenticatedLayout>
         <template #header>
             <h2
-                class="text-xl font-semibold leading-tight text-gray-800 dark:text-gray-200"
+                class="text-xl font-semibold leading-tight text-amber-800 dark:text-gray-200"
             >
                 {{ t('dashboard.title') }}
             </h2>
@@ -69,17 +69,17 @@ const getStatusBadgeClass = (status: string): string => {
             <div class="mx-auto max-w-7xl sm:px-6 lg:px-8">
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     <!-- Создать занятие -->
-                    <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg dark:bg-gray-800 dark:shadow-gray-900/20">
+                    <div class="bg-orange-50 overflow-hidden shadow-sm sm:rounded-lg dark:bg-gray-800 dark:shadow-gray-900/20">
                         <div class="p-6">
                             <div class="flex items-center">
                                 <div class="flex-shrink-0">
-                                    <svg class="h-8 w-8 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <svg class="h-8 w-8 text-orange-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                                     </svg>
                                 </div>
                                 <div class="ml-4">
-                                    <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">Создать занятие</h3>
-                                    <p class="text-sm text-gray-500 dark:text-gray-400">Начните новое музыкальное занятие</p>
+                                    <h3 class="text-lg font-medium text-amber-900 dark:text-gray-100">Создать занятие</h3>
+                                    <p class="text-sm text-amber-600 dark:text-gray-400">Начните новое музыкальное занятие</p>
                                 </div>
                             </div>
                             <div class="mt-4">
@@ -91,17 +91,17 @@ const getStatusBadgeClass = (status: string): string => {
                     </div>
 
                     <!-- Мои занятия -->
-                    <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg dark:bg-gray-800 dark:shadow-gray-900/20">
+                    <div class="bg-red-50 overflow-hidden shadow-sm sm:rounded-lg dark:bg-gray-800 dark:shadow-gray-900/20">
                         <div class="p-6">
                             <div class="flex items-center">
                                 <div class="flex-shrink-0">
-                                    <svg class="h-8 w-8 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <svg class="h-8 w-8 text-red-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
                                     </svg>
                                 </div>
                                 <div class="ml-4">
-                                    <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">Мои занятия</h3>
-                                    <p class="text-sm text-gray-500 dark:text-gray-400">Просмотр и управление занятиями</p>
+                                    <h3 class="text-lg font-medium text-amber-900 dark:text-gray-100">Мои занятия</h3>
+                                    <p class="text-sm text-amber-600 dark:text-gray-400">Просмотр и управление занятиями</p>
                                 </div>
                             </div>
                             <div class="mt-4">
@@ -113,17 +113,17 @@ const getStatusBadgeClass = (status: string): string => {
                     </div>
 
                     <!-- Статистика -->
-                    <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg dark:bg-gray-800 dark:shadow-gray-900/20">
+                    <div class="bg-yellow-50 overflow-hidden shadow-sm sm:rounded-lg dark:bg-gray-800 dark:shadow-gray-900/20">
                         <div class="p-6">
                             <div class="flex items-center">
                                 <div class="flex-shrink-0">
-                                    <svg class="h-8 w-8 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <svg class="h-8 w-8 text-yellow-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                                     </svg>
                                 </div>
                                 <div class="ml-4">
-                                    <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">Статистика</h3>
-                                    <p class="text-sm text-gray-500 dark:text-gray-400">Ваш прогресс в обучении</p>
+                                    <h3 class="text-lg font-medium text-amber-900 dark:text-gray-100">Статистика</h3>
+                                    <p class="text-sm text-amber-600 dark:text-gray-400">Ваш прогресс в обучении</p>
                                 </div>
                             </div>
                             <div class="mt-4">

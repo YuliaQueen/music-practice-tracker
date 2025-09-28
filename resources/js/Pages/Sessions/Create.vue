@@ -1,33 +1,33 @@
 <template>
     <AuthenticatedLayout>
         <template #header>
-            <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
+            <h2 class="font-semibold text-xl text-amber-800 dark:text-gray-200 leading-tight">
                 Создать занятие
             </h2>
         </template>
 
         <div class="py-12">
             <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg dark:bg-gray-800 dark:shadow-gray-900/20">
-                    <div class="p-6 text-gray-900 dark:text-gray-100">
+                <div class="bg-orange-50 overflow-hidden shadow-sm sm:rounded-lg dark:bg-gray-800 dark:shadow-gray-900/20">
+                    <div class="p-6 text-amber-900 dark:text-gray-100">
                         <form @submit.prevent="submit">
                             <!-- Основная информация -->
                             <div class="mb-6">
-                                <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">Основная информация</h3>
+                                <h3 class="text-lg font-medium text-amber-900 dark:text-gray-100 mb-4">Основная информация</h3>
                                 
                                 <!-- Уведомление о добавленном упражнении -->
-                                <div v-if="exerciseData" class="mb-4 p-4 bg-green-50 border border-green-200 rounded-lg dark:bg-green-900/20 dark:border-green-800">
+                                <div v-if="exerciseData" class="mb-4 p-4 bg-orange-100 border border-orange-200 rounded-lg dark:bg-green-900/20 dark:border-green-800">
                                     <div class="flex items-center">
                                         <div class="flex-shrink-0">
-                                            <svg class="h-5 w-5 text-green-400" fill="currentColor" viewBox="0 0 20 20">
+                                            <svg class="h-5 w-5 text-orange-500" fill="currentColor" viewBox="0 0 20 20">
                                                 <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
                                             </svg>
                                         </div>
                                         <div class="ml-3">
-                                            <h4 class="text-sm font-medium text-green-800 dark:text-green-200">
+                                            <h4 class="text-sm font-medium text-orange-800 dark:text-green-200">
                                                 Упражнение "{{ exerciseData.title }}" добавлено в занятие
                                             </h4>
-                                            <p class="text-sm text-green-700 dark:text-green-300 mt-1">
+                                            <p class="text-sm text-orange-700 dark:text-green-300 mt-1">
                                                 Вы можете добавить еще упражнения или изменить параметры этого упражнения ниже.
                                             </p>
                                         </div>

@@ -36,12 +36,12 @@ class GoalSessionIntegrationTest extends TestCase
             'type' => Goal::TYPE_DAILY_MINUTES,
             'target' => ['value' => 30, 'period' => 'daily'],
             'progress' => null,
+            'is_active' => true,
         ]);
 
         // Создаем завершенную сессию с блоками
-        $session = Session::factory()->create([
+        $session = Session::factory()->completed()->create([
             'user_id' => $this->user->id,
-            'status' => Session::STATUS_COMPLETED,
             'actual_duration' => 45,
             'created_at' => Carbon::now(),
         ]);
@@ -76,6 +76,7 @@ class GoalSessionIntegrationTest extends TestCase
             'type' => Goal::TYPE_WEEKLY_SESSIONS,
             'target' => ['value' => 3, 'period' => 'weekly'],
             'progress' => null,
+            'is_active' => true,
         ]);
 
         // Создаем несколько завершенных сессий
@@ -109,24 +110,22 @@ class GoalSessionIntegrationTest extends TestCase
             'type' => Goal::TYPE_STREAK_DAYS,
             'target' => ['value' => 7, 'period' => 'streak'],
             'progress' => null,
+            'is_active' => true,
         ]);
 
         // Создаем сессии за последние 3 дня
-        Session::factory()->create([
+        Session::factory()->completed()->create([
             'user_id' => $this->user->id,
-            'status' => Session::STATUS_COMPLETED,
             'created_at' => Carbon::now()->subDays(2),
         ]);
 
-        Session::factory()->create([
+        Session::factory()->completed()->create([
             'user_id' => $this->user->id,
-            'status' => Session::STATUS_COMPLETED,
             'created_at' => Carbon::now()->subDays(1),
         ]);
 
-        Session::factory()->create([
+        Session::factory()->completed()->create([
             'user_id' => $this->user->id,
-            'status' => Session::STATUS_COMPLETED,
             'created_at' => Carbon::now(),
         ]);
 
@@ -148,12 +147,12 @@ class GoalSessionIntegrationTest extends TestCase
             'type' => Goal::TYPE_EXERCISE_TYPE,
             'target' => ['value' => 60, 'period' => 'daily', 'exercise_type' => SessionBlock::TYPE_TECHNIQUE],
             'progress' => null,
+            'is_active' => true,
         ]);
 
         // Создаем сессию с блоками разных типов
-        $session = Session::factory()->create([
+        $session = Session::factory()->completed()->create([
             'user_id' => $this->user->id,
-            'status' => Session::STATUS_COMPLETED,
             'created_at' => Carbon::now(),
         ]);
 
@@ -191,13 +190,13 @@ class GoalSessionIntegrationTest extends TestCase
             'type' => Goal::TYPE_DAILY_MINUTES,
             'target' => ['value' => 30, 'period' => 'daily'],
             'progress' => null,
+            'is_active' => true,
             'is_completed' => false,
         ]);
 
         // Создаем сессию с достаточной продолжительностью
-        $session = Session::factory()->create([
+        $session = Session::factory()->completed()->create([
             'user_id' => $this->user->id,
-            'status' => Session::STATUS_COMPLETED,
             'actual_duration' => 35,
             'created_at' => Carbon::now(),
         ]);
@@ -213,6 +212,7 @@ class GoalSessionIntegrationTest extends TestCase
         $completedGoals = $this->goalProgressService->checkAndCompleteGoals($this->user);
 
         $goal->refresh();
+        
         $this->assertCount(1, $updatedGoals);
         $this->assertCount(1, $completedGoals);
         $this->assertTrue($goal->is_completed);
@@ -228,6 +228,7 @@ class GoalSessionIntegrationTest extends TestCase
             'type' => Goal::TYPE_DAILY_MINUTES,
             'target' => ['value' => 30, 'period' => 'daily'],
             'progress' => null,
+            'is_active' => true,
         ]);
 
         // Создаем сессию
@@ -267,6 +268,7 @@ class GoalSessionIntegrationTest extends TestCase
             'type' => Goal::TYPE_DAILY_MINUTES,
             'target' => ['value' => 30, 'period' => 'daily'],
             'progress' => null,
+            'is_active' => true,
         ]);
 
         // Создаем сессию и блок
@@ -306,22 +308,21 @@ class GoalSessionIntegrationTest extends TestCase
             'type' => Goal::TYPE_DAILY_MINUTES,
             'target' => ['value' => 30, 'period' => 'daily'],
             'progress' => null,
+            'is_active' => true,
         ]);
 
         $yesterday = Carbon::yesterday();
         $today = Carbon::now();
 
         // Создаем сессии за вчера и сегодня
-        Session::factory()->create([
+        Session::factory()->completed()->create([
             'user_id' => $this->user->id,
-            'status' => Session::STATUS_COMPLETED,
             'actual_duration' => 25,
             'created_at' => $yesterday,
         ]);
 
-        Session::factory()->create([
+        Session::factory()->completed()->create([
             'user_id' => $this->user->id,
-            'status' => Session::STATUS_COMPLETED,
             'actual_duration' => 35,
             'created_at' => $today,
         ]);
@@ -347,6 +348,7 @@ class GoalSessionIntegrationTest extends TestCase
             'type' => Goal::TYPE_DAILY_MINUTES,
             'target' => ['value' => 30, 'period' => 'daily'],
             'progress' => null,
+            'is_active' => true,
         ]);
 
         $weeklyGoal = Goal::factory()->create([
@@ -354,6 +356,7 @@ class GoalSessionIntegrationTest extends TestCase
             'type' => Goal::TYPE_WEEKLY_SESSIONS,
             'target' => ['value' => 2, 'period' => 'weekly'],
             'progress' => null,
+            'is_active' => true,
         ]);
 
         // Создаем сессии
@@ -397,9 +400,8 @@ class GoalSessionIntegrationTest extends TestCase
         ]);
 
         // Создаем сессию
-        Session::factory()->create([
+        Session::factory()->completed()->create([
             'user_id' => $this->user->id,
-            'status' => Session::STATUS_COMPLETED,
             'actual_duration' => 25,
             'created_at' => Carbon::now(),
         ]);
@@ -424,6 +426,7 @@ class GoalSessionIntegrationTest extends TestCase
             'type' => Goal::TYPE_DAILY_MINUTES,
             'target' => ['value' => 30, 'period' => 'daily'],
             'progress' => ['current' => 25, 'total' => 30],
+            'is_active' => true,
             'is_completed' => false,
         ]);
 
@@ -432,6 +435,7 @@ class GoalSessionIntegrationTest extends TestCase
             'type' => Goal::TYPE_WEEKLY_SESSIONS,
             'target' => ['value' => 2, 'period' => 'weekly'],
             'progress' => ['current' => 2, 'total' => 2],
+            'is_active' => true,
             'is_completed' => true,
         ]);
 

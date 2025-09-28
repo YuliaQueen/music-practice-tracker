@@ -16,9 +16,9 @@ const { t } = useSimpleI18n();
 
 <template>
     <div>
-        <div class="min-h-screen bg-gray-100 dark:bg-gray-900">
+        <div class="min-h-screen bg-amber-50 dark:bg-gray-900">
             <nav
-                class="border-b border-gray-100 bg-white dark:border-gray-800 dark:bg-gray-800"
+                class="border-b border-amber-200 bg-orange-50 dark:border-gray-800 dark:bg-gray-800"
             >
                 <!-- Primary Navigation Menu -->
                 <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -28,7 +28,7 @@ const { t } = useSimpleI18n();
                             <div class="flex shrink-0 items-center">
                                 <Link :href="route('dashboard')">
                                     <ApplicationLogo
-                                        class="block h-12 w-16 fill-current text-gray-800 dark:text-gray-200"
+                                        class="block h-12 w-16 fill-current text-amber-800 dark:text-gray-200"
                                     />
                                 </Link>
                             </div>
@@ -133,7 +133,7 @@ const { t } = useSimpleI18n();
                                     showingNavigationDropdown =
                                         !showingNavigationDropdown
                                 "
-                                class="inline-flex items-center justify-center rounded-md p-2 text-gray-400 transition duration-150 ease-in-out hover:bg-gray-100 hover:text-gray-500 focus:bg-gray-100 focus:text-gray-500 focus:outline-none dark:text-gray-500 dark:hover:bg-gray-700 dark:hover:text-gray-300 dark:focus:bg-gray-700 dark:focus:text-gray-300"
+                                class="inline-flex items-center justify-center rounded-md p-2 text-amber-500 transition duration-150 ease-in-out hover:bg-orange-100 hover:text-amber-600 focus:bg-orange-100 focus:text-amber-600 focus:outline-none dark:text-gray-500 dark:hover:bg-gray-700 dark:hover:text-gray-300 dark:focus:bg-gray-700 dark:focus:text-gray-300"
                             >
                                 <svg
                                     class="h-6 w-6"
@@ -212,15 +212,15 @@ const { t } = useSimpleI18n();
 
                     <!-- Responsive Settings Options -->
                     <div
-                        class="border-t border-gray-200 pb-1 pt-4 dark:border-gray-700"
+                        class="border-t border-amber-200 pb-1 pt-4 dark:border-gray-700"
                     >
                         <div class="px-4">
                             <div
-                                class="text-base font-medium text-gray-800 dark:text-gray-200"
+                                class="text-base font-medium text-amber-800 dark:text-gray-200"
                             >
                                 {{ $page.props.auth.user.name }}
                             </div>
-                            <div class="text-sm font-medium text-gray-500 dark:text-gray-400">
+                            <div class="text-sm font-medium text-amber-600 dark:text-gray-400">
                                 {{ $page.props.auth.user.email }}
                             </div>
                         </div>
@@ -246,7 +246,7 @@ const { t } = useSimpleI18n();
 
             <!-- Page Heading -->
             <header
-                class="bg-white shadow dark:bg-gray-800 dark:shadow-gray-900/20"
+                class="bg-orange-50 shadow dark:bg-gray-800 dark:shadow-gray-900/20"
                 v-if="$slots.header"
             >
                 <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
