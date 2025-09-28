@@ -56,6 +56,12 @@ const { t } = useSimpleI18n();
                                     Упражнения
                                 </NavLink>
                                 <NavLink
+                                    :href="route('notes.index')"
+                                    :active="route().current('notes.*')"
+                                >
+                                    {{ t('notes.title') }}
+                                </NavLink>
+                                <NavLink
                                     :href="route('sessions.index')"
                                     :active="route().current('sessions.*')"
                                 >
@@ -195,6 +201,12 @@ const { t } = useSimpleI18n();
                             :active="route().current('exercises.*')"
                         >
                             Упражнения
+                        </ResponsiveNavLink>
+                        <ResponsiveNavLink
+                            :href="route('notes.index')"
+                            :active="route().current('notes.*')"
+                        >
+                            {{ t('notes.title') }}
                         </ResponsiveNavLink>
                         <ResponsiveNavLink
                             :href="route('sessions.index')"

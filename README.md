@@ -1,204 +1,299 @@
-# 🎵 Music Practice Tracker
+# 🎵 Трекер музыкальной практики
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="200" alt="Laravel Logo">
+  <img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="200" alt="Логотип Laravel">
   <br>
-  <strong>Your Personal Music Practice Assistant</strong>
+  <strong>Ваш личный помощник для музыкальной практики</strong>
 </p>
 
 <p align="center">
-  <a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-  <a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-  <a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-  <a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
+  <a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Статус сборки"></a>
+  <a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Общее количество загрузок"></a>
+  <a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Последняя стабильная версия"></a>
+  <a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="Лицензия"></a>
 </p>
 
-## 🎯 About Music Practice Tracker
+## 🎯 О трекере музыкальной практики
 
-Music Practice Tracker is a comprehensive web application designed to help musicians organize, track, and improve their practice sessions. Built with Laravel and Vue.js, it provides a structured approach to musical learning with timers, progress tracking, and session management.
+Трекер музыкальной практики — это комплексное веб-приложение, предназначенное для помощи музыкантам в организации, отслеживании и улучшении их практических занятий. Построенное на Laravel и Vue.js, оно обеспечивает структурированный подход к музыкальному обучению с таймерами, отслеживанием прогресса и управлением сессиями.
 
-### ✨ Key Features
+### ✨ Основные возможности
 
-- **🎼 Structured Practice Sessions** - Create organized practice sessions with multiple exercises
-- **⏱️ Exercise Timers** - Set individual timers for each exercise to maintain focus
-- **📊 Progress Tracking** - Monitor your practice time and improvement over time
-- **📋 Exercise Templates** - Save and reuse exercise configurations
-- **🌙 Dark/Light Theme** - Switch between themes for comfortable practice
-- **🌍 Internationalization** - Support for Russian and English languages
-- **📱 Responsive Design** - Works seamlessly on desktop and mobile devices
-- **📈 Statistics Dashboard** - View detailed practice statistics and trends
+- **🎼 Структурированные практические сессии** - Создавайте организованные практические сессии с несколькими упражнениями
+- **⏱️ Таймеры упражнений** - Устанавливайте индивидуальные таймеры для каждого упражнения для поддержания концентрации
+- **📊 Отслеживание прогресса** - Отслеживайте время практики и улучшения с течением времени
+- **📋 Шаблоны упражнений** - Сохраняйте и повторно используйте конфигурации упражнений
+- **🎵 Управление нотами** - Загружайте и организуйте ноты, PDF-файлы и аудиофайлы
+- **☁️ Облачное хранилище** - Безопасное хранение файлов с MinIO для нот и медиа
+- **🌙 Темная/светлая тема** - Переключение между темами для комфортной практики
+- **🌍 Интернационализация** - Поддержка русского и английского языков
+- **📱 Адаптивный дизайн** - Работает безупречно на настольных и мобильных устройствах
+- **📈 Панель статистики** - Просматривайте детальную статистику практики и тренды
 
-### 🛠️ Technology Stack
+### 🛠️ Технологический стек
 
 - **Backend**: Laravel 11 (PHP 8.2+)
-- **Frontend**: Vue.js 3 with TypeScript
-- **Styling**: Tailwind CSS with dark mode support
-- **Database**: MySQL/PostgreSQL
-- **Authentication**: Laravel Breeze
-- **Internationalization**: Vue I18n
-- **Build Tool**: Vite
+- **Frontend**: Vue.js 3 с TypeScript
+- **Стилизация**: Tailwind CSS с поддержкой темного режима
+- **Хранилище**: MinIO (объектное хранилище, совместимое с S3)
+- **Управление файлами**: Spatie Media Library
+- **База данных**: MySQL/PostgreSQL
+- **Аутентификация**: Laravel Breeze
+- **Интернационализация**: Vue I18n
+- **Инструмент сборки**: Vite
 
-## 🚀 Quick Start
+## 🚀 Быстрый старт
 
-### Prerequisites
+### Предварительные требования
 
-- PHP 8.2 or higher
+- PHP 8.2 или выше
 - Composer
-- Node.js 18+ and npm
+- Node.js 18+ и npm
 - MySQL/PostgreSQL
+- Make (опционально, для удобных команд)
 
-### Installation
+### Установка
 
-1. **Clone the repository**
+#### С помощью Make (рекомендуется)
+
+```bash
+# Клонируйте репозиторий
+git clone https://github.com/yourusername/music-practice-tracker.git
+cd music-practice-tracker
+
+# Полная установка
+make install
+
+# Или для разработки
+make install-dev
+```
+
+#### Ручная установка
+
+1. **Клонируйте репозиторий**
    ```bash
    git clone https://github.com/yourusername/music-practice-tracker.git
    cd music-practice-tracker
    ```
 
-2. **Install PHP dependencies**
+2. **Установите зависимости PHP**
    ```bash
    composer install
    ```
 
-3. **Install JavaScript dependencies**
+3. **Установите зависимости JavaScript**
    ```bash
    npm install
    ```
 
-4. **Environment setup**
+4. **Настройка окружения**
    ```bash
    cp .env.example .env
    php artisan key:generate
    ```
 
-5. **Database setup**
+5. **Настройка базы данных**
    ```bash
    php artisan migrate
    ```
 
-6. **Build assets**
+6. **Сборка ресурсов**
    ```bash
    npm run build
    ```
 
-7. **Start the development server**
+7. **Запуск сервера разработки**
    ```bash
    php artisan serve
    ```
 
-Visit `http://localhost:8000` to access the application.
+Посетите `http://localhost:8000` для доступа к приложению.
 
-## 📖 Usage Guide
+### 🛠️ Удобные команды Make
 
-### Creating Your First Practice Session
+Проект включает Makefile с удобными командами для разработки:
 
-1. **Register** or **Login** to your account
-2. **Navigate** to "Sessions" → "Create New Session"
-3. **Add exercises** with individual timers
-4. **Start practicing** and track your progress
-5. **Review statistics** on the Dashboard
+```bash
+# Показать все доступные команды
+make help
 
-### Managing Exercises
+# Разработка
+make dev              # Запуск сервера разработки
+make dev-watch        # Запуск с отслеживанием изменений
+make build            # Сборка фронтенда
+make build-watch      # Сборка с отслеживанием изменений
 
-- Create custom exercises with descriptions
-- Set practice durations
-- Organize exercises by type (scales, pieces, technique, etc.)
-- Save exercise templates for reuse
+# База данных
+make migrate          # Запуск миграций
+make migrate-fresh    # Пересоздание БД
+make migrate-seed     # Миграции с данными
 
-### Tracking Progress
+# Тестирование
+make test             # Все тесты
+make test-php         # PHP тесты
+make test-js          # JavaScript тесты
 
-- View daily, weekly, and monthly practice statistics
-- Monitor time spent on different exercise types
-- Track improvement over time
-- Export data for external analysis
+# Docker (рекомендуется)
+make docker-setup     # Полная настройка Docker окружения
+make docker-up        # Запуск всех контейнеров
+make docker-down      # Остановка всех контейнеров
+make docker-build     # Сборка Docker образов
+make docker-logs      # Просмотр логов
+make docker-shell     # Подключение к контейнеру приложения
 
-## 🌍 Internationalization
+# Очистка
+make clean            # Очистка кэша
+make clean-all        # Полная очистка
 
-The application supports multiple languages:
+# Утилиты
+make logs             # Просмотр логов
+make tinker           # Laravel Tinker
+make check            # Проверка кода
+make lint             # Линтинг
+make stats            # Статистика проекта
+```
 
-- **🇷🇺 Russian** (default)
-- **🇺🇸 English**
+### 🐳 Docker Setup (рекомендуется)
 
-Language can be switched using the language selector in the navigation bar. Your preference is saved in localStorage.
+Для быстрого запуска всего стека используйте Docker:
 
-## 🎨 Themes
+```bash
+# Полная настройка Docker окружения
+make docker-setup
+```
 
-Switch between light and dark themes using the theme toggle in the navigation. The theme preference is automatically saved and restored on subsequent visits.
+Это запустит:
+- **🌐 Nginx** (порт 80) - веб-сервер
+- **🐘 PHP-FPM** - обработка PHP
+- **🗄️ MySQL 8.0** (порт 3306) - база данных
+- **🔴 Redis** (порт 6379) - кэш и сессии
+- **☁️ MinIO** (порты 9000/9001) - файловое хранилище
+- **📦 Node.js** - сборка фронтенда
 
-## 📁 Project Structure
+После запуска приложение будет доступно по адресу: **http://localhost**
+
+Подробная документация: [docker/DOCKER_SETUP.md](docker/DOCKER_SETUP.md)
+
+## 📖 Руководство по использованию
+
+### Создание первой практической сессии
+
+1. **Зарегистрируйтесь** или **войдите** в свой аккаунт
+2. **Перейдите** в "Сессии" → "Создать новую сессию"
+3. **Добавьте упражнения** с индивидуальными таймерами
+4. **Начните практику** и отслеживайте свой прогресс
+5. **Просмотрите статистику** на панели управления
+
+### Управление упражнениями
+
+- Создавайте пользовательские упражнения с описаниями
+- Устанавливайте продолжительность практики
+- Организуйте упражнения по типам (гаммы, произведения, техника и т.д.)
+- Сохраняйте шаблоны упражнений для повторного использования
+
+### Отслеживание прогресса
+
+- Просматривайте ежедневную, еженедельную и ежемесячную статистику практики
+- Отслеживайте время, потраченное на различные типы упражнений
+- Отслеживайте улучшения с течением времени
+- Экспортируйте данные для внешнего анализа
+
+## 🌍 Интернационализация
+
+Приложение поддерживает несколько языков:
+
+- **🇷🇺 Русский** (по умолчанию)
+- **🇺🇸 Английский**
+
+Язык можно переключить с помощью селектора языка в панели навигации. Ваши предпочтения сохраняются в localStorage.
+
+## 🎨 Темы
+
+Переключайтесь между светлой и темной темами с помощью переключателя темы в навигации. Предпочтение темы автоматически сохраняется и восстанавливается при последующих посещениях.
+
+## 📁 Структура проекта
 
 ```
 music-practice-tracker/
 ├── app/
-│   ├── Http/Controllers/     # API controllers
-│   ├── Models/              # Eloquent models
-│   └── Services/            # Business logic services
+│   ├── Http/Controllers/     # API контроллеры
+│   ├── Models/              # Eloquent модели
+│   └── Services/            # Сервисы бизнес-логики
 ├── resources/
 │   ├── js/
-│   │   ├── Components/      # Vue components
-│   │   ├── Pages/          # Page components
-│   │   ├── Layouts/        # Layout components
-│   │   ├── composables/    # Vue composables
-│   │   ├── locales/        # Translation files
-│   │   └── app.ts          # Application entry point
-│   └── views/              # Blade templates
+│   │   ├── Components/      # Vue компоненты
+│   │   ├── Pages/          # Компоненты страниц
+│   │   ├── Layouts/        # Компоненты макетов
+│   │   ├── composables/    # Vue композаблы
+│   │   ├── locales/        # Файлы переводов
+│   │   └── app.ts          # Точка входа приложения
+│   └── views/              # Blade шаблоны
 ├── database/
-│   ├── migrations/         # Database migrations
-│   └── seeders/           # Database seeders
-└── tests/                 # Test files
+│   ├── migrations/         # Миграции базы данных
+│   └── seeders/           # Сидеры базы данных
+└── tests/                 # Тестовые файлы
 ```
 
-## 🧪 Testing
+## 🧪 Тестирование
 
-Run the test suite:
+Запустите набор тестов:
 
 ```bash
-# Run PHP tests
+# Запуск PHP тестов
 php artisan test
 
-# Run JavaScript tests
+# Запуск JavaScript тестов
 npm run test
 ```
 
-## 🤝 Contributing
+## 🤝 Участие в разработке
 
-We welcome contributions! Please follow these steps:
+Мы приветствуем вклад в проект! Пожалуйста, следуйте этим шагам:
 
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+1. Форкните репозиторий
+2. Создайте ветку функции (`git checkout -b feature/amazing-feature`)
+3. Зафиксируйте свои изменения (`git commit -m 'Add amazing feature'`)
+4. Отправьте в ветку (`git push origin feature/amazing-feature`)
+5. Откройте Pull Request
 
-### Development Guidelines
+### Руководящие принципы разработки
 
-- Follow PSR-12 coding standards for PHP
-- Use TypeScript for JavaScript code
-- Write tests for new features
-- Update documentation as needed
-- Follow conventional commit messages
+- Следуйте стандартам кодирования PSR-12 для PHP
+- Используйте TypeScript для JavaScript кода
+- Пишите тесты для новых функций
+- Обновляйте документацию по мере необходимости
+- Следуйте соглашениям о сообщениях коммитов
 
-## 📝 License
+## 📝 Лицензия
 
-This project is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+Этот проект является программным обеспечением с открытым исходным кодом, лицензированным под [лицензией MIT](https://opensource.org/licenses/MIT).
 
-## 🙏 Acknowledgments
+## 🙏 Благодарности
 
-- Built with [Laravel](https://laravel.com) framework
-- Frontend powered by [Vue.js](https://vuejs.org/)
-- Styled with [Tailwind CSS](https://tailwindcss.com/)
-- Icons by [Heroicons](https://heroicons.com/)
+- Построено с помощью фреймворка [Laravel](https://laravel.com)
+- Frontend работает на [Vue.js](https://vuejs.org/)
+- Стилизовано с помощью [Tailwind CSS](https://tailwindcss.com/)
+- Иконки от [Heroicons](https://heroicons.com/)
 
-## 📞 Support
+## 📚 Документация
 
-If you encounter any issues or have questions:
+Дополнительная документация:
 
-- Create an [issue](https://github.com/yourusername/music-practice-tracker/issues)
-- Check the [documentation](https://github.com/yourusername/music-practice-tracker/wiki)
-- Contact us at [your-email@example.com](mailto:your-email@example.com)
+- **[docker/README.md](docker/README.md)** - Docker конфигурация
+- **[docker/DOCKER_SETUP.md](docker/DOCKER_SETUP.md)** - Подробная настройка Docker
+
+> **Примечание**: Документация по функциям приложения находится в папке `docs/` (не включена в репозиторий)
+
+## 📞 Поддержка
+
+Если вы столкнулись с проблемами или у вас есть вопросы:
+
+- Создайте [issue](https://github.com/yourusername/music-practice-tracker/issues)
+- Проверьте [документацию](https://github.com/yourusername/music-practice-tracker/wiki)
+- Свяжитесь с нами по [youlka2@gmail.com](mailto:youlka2@gmail.com)
 
 ---
 
 <p align="center">
-  Made with ❤️ for musicians worldwide
+  Сделано с ❤️ для музыкантов по всему миру
 </p>

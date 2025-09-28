@@ -6,6 +6,7 @@ namespace App\Domains\Planning\Models;
 
 use App\Domains\Shared\Models\BaseModel;
 use App\Domains\User\Models\User;
+use App\Models\Note;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -132,6 +133,14 @@ class Exercise extends BaseModel
     public function sessionBlocks(): HasMany
     {
         return $this->hasMany(SessionBlock::class, 'exercise_id');
+    }
+
+    /**
+     * Связь с нотами упражнения
+     */
+    public function notes(): HasMany
+    {
+        return $this->hasMany(Note::class, 'exercise_id');
     }
 
     /**

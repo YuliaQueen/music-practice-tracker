@@ -5,16 +5,15 @@ use App\Http\Controllers\SessionController;
 use App\Http\Controllers\StatisticsController;
 use App\Http\Controllers\ExerciseController;
 use App\Http\Controllers\GoalController;
+use App\Http\Controllers\NoteController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
 Route::get('/', function () {
-    return Inertia::render('Welcome', [
+    return Inertia::render('Home', [
         'canLogin' => Route::has('login'),
         'canRegister' => Route::has('register'),
-        'laravelVersion' => Application::VERSION,
-        'phpVersion' => PHP_VERSION,
     ]);
 });
 
@@ -52,6 +51,12 @@ Route::middleware('auth')->group(function () {
     Route::patch('/goals/{goal}/progress', [GoalController::class, 'updateProgress'])->name('goals.progress');
     Route::post('/goals/{goal}/complete', [GoalController::class, 'complete'])->name('goals.complete');
     Route::post('/goals/{goal}/toggle', [GoalController::class, 'toggle'])->name('goals.toggle');
+    
+    // Ноты
+    Route::resource('notes', NoteController::class);
+    Route::get('/notes/{note}/view', [NoteController::class, 'view'])->name('notes.view');
+    Route::get('/notes/{note}/download', [NoteController::class, 'download'])->name('notes.download');
+    Route::get('/exercises/{exercise}/notes', [NoteController::class, 'forExercise'])->name('exercises.notes');
 });
 
 require __DIR__.'/auth.php';
