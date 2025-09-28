@@ -9,6 +9,7 @@ use App\Domains\User\Models\User;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Database\Factories\ExerciseFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -276,5 +277,13 @@ class Exercise extends BaseModel
             ->logOnly(['title', 'description', 'type', 'planned_duration', 'status', 'scheduled_for'])
             ->logOnlyDirty()
             ->dontSubmitEmptyLogs();
+    }
+
+    /**
+     * Create a new factory instance for the model.
+     */
+    protected static function newFactory()
+    {
+        return ExerciseFactory::new();
     }
 }
