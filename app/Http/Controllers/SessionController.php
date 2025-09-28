@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Domains\Planning\Models\Exercise;
 use App\Domains\Planning\Models\Session;
 use App\Domains\Planning\Models\SessionBlock;
 use App\Domains\Planning\Models\Template;
@@ -40,10 +41,9 @@ class SessionController extends Controller
             ->orderBy('name')
             ->get();
 
-        // Получаем упражнения из предыдущих сессий пользователя
+        // Получаем упражнения из всех сессий пользователя (включая незавершенные)
         $previousExercises = SessionBlock::whereHas('session', function ($query) {
-                $query->where('user_id', auth()->id())
-                      ->where('status', 'completed');
+                $query->where('user_id', auth()->id());
             })
             ->select('title', 'description', 'type', 'planned_duration')
             ->distinct()
@@ -61,6 +61,24 @@ class SessionController extends Controller
                 ];
             })
             ->values();
+
+        // Если нет упражнений из сессий, добавляем упражнения из библиотеки упражнений
+        if ($previousExercises->isEmpty()) {
+            $exerciseLibrary = Exercise::where('user_id', auth()->id())
+                ->select('title', 'description', 'type', 'planned_duration')
+                ->get()
+                ->map(function ($exercise) {
+                    return [
+                        'title' => $exercise->title,
+                        'description' => $exercise->description,
+                        'type' => $exercise->type,
+                        'duration' => $exercise->planned_duration,
+                        'usage_count' => 0, // Упражнения из библиотеки еще не использовались
+                    ];
+                });
+            
+            $previousExercises = $previousExercises->concat($exerciseLibrary);
+        }
 
         // Получаем данные об упражнении, если они переданы
         $exerciseData = null;
