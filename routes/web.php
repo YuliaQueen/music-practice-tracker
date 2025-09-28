@@ -4,6 +4,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SessionController;
 use App\Http\Controllers\StatisticsController;
 use App\Http\Controllers\ExerciseController;
+use App\Http\Controllers\GoalController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -45,6 +46,12 @@ Route::middleware('auth')->group(function () {
     
     // Упражнения
     Route::resource('exercises', ExerciseController::class);
+    
+    // Цели
+    Route::resource('goals', GoalController::class);
+    Route::patch('/goals/{goal}/progress', [GoalController::class, 'updateProgress'])->name('goals.progress');
+    Route::post('/goals/{goal}/complete', [GoalController::class, 'complete'])->name('goals.complete');
+    Route::post('/goals/{goal}/toggle', [GoalController::class, 'toggle'])->name('goals.toggle');
 });
 
 require __DIR__.'/auth.php';

@@ -7,6 +7,7 @@ namespace App\Http\Controllers;
 use App\Domains\Planning\Models\Session;
 use App\Domains\Planning\Models\SessionBlock;
 use App\Domains\Planning\Models\Template;
+use App\Services\GoalProgressService;
 use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
@@ -191,7 +192,18 @@ class SessionController extends Controller
             'actual_duration' => $actualDuration,
         ]);
 
-        return back()->with('success', 'Сессия завершена!');
+        // Обновляем прогресс целей после завершения сессии
+        $goalProgressService = app(GoalProgressService::class);
+        $updatedGoals = $goalProgressService->updateProgressAfterSession($session);
+        $completedGoals = $goalProgressService->checkAndCompleteGoals($session->user);
+
+        $message = 'Сессия завершена!';
+        if (!empty($completedGoals)) {
+            $goalTitles = collect($completedGoals)->pluck('title')->join(', ');
+            $message .= " Поздравляем! Достигнуты цели: {$goalTitles}";
+        }
+
+        return back()->with('success', $message);
     }
 
     /**
@@ -217,6 +229,21 @@ class SessionController extends Controller
         }
 
         $block->update($updateData);
+
+        // Обновляем прогресс целей после обновления блока сессии
+        if ($request->status === SessionBlock::STATUS_COMPLETED) {
+            $goalProgressService = app(GoalProgressService::class);
+            $updatedGoals = $goalProgressService->updateProgressAfterSessionBlock($block);
+            $completedGoals = $goalProgressService->checkAndCompleteGoals($session->user);
+
+            $message = 'Блок обновлен';
+            if (!empty($completedGoals)) {
+                $goalTitles = collect($completedGoals)->pluck('title')->join(', ');
+                $message .= "! Поздравляем! Достигнуты цели: {$goalTitles}";
+            }
+
+            return back()->with('success', $message);
+        }
 
         return back()->with('success', 'Блок обновлен');
     }

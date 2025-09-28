@@ -43,6 +43,30 @@ const { t } = useSimpleI18n();
                                 >
                                     {{ t('navigation.dashboard') }}
                                 </NavLink>
+                                <NavLink
+                                    :href="route('goals.index')"
+                                    :active="route().current('goals.*')"
+                                >
+                                    Цели
+                                </NavLink>
+                                <NavLink
+                                    :href="route('exercises.index')"
+                                    :active="route().current('exercises.*')"
+                                >
+                                    Упражнения
+                                </NavLink>
+                                <NavLink
+                                    :href="route('sessions.index')"
+                                    :active="route().current('sessions.*')"
+                                >
+                                    Сессии
+                                </NavLink>
+                                <NavLink
+                                    :href="route('statistics.index')"
+                                    :active="route().current('statistics.*')"
+                                >
+                                    Статистика
+                                </NavLink>
                             </div>
                         </div>
 
@@ -159,6 +183,30 @@ const { t } = useSimpleI18n();
                             :active="route().current('dashboard')"
                         >
                             Дашборд
+                        </ResponsiveNavLink>
+                        <ResponsiveNavLink
+                            :href="route('goals.index')"
+                            :active="route().current('goals.*')"
+                        >
+                            Цели
+                        </ResponsiveNavLink>
+                        <ResponsiveNavLink
+                            :href="route('exercises.index')"
+                            :active="route().current('exercises.*')"
+                        >
+                            Упражнения
+                        </ResponsiveNavLink>
+                        <ResponsiveNavLink
+                            :href="route('sessions.index')"
+                            :active="route().current('sessions.*')"
+                        >
+                            Сессии
+                        </ResponsiveNavLink>
+                        <ResponsiveNavLink
+                            :href="route('statistics.index')"
+                            :active="route().current('statistics.*')"
+                        >
+                            Статистика
                         </ResponsiveNavLink>
                     </div>
 
