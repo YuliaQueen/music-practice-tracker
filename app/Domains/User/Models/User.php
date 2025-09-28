@@ -7,6 +7,7 @@ namespace App\Domains\User\Models;
 use Carbon\Carbon;
 use App\Domains\Planning\Models\Session;
 use App\Domains\Planning\Models\Template;
+use App\Domains\Goals\Models\Goal;
 use App\Domains\Shared\Models\BaseModel;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Database\Factories\UserFactory;
@@ -78,6 +79,14 @@ class User extends Authenticatable
     public function templates(): HasMany
     {
         return $this->hasMany(Template::class);
+    }
+
+    /**
+     * Получить все цели пользователя
+     */
+    public function goals(): HasMany
+    {
+        return $this->hasMany(Goal::class);
     }
 
 
