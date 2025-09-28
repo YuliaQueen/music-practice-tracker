@@ -58,4 +58,6 @@ make docker-logs
 - **Приложение**: http://localhost
 - **MinIO Console**: http://localhost:9001 (minioadmin/minioadmin123)
 - **MySQL**: localhost:3306 (music_tracker/music_tracker_password)
+
+> **Примечание**: Пароли по умолчанию используются только для development. Для production измените переменные окружения.
 - **Redis**: localhost:6379
