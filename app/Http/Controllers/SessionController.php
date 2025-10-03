@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Domains\Planning\Models\Exercise;
 use App\Domains\Planning\Models\Session;
 use App\Domains\Planning\Models\SessionBlock;
 use App\Domains\Planning\Models\Template;
@@ -40,10 +41,9 @@ class SessionController extends Controller
             ->orderBy('name')
             ->get();
 
-        // Получаем упражнения из предыдущих сессий пользователя
+        // Получаем упражнения из всех сессий пользователя (включая незавершенные)
         $previousExercises = SessionBlock::whereHas('session', function ($query) {
-                $query->where('user_id', auth()->id())
-                      ->where('status', 'completed');
+                $query->where('user_id', auth()->id());
             })
             ->select('title', 'description', 'type', 'planned_duration')
             ->distinct()
@@ -61,6 +61,24 @@ class SessionController extends Controller
                 ];
             })
             ->values();
+
+        // Если нет упражнений из сессий, добавляем упражнения из библиотеки упражнений
+        if ($previousExercises->isEmpty()) {
+            $exerciseLibrary = Exercise::where('user_id', auth()->id())
+                ->select('title', 'description', 'type', 'planned_duration')
+                ->get()
+                ->map(function ($exercise) {
+                    return [
+                        'title' => $exercise->title,
+                        'description' => $exercise->description,
+                        'type' => $exercise->type,
+                        'duration' => $exercise->planned_duration,
+                        'usage_count' => 0, // Упражнения из библиотеки еще не использовались
+                    ];
+                });
+            
+            $previousExercises = $previousExercises->concat($exerciseLibrary);
+        }
 
         // Получаем данные об упражнении, если они переданы
         $exerciseData = null;
@@ -106,8 +124,9 @@ class SessionController extends Controller
             'status' => Session::STATUS_PLANNED,
         ]);
 
-        // Создаем блоки сессии
+        // Создаем блоки сессии и упражнения
         foreach ($request->blocks as $index => $blockData) {
+            // Создаем блок сессии
             $session->blocks()->create([
                 'title' => $blockData['title'],
                 'description' => $blockData['description'],
@@ -116,6 +135,24 @@ class SessionController extends Controller
                 'status' => SessionBlock::STATUS_PLANNED,
                 'sort_order' => $index + 1,
             ]);
+
+            // Проверяем, существует ли уже такое упражнение у пользователя
+            $existingExercise = Exercise::where('user_id', auth()->id())
+                ->where('title', $blockData['title'])
+                ->where('type', $blockData['type'])
+                ->first();
+
+            // Если упражнение не существует, создаем его
+            if (!$existingExercise) {
+                Exercise::create([
+                    'user_id' => auth()->id(),
+                    'title' => $blockData['title'],
+                    'description' => $blockData['description'],
+                    'type' => $blockData['type'],
+                    'planned_duration' => $blockData['duration'],
+                    'status' => Exercise::STATUS_PLANNED,
+                ]);
+            }
         }
 
         return redirect()->route('sessions.show', $session)
@@ -214,14 +251,15 @@ class SessionController extends Controller
         $this->authorize('update', $session);
 
         $request->validate([
-            'status' => 'required|string|in:' . implode(',', SessionBlock::STATUSES),
+            'status' => 'nullable|string|in:' . implode(',', SessionBlock::STATUSES),
             'actual_duration' => 'nullable|integer|min:0',
             'started_at' => 'nullable|date',
             'completed_at' => 'nullable|date',
             'notes' => 'nullable|string',
+            'planned_duration' => 'nullable|integer|min:1',
         ]);
 
-        $updateData = $request->only(['status', 'actual_duration', 'started_at', 'completed_at', 'notes']);
+        $updateData = $request->only(['status', 'actual_duration', 'started_at', 'completed_at', 'notes', 'planned_duration']);
         
         // Если блок завершается, устанавливаем время завершения если не передано
         if ($request->status === SessionBlock::STATUS_COMPLETED && !$request->completed_at) {

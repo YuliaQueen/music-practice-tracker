@@ -111,7 +111,7 @@
                                             @click="showExercisesList = !showExercisesList"
                                             class="text-sm"
                                         >
-                                            📚 Из предыдущих сессий
+                                            📚 Из библиотеки упражнений
                                         </SecondaryButton>
                                         <PrimaryButton
                                             type="button"
@@ -123,10 +123,10 @@
                                     </div>
                                 </div>
 
-                                <!-- Список упражнений из предыдущих сессий -->
+                                <!-- Список упражнений из библиотеки -->
                                 <div v-if="showExercisesList && previousExercises.length > 0" class="mb-6 p-4 bg-gray-50 rounded-lg dark:bg-gray-700">
                                     <div class="flex justify-between items-center mb-4">
-                                        <h4 class="font-medium text-gray-900 dark:text-gray-100">Выберите упражнения из предыдущих сессий</h4>
+                                        <h4 class="font-medium text-gray-900 dark:text-gray-100">Выберите упражнения из библиотеки</h4>
                                         <div class="flex space-x-2">
                                             <SecondaryButton
                                                 type="button"

@@ -20,6 +20,37 @@
 
         <div class="py-4 sm:py-6">
             <div class="max-w-7xl mx-auto sm:px-4 lg:px-6">
+                <!-- Уведомление о продлении времени -->
+                <Transition
+                    enter-active-class="transition ease-out duration-300"
+                    enter-from-class="opacity-0 transform translate-y-2"
+                    enter-to-class="opacity-100 transform translate-y-0"
+                    leave-active-class="transition ease-in duration-200"
+                    leave-from-class="opacity-100 transform translate-y-0"
+                    leave-to-class="opacity-0 transform translate-y-2"
+                >
+                    <div
+                        v-if="extensionNotification.show"
+                        class="mb-4 p-4 bg-green-100 border border-green-200 rounded-lg shadow-sm dark:bg-green-900/20 dark:border-green-800"
+                    >
+                        <div class="flex items-center">
+                            <div class="flex-shrink-0">
+                                <svg class="h-5 w-5 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                                </svg>
+                            </div>
+                            <div class="ml-3">
+                                <h4 class="text-sm font-medium text-green-800 dark:text-green-200">
+                                    {{ extensionNotification.message }}
+                                </h4>
+                                <p class="text-sm text-green-700 dark:text-green-300 mt-1">
+                                    Новое запланированное время: {{ extensionNotification.minutes > 0 ? (currentBlock?.planned_duration || 0) : 'перезапущен' }}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </Transition>
+
                 <!-- Информация о сессии -->
                 <div class="bg-gradient-to-br from-amber-50 to-orange-50 dark:from-gray-800 dark:to-gray-900 overflow-hidden shadow-lg sm:rounded-xl mb-4 border border-amber-200 dark:border-gray-700">
                     <div class="p-4 sm:p-6 text-amber-900 dark:text-gray-100">
@@ -240,6 +271,70 @@
                             >
                                 {{ soundSettings.enabled ? '🔊' : '🔇' }}
                             </button>
+                        </div>
+
+                        <!-- Кнопки продления времени -->
+                        <div v-if="session.status === 'active' && session.blocks.length > 0" class="mt-4">
+                            <div class="text-center mb-3">
+                                <span class="text-sm text-gray-600 dark:text-gray-400">
+                                    Добавить время к упражнению:
+                                </span>
+                            </div>
+                            
+                            <!-- Выбор блока для продления -->
+                            <div class="mb-3">
+                                <select
+                                    v-model="selectedBlockForExtension"
+                                    class="w-full max-w-xs mx-auto block border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 dark:focus:border-indigo-400 dark:focus:ring-indigo-400 text-sm"
+                                >
+                                    <option value="">Выберите упражнение</option>
+                                    <option
+                                        v-for="block in session.blocks"
+                                        :key="block.id"
+                                        :value="block.id"
+                                    >
+                                        {{ block.title }} ({{ block.status === 'completed' ? 'завершено' : block.status === 'active' ? 'активно' : block.status === 'paused' ? 'приостановлено' : 'запланировано' }})
+                                    </option>
+                                </select>
+                            </div>
+                            
+                            <div class="flex justify-center gap-2">
+                                <button
+                                    @click="extendTimer(5)"
+                                    :disabled="!selectedBlockForExtension"
+                                    class="px-3 py-2 bg-indigo-500 text-white font-medium rounded-lg shadow hover:bg-indigo-600 transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                                    title="Добавить 5 минут"
+                                >
+                                    +5 мин
+                                </button>
+                                <button
+                                    @click="extendTimer(10)"
+                                    :disabled="!selectedBlockForExtension"
+                                    class="px-3 py-2 bg-indigo-500 text-white font-medium rounded-lg shadow hover:bg-indigo-600 transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                                    title="Добавить 10 минут"
+                                >
+                                    +10 мин
+                                </button>
+                                <button
+                                    @click="extendTimer(15)"
+                                    :disabled="!selectedBlockForExtension"
+                                    class="px-3 py-2 bg-indigo-500 text-white font-medium rounded-lg shadow hover:bg-indigo-600 transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                                    title="Добавить 15 минут"
+                                >
+                                    +15 мин
+                                </button>
+                            </div>
+                            
+                            <!-- Кнопка перезапуска таймера для завершенных блоков -->
+                            <div v-if="selectedBlockForExtension" class="mt-3 text-center">
+                                <button
+                                    @click="restartTimerForBlock"
+                                    class="px-4 py-2 bg-green-500 text-white font-medium rounded-lg shadow hover:bg-green-600 transition-colors text-sm"
+                                    title="Перезапустить таймер для выбранного упражнения"
+                                >
+                                    🔄 Перезапустить таймер
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -494,6 +589,12 @@ const startTime = ref<number | null>(null)
 const blockStartTime = ref<number | null>(null) // Время начала блока
 const warningPlayed = ref(false) // Флаг для предотвращения повторного воспроизведения предупреждения
 const showSoundSettings = ref(false) // Показать модальное окно настроек звука
+const extensionNotification = ref<{ show: boolean; message: string; minutes: number }>({
+    show: false,
+    message: '',
+    minutes: 0
+})
+const selectedBlockForExtension = ref<number | null>(null)
 
 const currentBlock = computed(() => {
     return props.session.blocks.find(block => block.status === 'active')
@@ -719,6 +820,107 @@ const resetTimer = () => {
     clearTimerState()
 }
 
+const extendTimer = (minutes: number) => {
+    if (!selectedBlockForExtension.value) return
+    
+    // Находим выбранный блок
+    const selectedBlock = props.session.blocks.find(block => block.id === selectedBlockForExtension.value)
+    if (!selectedBlock) return
+    
+    // Обновляем запланированную длительность блока
+    const newPlannedDuration = selectedBlock.planned_duration + minutes
+    
+    // Обновляем блок в базе данных
+    const blockForm = useForm({
+        planned_duration: newPlannedDuration,
+    })
+    
+    blockForm.patch(route('sessions.blocks.update', { 
+        session: props.session.id, 
+        block: selectedBlock.id 
+    }), {
+        preserveScroll: true,
+        onSuccess: () => {
+            // Обновляем локальное значение
+            selectedBlock.planned_duration = newPlannedDuration
+            
+            // Если это активный блок, обновляем таймер
+            if (selectedBlock.id === currentBlock.value?.id && timerRunning.value) {
+                // Обновляем startTime чтобы таймер правильно работал с новым временем
+                if (startTime.value) {
+                    const now = Date.now()
+                    const elapsed = Math.floor((now - startTime.value) / 1000)
+                    const newPlannedSeconds = newPlannedDuration * 60
+                    const newRemaining = Math.max(0, newPlannedSeconds - elapsed)
+                    currentBlockTime.value = newRemaining
+                }
+            }
+            
+            // Сохраняем состояние таймера
+            saveTimerState()
+            
+            // Показываем уведомление
+            showExtensionNotification(minutes, selectedBlock.title)
+        }
+    })
+}
+
+const restartTimerForBlock = () => {
+    if (!selectedBlockForExtension.value) return
+    
+    // Находим выбранный блок
+    const selectedBlock = props.session.blocks.find(block => block.id === selectedBlockForExtension.value)
+    if (!selectedBlock) return
+    
+    // Сбрасываем статус блока на 'active' и очищаем время завершения
+    const blockForm = useForm({
+        status: 'active',
+        actual_duration: null,
+        completed_at: null,
+    })
+    
+    blockForm.patch(route('sessions.blocks.update', { 
+        session: props.session.id, 
+        block: selectedBlock.id 
+    }), {
+        preserveScroll: true,
+        onSuccess: () => {
+            // Обновляем локальное значение
+            selectedBlock.status = 'active'
+            selectedBlock.actual_duration = null
+            selectedBlock.completed_at = null
+            
+            // Сбрасываем таймер
+            resetTimer()
+            
+            // Показываем уведомление
+            showExtensionNotification(0, selectedBlock.title, 'Перезапущен')
+        }
+    })
+}
+
+const showExtensionNotification = (minutes: number, blockTitle?: string, action?: string) => {
+    const title = blockTitle ? ` для "${blockTitle}"` : ''
+    let message = ''
+    
+    if (action === 'Перезапущен') {
+        message = `Таймер перезапущен${title}`
+    } else {
+        message = `Время продлено на ${minutes} минут${title}`
+    }
+    
+    extensionNotification.value = {
+        show: true,
+        message: message,
+        minutes: minutes
+    }
+    
+    // Автоматически скрываем уведомление через 3 секунды
+    setTimeout(() => {
+        extensionNotification.value.show = false
+    }, 3000)
+}
+
 const formatTime = (seconds: number) => {
     const minutes = Math.floor(seconds / 60)
     const remainingSeconds = seconds % 60
@@ -897,6 +1099,11 @@ onMounted(() => {
     // Загружаем настройки звука
     loadSoundSettings()
     
+    // Автоматически выбираем активный блок для продления времени
+    if (currentBlock.value) {
+        selectedBlockForExtension.value = currentBlock.value.id
+    }
+    
     // Пытаемся восстановить состояние таймера
     const timerRestored = restoreTimerState()
     
@@ -917,6 +1124,11 @@ watch(currentBlock, (newBlock, oldBlock) => {
     if (oldBlock && newBlock && oldBlock.id !== newBlock.id) {
         // Переключились на новый блок, сбрасываем таймер
         resetTimer()
+    }
+    
+    // Автоматически выбираем активный блок для продления времени
+    if (newBlock) {
+        selectedBlockForExtension.value = newBlock.id
     }
     
     // Если появился новый активный блок, запускаем таймер
