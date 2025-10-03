@@ -251,14 +251,15 @@ class SessionController extends Controller
         $this->authorize('update', $session);
 
         $request->validate([
-            'status' => 'required|string|in:' . implode(',', SessionBlock::STATUSES),
+            'status' => 'nullable|string|in:' . implode(',', SessionBlock::STATUSES),
             'actual_duration' => 'nullable|integer|min:0',
             'started_at' => 'nullable|date',
             'completed_at' => 'nullable|date',
             'notes' => 'nullable|string',
+            'planned_duration' => 'nullable|integer|min:1',
         ]);
 
-        $updateData = $request->only(['status', 'actual_duration', 'started_at', 'completed_at', 'notes']);
+        $updateData = $request->only(['status', 'actual_duration', 'started_at', 'completed_at', 'notes', 'planned_duration']);
         
         // Если блок завершается, устанавливаем время завершения если не передано
         if ($request->status === SessionBlock::STATUS_COMPLETED && !$request->completed_at) {

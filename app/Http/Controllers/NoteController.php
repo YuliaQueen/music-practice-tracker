@@ -210,9 +210,8 @@ class NoteController extends Controller
     {
         $this->authorize('view', $note);
 
-        $url = $note->is_public 
-            ? $note->url 
-            : $note->getTemporaryUrl(60);
+        // Всегда используем временные URL для безопасности
+        $url = $note->getTemporaryUrl(60);
 
         return redirect($url);
     }
