@@ -66,8 +66,8 @@ return [
             'secret' => env('MINIO_SECRET_KEY'),
             'region' => env('MINIO_REGION', 'us-east-1'),
             'bucket' => env('MINIO_BUCKET', 'music-tracker-notes'),
-            'endpoint' => env('MINIO_URL'), // Используем внешний URL для временных URL
-            'url' => env('MINIO_URL'),
+            'endpoint' => env('MINIO_ENDPOINT'), // Используем внутренний endpoint для операций
+            'url' => env('MINIO_URL'), // Используем внешний URL для временных URL
             'use_path_style_endpoint' => true,
             'throw' => false,
             'report' => false,

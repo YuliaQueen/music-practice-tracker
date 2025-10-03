@@ -83,6 +83,13 @@ class NoteController extends Controller
                 ->with('error', 'Неподдерживаемый тип файла.');
         }
 
+        // Проверяем, не существует ли уже файл с таким хешем
+        $existingNote = Note::where('file_hash', $fileHash)->first();
+        if ($existingNote) {
+            return redirect()->back()
+                ->with('error', 'Файл с таким содержимым уже существует: ' . $existingNote->title);
+        }
+
         // Генерируем уникальное имя файла
         $filename = $file->getClientOriginalName();
         $extension = $file->getClientOriginalExtension();
@@ -90,25 +97,37 @@ class NoteController extends Controller
         $filePath = 'notes/' . auth()->id() . '/' . $uniqueFilename;
 
         // Загружаем файл в MinIO
-        Storage::disk('minio')->put($filePath, file_get_contents($file->getPathname()));
+        try {
+            Storage::disk('minio')->put($filePath, file_get_contents($file->getPathname()));
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->with('error', 'Ошибка при загрузке файла в хранилище: ' . $e->getMessage());
+        }
 
         // Создаем запись в базе данных
-        $note = Note::create([
-            'user_id' => auth()->id(),
-            'exercise_id' => $request->exercise_id,
-            'title' => $request->title,
-            'description' => $request->description,
-            'filename' => $filename,
-            'file_path' => $filePath,
-            'mime_type' => $mimeType,
-            'file_size' => $file->getSize(),
-            'file_hash' => $fileHash,
-            'is_public' => $request->boolean('is_public', false),
-            'metadata' => [
-                'uploaded_at' => now()->toISOString(),
-                'original_name' => $filename,
-            ],
-        ]);
+        try {
+            $note = Note::create([
+                'user_id' => auth()->id(),
+                'exercise_id' => $request->exercise_id,
+                'title' => $request->title,
+                'description' => $request->description,
+                'filename' => $filename,
+                'file_path' => $filePath,
+                'mime_type' => $mimeType,
+                'file_size' => $file->getSize(),
+                'file_hash' => $fileHash,
+                'is_public' => $request->boolean('is_public', false),
+                'metadata' => [
+                    'uploaded_at' => now()->toISOString(),
+                    'original_name' => $filename,
+                ],
+            ]);
+        } catch (\Exception $e) {
+            // Удаляем файл из хранилища, если не удалось создать запись в БД
+            Storage::disk('minio')->delete($filePath);
+            return redirect()->back()
+                ->with('error', 'Ошибка при сохранении информации о файле: ' . $e->getMessage());
+        }
 
         return redirect()->route('notes.index')
             ->with('success', 'Ноты успешно загружены');
@@ -194,7 +213,8 @@ class NoteController extends Controller
     {
         $this->authorize('view', $note);
 
-        $url = $note->getTemporaryUrl(60); // Временный URL на 1 час
+        // Используем прокси-URL вместо прямого MinIO URL
+        $url = route('notes.proxy', $note->id);
 
         return response()->json([
             'url' => $url,
@@ -204,16 +224,35 @@ class NoteController extends Controller
     }
 
     /**
+     * Прокси для отдачи файлов (обходит проблемы с подписью MinIO)
+     */
+    public function proxy(Note $note)
+    {
+        $this->authorize('view', $note);
+
+        try {
+            // Получаем файл из MinIO
+            $fileContent = Storage::disk('minio')->get($note->file_path);
+            
+            return response($fileContent)
+                ->header('Content-Type', $note->mime_type)
+                ->header('Content-Disposition', 'inline; filename="' . $note->filename . '"')
+                ->header('Cache-Control', 'public, max-age=3600'); // Кешируем на 1 час
+                
+        } catch (\Exception $e) {
+            abort(404, 'Файл не найден');
+        }
+    }
+
+    /**
      * Скачать файл
      */
     public function download(Note $note)
     {
         $this->authorize('view', $note);
 
-        // Всегда используем временные URL для безопасности
-        $url = $note->getTemporaryUrl(60);
-
-        return redirect($url);
+        // Используем прокси для скачивания
+        return $this->proxy($note);
     }
 
     /**

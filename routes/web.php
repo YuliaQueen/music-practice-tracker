@@ -56,6 +56,7 @@ Route::middleware('auth')->group(function () {
     Route::resource('notes', NoteController::class);
     Route::get('/notes/{note}/view', [NoteController::class, 'view'])->name('notes.view');
     Route::get('/notes/{note}/download', [NoteController::class, 'download'])->name('notes.download');
+    Route::get('/notes/{note}/proxy', [NoteController::class, 'proxy'])->name('notes.proxy');
     Route::get('/exercises/{exercise}/notes', [NoteController::class, 'forExercise'])->name('exercises.notes');
 });
 

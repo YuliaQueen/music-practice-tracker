@@ -142,9 +142,8 @@ class Note extends Model
      */
     public function getUrlAttribute(): string
     {
-        $baseUrl = config('filesystems.disks.minio.url');
-        $bucket = config('filesystems.disks.minio.bucket');
-        return $baseUrl . '/' . $bucket . '/' . $this->file_path;
+        // Для прямого доступа к файлам используем временный URL
+        return $this->getTemporaryUrl(60);
     }
 
     /**
@@ -152,7 +151,14 @@ class Note extends Model
      */
     public function getTemporaryUrl(int $minutes = 60): string
     {
-        return Storage::disk('minio')->temporaryUrl($this->file_path, now()->addMinutes($minutes));
+        // Генерируем временный URL с внутренним endpoint для правильной подписи
+        $temporaryUrl = Storage::disk('minio')->temporaryUrl($this->file_path, now()->addMinutes($minutes));
+        
+        // Заменяем внутренний адрес на внешний для доступа из браузера
+        $externalUrl = config('filesystems.disks.minio.url');
+        $internalEndpoint = config('filesystems.disks.minio.endpoint');
+        
+        return str_replace($internalEndpoint, $externalUrl, $temporaryUrl);
     }
 
     /**
