@@ -64,20 +64,6 @@ enum PeriodType: string
     }
 
     /**
-     * Попытка создать enum из строки
-     */
-    public static function tryFrom(string $value): ?self
-    {
-        return match ($value) {
-            'day'   => self::DAY,
-            'week'  => self::WEEK,
-            'month' => self::MONTH,
-            'year'  => self::YEAR,
-            default => null,
-        };
-    }
-
-    /**
      * Получить период из строки или вернуть по умолчанию
      */
     public static function fromString(string $value, self $default = self::WEEK): self
