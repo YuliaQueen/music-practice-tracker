@@ -6,14 +6,14 @@ namespace App\Enums;
 
 enum ExerciseType: string
 {
-    case WARMUP    = 'warmup';
-    case TECHNIQUE = 'technique';
+    case WARMUP     = 'warmup';
+    case TECHNIQUE  = 'technique';
     case REPERTOIRE = 'repertoire';
     case IMPROVISATION = 'improvisation';
     case SIGHT_READING = 'sight_reading';
-    case THEORY    = 'theory';
-    case BREAK     = 'break';
-    case CUSTOM    = 'custom';
+    case THEORY     = 'theory';
+    case BREAK      = 'break';
+    case CUSTOM     = 'custom';
 
     /**
      * Получить все возможные значения в виде массива строк

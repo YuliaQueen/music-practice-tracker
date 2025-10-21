@@ -6,10 +6,10 @@ namespace App\Enums;
 
 enum GoalType: string
 {
-    case DAILY_MINUTES = 'daily_minutes';
+    case DAILY_MINUTES   = 'daily_minutes';
     case WEEKLY_SESSIONS = 'weekly_sessions';
-    case STREAK_DAYS = 'streak_days';
-    case EXERCISE_TYPE = 'exercise_type';
+    case STREAK_DAYS     = 'streak_days';
+    case EXERCISE_TYPE   = 'exercise_type';
     case MONTHLY_MINUTES = 'monthly_minutes';
     case YEARLY_SESSIONS = 'yearly_sessions';
 

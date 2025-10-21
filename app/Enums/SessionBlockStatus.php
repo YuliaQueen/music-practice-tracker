@@ -6,11 +6,11 @@ namespace App\Enums;
 
 enum SessionBlockStatus: string
 {
-    case PLANNED = 'planned';
-    case ACTIVE = 'active';
-    case PAUSED = 'paused';
+    case PLANNED   = 'planned';
+    case ACTIVE    = 'active';
+    case PAUSED    = 'paused';
     case COMPLETED = 'completed';
-    case SKIPPED = 'skipped';
+    case SKIPPED   = 'skipped';
 
     /**
      * Получить все возможные значения в виде массива строк
