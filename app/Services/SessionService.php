@@ -14,13 +14,11 @@ use App\DTOs\Sessions\UpdateSessionBlockDTO;
 use App\Enums\ExerciseStatus;
 use App\Enums\SessionBlockStatus;
 use App\Enums\SessionStatus;
+use App\Events\SessionBlockCompleted;
+use App\Events\SessionCompleted;
 
 class SessionService
 {
-    public function __construct(
-        private GoalProgressService $goalProgressService
-    ) {
-    }
 
     /**
      * Создать новую сессию со всеми связанными блоками и упражнениями
@@ -127,7 +125,6 @@ class SessionService
             return [
                 'success' => false,
                 'message' => 'Сессия не может быть завершена в текущем статусе',
-                'completed_goals' => [],
             ];
         }
 
@@ -139,20 +136,12 @@ class SessionService
             'actual_duration' => $actualDuration,
         ]);
 
-        // Обновляем прогресс целей после завершения сессии
-        $updatedGoals = $this->goalProgressService->updateProgressAfterSession($session);
-        $completedGoals = $this->goalProgressService->checkAndCompleteGoals($session->user);
-
-        $message = 'Сессия завершена!';
-        if (!empty($completedGoals)) {
-            $goalTitles = collect($completedGoals)->pluck('title')->join(', ');
-            $message .= " Поздравляем! Достигнуты цели: {$goalTitles}";
-        }
+        // Отправляем событие для асинхронного обновления прогресса целей
+        SessionCompleted::dispatch($session);
 
         return [
             'success' => true,
-            'message' => $message,
-            'completed_goals' => $completedGoals,
+            'message' => 'Сессия завершена!',
         ];
     }
 
@@ -170,28 +159,14 @@ class SessionService
 
         $block->update($updateData);
 
-        // Обновляем прогресс целей после обновления блока сессии
+        // Отправляем событие для асинхронного обновления прогресса целей
         if ($dto->status === SessionBlockStatus::COMPLETED) {
-            $updatedGoals = $this->goalProgressService->updateProgressAfterSessionBlock($block);
-            $completedGoals = $this->goalProgressService->checkAndCompleteGoals($session->user);
-
-            $message = 'Блок обновлен';
-            if (!empty($completedGoals)) {
-                $goalTitles = collect($completedGoals)->pluck('title')->join(', ');
-                $message .= "! Поздравляем! Достигнуты цели: {$goalTitles}";
-            }
-
-            return [
-                'success' => true,
-                'message' => $message,
-                'completed_goals' => $completedGoals,
-            ];
+            SessionBlockCompleted::dispatch($block);
         }
 
         return [
             'success' => true,
             'message' => 'Блок обновлен',
-            'completed_goals' => [],
         ];
     }
 
