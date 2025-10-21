@@ -4,18 +4,27 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
-use App\Domains\Planning\Models\Exercise;
-use App\Domains\Planning\Models\Session;
-use App\Domains\Planning\Models\SessionBlock;
-use App\Domains\Planning\Models\Template;
-use App\Services\GoalProgressService;
-use Illuminate\Http\Request;
-use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
 use Inertia\Response;
+use Illuminate\Http\Request;
+use App\Services\SessionService;
+use Illuminate\Http\RedirectResponse;
+use App\DTOs\Sessions\CreateSessionDTO;
+use App\Domains\Planning\Models\Session;
+use App\Domains\Planning\Models\Exercise;
+use App\Domains\Planning\Models\Template;
+use App\DTOs\Sessions\UpdateSessionBlockDTO;
+use App\Domains\Planning\Models\SessionBlock;
+use App\Http\Requests\Session\StoreSessionRequest;
+use App\Http\Requests\Session\UpdateSessionBlockRequest;
 
 class SessionController extends Controller
 {
+    public function __construct(
+        private SessionService $sessionService
+    ) {
+    }
+
     /**
      * Показать список сессий пользователя
      */
@@ -43,8 +52,8 @@ class SessionController extends Controller
 
         // Получаем упражнения из всех сессий пользователя (включая незавершенные)
         $previousExercises = SessionBlock::whereHas('session', function ($query) {
-                $query->where('user_id', auth()->id());
-            })
+            $query->where('user_id', auth()->id());
+        })
             ->select('title', 'description', 'type', 'planned_duration')
             ->distinct()
             ->orderBy('title')
@@ -76,7 +85,7 @@ class SessionController extends Controller
                         'usage_count' => 0, // Упражнения из библиотеки еще не использовались
                     ];
                 });
-            
+
             $previousExercises = $previousExercises->concat($exerciseLibrary);
         }
 
@@ -84,7 +93,7 @@ class SessionController extends Controller
         $exerciseData = null;
         if ($request->has('exercise_id')) {
             $exerciseData = [
-                'id' => $request->get('exercise_id'),
+                'id'   => $request->get('exercise_id'),
                 'title' => $request->get('exercise_title'),
                 'type' => $request->get('exercise_type'),
                 'duration' => $request->get('exercise_duration'),
@@ -102,58 +111,11 @@ class SessionController extends Controller
     /**
      * Сохранить новую сессию
      */
-    public function store(Request $request): RedirectResponse
+    public function store(StoreSessionRequest $request): RedirectResponse
     {
-        $request->validate([
-            'title' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'template_id' => 'nullable|exists:practice_templates,id',
-            'blocks' => 'required|array|min:1',
-            'blocks.*.title' => 'required|string|max:255',
-            'blocks.*.description' => 'nullable|string',
-            'blocks.*.duration' => 'required|integer|min:1',
-            'blocks.*.type' => 'required|string',
-        ]);
+        $dto = CreateSessionDTO::fromRequest($request);
 
-        $session = Session::create([
-            'user_id' => auth()->id(),
-            'practice_template_id' => $request->template_id,
-            'title' => $request->title,
-            'description' => $request->description,
-            'planned_duration' => collect($request->blocks)->sum('duration'),
-            'status' => Session::STATUS_PLANNED,
-        ]);
-
-        // Создаем блоки сессии и упражнения
-        foreach ($request->blocks as $index => $blockData) {
-            // Создаем блок сессии
-            $session->blocks()->create([
-                'title' => $blockData['title'],
-                'description' => $blockData['description'],
-                'type' => $blockData['type'],
-                'planned_duration' => $blockData['duration'],
-                'status' => SessionBlock::STATUS_PLANNED,
-                'sort_order' => $index + 1,
-            ]);
-
-            // Проверяем, существует ли уже такое упражнение у пользователя
-            $existingExercise = Exercise::where('user_id', auth()->id())
-                ->where('title', $blockData['title'])
-                ->where('type', $blockData['type'])
-                ->first();
-
-            // Если упражнение не существует, создаем его
-            if (!$existingExercise) {
-                Exercise::create([
-                    'user_id' => auth()->id(),
-                    'title' => $blockData['title'],
-                    'description' => $blockData['description'],
-                    'type' => $blockData['type'],
-                    'planned_duration' => $blockData['duration'],
-                    'status' => Exercise::STATUS_PLANNED,
-                ]);
-            }
-        }
+        $session = $this->sessionService->createSession(auth()->user(), $dto);
 
         return redirect()->route('sessions.show', $session)
             ->with('success', 'Сессия создана успешно!');
@@ -180,14 +142,11 @@ class SessionController extends Controller
     {
         $this->authorize('update', $session);
 
-        if (!$session->canBeStarted()) {
+        $success = $this->sessionService->startSession($session);
+
+        if (!$success) {
             return back()->with('error', 'Сессия не может быть запущена в текущем статусе');
         }
-
-        $session->update([
-            'status' => Session::STATUS_ACTIVE,
-            'started_at' => now(),
-        ]);
 
         return back()->with('success', 'Сессия запущена!');
     }
@@ -199,13 +158,11 @@ class SessionController extends Controller
     {
         $this->authorize('update', $session);
 
-        if ($session->status !== Session::STATUS_ACTIVE) {
+        $success = $this->sessionService->pauseSession($session);
+
+        if (!$success) {
             return back()->with('error', 'Можно приостановить только активную сессию');
         }
-
-        $session->update([
-            'status' => Session::STATUS_PAUSED,
-        ]);
 
         return back()->with('success', 'Сессия приостановлена');
     }
@@ -217,73 +174,28 @@ class SessionController extends Controller
     {
         $this->authorize('update', $session);
 
-        if (!$session->canBeCompleted()) {
-            return back()->with('error', 'Сессия не может быть завершена в текущем статусе');
+        $result = $this->sessionService->completeSession($session);
+
+        if (!$result['success']) {
+            return back()->with('error', $result['message    ']);
         }
 
-        $actualDuration = $session->getTotalBlocksActualDuration();
-
-        $session->update([
-            'status' => Session::STATUS_COMPLETED,
-            'completed_at' => now(),
-            'actual_duration' => $actualDuration,
-        ]);
-
-        // Обновляем прогресс целей после завершения сессии
-        $goalProgressService = app(GoalProgressService::class);
-        $updatedGoals = $goalProgressService->updateProgressAfterSession($session);
-        $completedGoals = $goalProgressService->checkAndCompleteGoals($session->user);
-
-        $message = 'Сессия завершена!';
-        if (!empty($completedGoals)) {
-            $goalTitles = collect($completedGoals)->pluck('title')->join(', ');
-            $message .= " Поздравляем! Достигнуты цели: {$goalTitles}";
-        }
-
-        return back()->with('success', $message);
+        return back()->with('success', $result['message']);
     }
 
     /**
      * Обновить блок сессии
      */
-    public function updateBlock(Request $request, Session $session, SessionBlock $block): RedirectResponse
+    public function updateBlock(UpdateSessionBlockRequest $request, Session $session, SessionBlock $block): RedirectResponse
     {
         $this->authorize('update', $session);
 
-        $request->validate([
-            'status' => 'nullable|string|in:' . implode(',', SessionBlock::STATUSES),
-            'actual_duration' => 'nullable|integer|min:0',
-            'started_at' => 'nullable|date',
-            'completed_at' => 'nullable|date',
-            'notes' => 'nullable|string',
-            'planned_duration' => 'nullable|integer|min:1',
-        ]);
+        $dto = UpdateSessionBlockDTO::fromRequest($request);
 
-        $updateData = $request->only(['status', 'actual_duration', 'started_at', 'completed_at', 'notes', 'planned_duration']);
-        
-        // Если блок завершается, устанавливаем время завершения если не передано
-        if ($request->status === SessionBlock::STATUS_COMPLETED && !$request->completed_at) {
-            $updateData['completed_at'] = now();
-        }
 
-        $block->update($updateData);
+        $result = $this->sessionService->updateSessionBlock($session, $block, $dto);
 
-        // Обновляем прогресс целей после обновления блока сессии
-        if ($request->status === SessionBlock::STATUS_COMPLETED) {
-            $goalProgressService = app(GoalProgressService::class);
-            $updatedGoals = $goalProgressService->updateProgressAfterSessionBlock($block);
-            $completedGoals = $goalProgressService->checkAndCompleteGoals($session->user);
-
-            $message = 'Блок обновлен';
-            if (!empty($completedGoals)) {
-                $goalTitles = collect($completedGoals)->pluck('title')->join(', ');
-                $message .= "! Поздравляем! Достигнуты цели: {$goalTitles}";
-            }
-
-            return back()->with('success', $message);
-        }
-
-        return back()->with('success', 'Блок обновлен');
+        return back()->with('success', $result['message']);
     }
 
     /**
@@ -293,11 +205,7 @@ class SessionController extends Controller
     {
         $this->authorize('delete', $session);
 
-        // Удаляем все блоки сессии
-        $session->blocks()->delete();
-        
-        // Удаляем саму сессию
-        $session->delete();
+        $this->sessionService->deleteSession($session);
 
         return redirect()->route('sessions.index')
             ->with('success', 'Сессия успешно удалена');

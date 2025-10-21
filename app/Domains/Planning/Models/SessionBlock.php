@@ -4,15 +4,17 @@ declare(strict_types=1);
 
 namespace App\Domains\Planning\Models;
 
-use App\Domains\Shared\Models\BaseModel;
 use Carbon\Carbon;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Database\Factories\SessionBlockFactory;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\SoftDeletes;
+use App\Enums\ExerciseType;
+use App\Enums\SessionBlockStatus;
 use Spatie\Activitylog\LogOptions;
+use App\Domains\Shared\Models\BaseModel;
+use Illuminate\Database\Eloquent\Builder;
+use Database\Factories\SessionBlockFactory;
 use Spatie\Activitylog\Traits\LogsActivity;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 /**
  * Модель блока сессии - конкретный элемент занятия
@@ -44,56 +46,36 @@ class SessionBlock extends BaseModel
     use SoftDeletes;
 
     /**
-     * Название таблицы
+     * Типы блоков (backward compatibility)
      */
-    protected $table = 'practice_session_blocks';
-
+    public const TYPE_WARMUP        = 'warmup';
+    public const TYPE_TECHNIQUE     = 'technique';
+    public const TYPE_REPERTOIRE    = 'repertoire';
+    public const TYPE_IMPROVISATION = 'improvisation';
+    public const TYPE_SIGHT_READING = 'sight_reading';
+    public const TYPE_THEORY        = 'theory';
+    public const TYPE_BREAK         = 'break';
+    public const TYPE_CUSTOM        = 'custom';
     /**
-     * Типы блоков
-     */
-    public const TYPE_WARMUP        = 'warmup';            // Разминка
-    public const TYPE_TECHNIQUE     = 'technique';         // Техника
-    public const TYPE_REPERTOIRE    = 'repertoire';        // Репертуар
-    public const TYPE_IMPROVISATION = 'improvisation';     // Импровизация
-    public const TYPE_SIGHT_READING = 'sight_reading';     // Чтение с листа
-    public const TYPE_THEORY        = 'theory';            // Теория
-    public const TYPE_BREAK         = 'break';             // Перерыв
-    public const TYPE_CUSTOM        = 'custom';            // Пользовательский
-
-    /**
-     * Статусы блока
+     * Статусы блока (backward compatibility)
      */
     public const STATUS_PLANNED   = 'planned';
     public const STATUS_ACTIVE    = 'active';
     public const STATUS_PAUSED    = 'paused';
     public const STATUS_COMPLETED = 'completed';
     public const STATUS_SKIPPED   = 'skipped';
-
     /**
      * Все возможные типы
      */
-    public const TYPES = [
-        self::TYPE_WARMUP,
-        self::TYPE_TECHNIQUE,
-        self::TYPE_REPERTOIRE,
-        self::TYPE_IMPROVISATION,
-        self::TYPE_SIGHT_READING,
-        self::TYPE_THEORY,
-        self::TYPE_BREAK,
-        self::TYPE_CUSTOM,
-    ];
-
+    public const TYPES = ExerciseType::class;
     /**
      * Все возможные статусы
      */
-    public const STATUSES = [
-        self::STATUS_PLANNED,
-        self::STATUS_ACTIVE,
-        self::STATUS_PAUSED,
-        self::STATUS_COMPLETED,
-        self::STATUS_SKIPPED,
-    ];
-
+    public const STATUSES = SessionBlockStatus::class;
+    /**
+     * Название таблицы
+     */
+    protected $table = 'practice_session_blocks';
     protected $fillable = [
         'practice_session_id',
         'practice_template_block_id',
@@ -110,6 +92,8 @@ class SessionBlock extends BaseModel
     ];
 
     protected $casts = [
+        'type'             => ExerciseType::class,
+        'status'           => SessionBlockStatus::class,
         'planned_duration' => 'integer',
         'actual_duration'  => 'integer',
         'sort_order'       => 'integer',
@@ -117,6 +101,14 @@ class SessionBlock extends BaseModel
         'completed_at'     => 'datetime',
         'settings'         => 'array',
     ];
+
+    /**
+     * Create a new factory instance for the model.
+     */
+    protected static function newFactory()
+    {
+        return SessionBlockFactory::new();
+    }
 
     /**
      * Связь с сессией
@@ -133,7 +125,6 @@ class SessionBlock extends BaseModel
     {
         return $this->belongsTo(TemplateBlock::class, 'practice_template_block_id');
     }
-
 
     /**
      * Scope: активные блоки
@@ -172,7 +163,7 @@ class SessionBlock extends BaseModel
      */
     public function isActive(): bool
     {
-        return $this->status === self::STATUS_ACTIVE;
+        return $this->status === SessionBlockStatus::ACTIVE;
     }
 
     /**
@@ -180,7 +171,7 @@ class SessionBlock extends BaseModel
      */
     public function isCompleted(): bool
     {
-        return $this->status === self::STATUS_COMPLETED;
+        return $this->status === SessionBlockStatus::COMPLETED;
     }
 
     /**
@@ -188,7 +179,7 @@ class SessionBlock extends BaseModel
      */
     public function isPlanned(): bool
     {
-        return $this->status === self::STATUS_PLANNED;
+        return $this->status === SessionBlockStatus::PLANNED;
     }
 
     /**
@@ -196,7 +187,7 @@ class SessionBlock extends BaseModel
      */
     public function canBeStarted(): bool
     {
-        return in_array($this->status, [self::STATUS_PLANNED, self::STATUS_PAUSED]);
+        return in_array($this->status, [SessionBlockStatus::PLANNED, SessionBlockStatus::PAUSED]);
     }
 
     /**
@@ -204,7 +195,7 @@ class SessionBlock extends BaseModel
      */
     public function canBeCompleted(): bool
     {
-        return in_array($this->status, [self::STATUS_ACTIVE, self::STATUS_PAUSED]);
+        return in_array($this->status, [SessionBlockStatus::ACTIVE, SessionBlockStatus::PAUSED]);
     }
 
     /**
@@ -212,17 +203,7 @@ class SessionBlock extends BaseModel
      */
     public function getTypeLabel(): string
     {
-        return match ($this->type) {
-            self::TYPE_WARMUP => 'Разминка',
-            self::TYPE_TECHNIQUE => 'Техника',
-            self::TYPE_REPERTOIRE => 'Репертуар',
-            self::TYPE_IMPROVISATION => 'Импровизация',
-            self::TYPE_SIGHT_READING => 'Чтение с листа',
-            self::TYPE_THEORY => 'Теория',
-            self::TYPE_BREAK => 'Перерыв',
-            self::TYPE_CUSTOM => 'Пользовательский',
-            default => 'Неизвестный тип',
-        };
+        return $this->type instanceof ExerciseType ? $this->type->label() : 'Неизвестный тип';
     }
 
     /**
@@ -230,17 +211,7 @@ class SessionBlock extends BaseModel
      */
     public function getTypeIcon(): string
     {
-        return match ($this->type) {
-            self::TYPE_WARMUP => '🔥',
-            self::TYPE_TECHNIQUE => '⚡',
-            self::TYPE_REPERTOIRE => '🎵',
-            self::TYPE_IMPROVISATION => '🎨',
-            self::TYPE_SIGHT_READING => '👀',
-            self::TYPE_THEORY => '📚',
-            self::TYPE_BREAK => '☕',
-            self::TYPE_CUSTOM => '⭐',
-            default => '❓',
-        };
+        return $this->type instanceof ExerciseType ? $this->type->icon() : '❓';
     }
 
     /**
@@ -248,17 +219,7 @@ class SessionBlock extends BaseModel
      */
     public function getTypeColor(): string
     {
-        return match ($this->type) {
-            self::TYPE_WARMUP => 'orange',
-            self::TYPE_TECHNIQUE => 'yellow',
-            self::TYPE_REPERTOIRE => 'blue',
-            self::TYPE_IMPROVISATION => 'purple',
-            self::TYPE_SIGHT_READING => 'green',
-            self::TYPE_THEORY => 'gray',
-            self::TYPE_BREAK => 'slate',
-            self::TYPE_CUSTOM => 'pink',
-            default => 'gray',
-        };
+        return $this->type instanceof ExerciseType ? $this->type->color() : 'gray';
     }
 
     /**
@@ -310,13 +271,5 @@ class SessionBlock extends BaseModel
             ->logOnly(['title', 'status', 'type', 'planned_duration', 'actual_duration'])
             ->logOnlyDirty()
             ->dontSubmitEmptyLogs();
-    }
-
-    /**
-     * Create a new factory instance for the model.
-     */
-    protected static function newFactory()
-    {
-        return SessionBlockFactory::new();
     }
 }

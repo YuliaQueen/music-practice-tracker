@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\Console\Commands;
 
-use App\Services\GoalProgressService;
-use App\Domains\User\Models\User;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
+use App\Domains\User\Models\User;
+use App\Services\GoalProgressService;
 
 class UpdateGoalProgressCommand extends Command
 {
@@ -16,7 +16,7 @@ class UpdateGoalProgressCommand extends Command
      *
      * @var string
      */
-    protected $signature = 'goals:update-progress 
+    protected $signature = 'goals:update-progress
                             {--date= : Дата для обновления прогресса (Y-m-d)}
                             {--user= : ID пользователя для обновления прогресса}
                             {--all : Обновить прогресс для всех пользователей}';
@@ -34,13 +34,13 @@ class UpdateGoalProgressCommand extends Command
     public function handle(): int
     {
         $goalProgressService = app(GoalProgressService::class);
-        
+
         $date = $this->option('date') ? Carbon::createFromFormat('Y-m-d', $this->option('date')) : Carbon::now();
         $userId = $this->option('user');
         $allUsers = $this->option('all');
-        
+
         $this->info("Обновление прогресса целей за {$date->format('Y-m-d')}...");
-        
+
         if ($userId) {
             // Обновляем прогресс для конкретного пользователя
             $user = User::find($userId);
@@ -48,38 +48,38 @@ class UpdateGoalProgressCommand extends Command
                 $this->error("Пользователь с ID {$userId} не найден");
                 return 1;
             }
-            
+
             $this->updateUserGoals($goalProgressService, $user, $date);
         } elseif ($allUsers) {
             // Обновляем прогресс для всех пользователей
             $users = User::whereHas('goals')->get();
-            
+
             if ($users->isEmpty()) {
                 $this->info('Пользователи с целями не найдены');
                 return 0;
             }
-            
+
             $this->info("Найдено {$users->count()} пользователей с целями");
-            
+
             $progressBar = $this->output->createProgressBar($users->count());
             $progressBar->start();
-            
+
             foreach ($users as $user) {
                 $this->updateUserGoals($goalProgressService, $user, $date);
                 $progressBar->advance();
             }
-            
+
             $progressBar->finish();
             $this->newLine();
         } else {
             $this->error('Необходимо указать --user=ID или --all');
             return 1;
         }
-        
+
         $this->info('Обновление прогресса завершено!');
         return 0;
     }
-    
+
     /**
      * Обновить цели для конкретного пользователя
      */
@@ -87,14 +87,14 @@ class UpdateGoalProgressCommand extends Command
     {
         $dayStart = $date->copy()->startOfDay();
         $dayEnd = $date->copy()->endOfDay();
-        
+
         $updatedGoals = $goalProgressService->updateProgressFromSessions($user, $dayStart, $dayEnd);
         $completedGoals = $goalProgressService->checkAndCompleteGoals($user);
-        
+
         if (!empty($updatedGoals)) {
             $this->line("Пользователь {$user->name}: обновлено " . count($updatedGoals) . " целей");
         }
-        
+
         if (!empty($completedGoals)) {
             $goalTitles = collect($completedGoals)->pluck('title')->join(', ');
             $this->line("Пользователь {$user->name}: достигнуты цели: {$goalTitles}");

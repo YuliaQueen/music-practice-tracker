@@ -4,18 +4,18 @@ declare(strict_types=1);
 
 namespace App\Domains\Planning\Models;
 
-use App\Domains\Shared\Models\BaseModel;
-use App\Domains\User\Models\User;
 use Carbon\Carbon;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Attributes\Scope;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Database\Factories\SessionFactory;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\SoftDeletes;
+use App\Enums\SessionStatus;
+use App\Domains\User\Models\User;
 use Spatie\Activitylog\LogOptions;
+use Database\Factories\SessionFactory;
+use App\Domains\Shared\Models\BaseModel;
+use Illuminate\Database\Eloquent\Builder;
 use Spatie\Activitylog\Traits\LogsActivity;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 /**
  * Модель сессии занятий - основная единица планирования
@@ -47,30 +47,21 @@ class Session extends BaseModel
     use SoftDeletes;
 
     /**
-     * Название таблицы
-     */
-    protected $table = 'practice_sessions';
-
-    /**
-     * Статусы сессии
+     * Статусы сессии (backward compatibility)
      */
     public const STATUS_PLANNED   = 'planned';
     public const STATUS_ACTIVE    = 'active';
     public const STATUS_PAUSED    = 'paused';
     public const STATUS_COMPLETED = 'completed';
     public const STATUS_CANCELLED = 'cancelled';
-
     /**
      * Все возможные статусы
      */
-    public const STATUSES = [
-        self::STATUS_PLANNED,
-        self::STATUS_ACTIVE,
-        self::STATUS_PAUSED,
-        self::STATUS_COMPLETED,
-        self::STATUS_CANCELLED,
-    ];
-
+    public const STATUSES = SessionStatus::class;
+    /**
+     * Название таблицы
+     */
+    protected $table = 'practice_sessions';
     protected $fillable = [
         'user_id',
         'practice_template_id',
@@ -86,6 +77,7 @@ class Session extends BaseModel
     ];
 
     protected $casts = [
+        'status'           => SessionStatus::class,
         'planned_duration' => 'integer',
         'actual_duration'  => 'integer',
         'scheduled_for'    => 'datetime',
@@ -93,6 +85,14 @@ class Session extends BaseModel
         'completed_at'     => 'datetime',
         'metadata'         => 'array',
     ];
+
+    /**
+     * Create a new factory instance for the model.
+     */
+    protected static function newFactory()
+    {
+        return SessionFactory::new();
+    }
 
     /**
      * Связь с пользователем
@@ -117,7 +117,6 @@ class Session extends BaseModel
     {
         return $this->hasMany(SessionBlock::class, 'practice_session_id')->orderBy('sort_order');
     }
-
 
     /**
      * Scope: активные сессии
@@ -164,7 +163,7 @@ class Session extends BaseModel
      */
     public function isActive(): bool
     {
-        return $this->status === self::STATUS_ACTIVE;
+        return $this->status === SessionStatus::ACTIVE;
     }
 
     /**
@@ -172,7 +171,7 @@ class Session extends BaseModel
      */
     public function isCompleted(): bool
     {
-        return $this->status === self::STATUS_COMPLETED;
+        return $this->status === SessionStatus::COMPLETED;
     }
 
     /**
@@ -180,7 +179,7 @@ class Session extends BaseModel
      */
     public function isPlanned(): bool
     {
-        return $this->status === self::STATUS_PLANNED;
+        return $this->status === SessionStatus::PLANNED;
     }
 
     /**
@@ -188,7 +187,7 @@ class Session extends BaseModel
      */
     public function canBeStarted(): bool
     {
-        return in_array($this->status, [self::STATUS_PLANNED, self::STATUS_PAUSED]);
+        return in_array($this->status, [SessionStatus::PLANNED, SessionStatus::PAUSED]);
     }
 
     /**
@@ -196,7 +195,7 @@ class Session extends BaseModel
      */
     public function canBeCompleted(): bool
     {
-        return in_array($this->status, [self::STATUS_ACTIVE, self::STATUS_PAUSED]);
+        return in_array($this->status, [SessionStatus::ACTIVE, SessionStatus::PAUSED]);
     }
 
     /**
@@ -280,13 +279,5 @@ class Session extends BaseModel
             ->logOnly(['title', 'status', 'planned_duration', 'actual_duration'])
             ->logOnlyDirty()
             ->dontSubmitEmptyLogs();
-    }
-
-    /**
-     * Create a new factory instance for the model.
-     */
-    protected static function newFactory()
-    {
-        return SessionFactory::new();
     }
 }
