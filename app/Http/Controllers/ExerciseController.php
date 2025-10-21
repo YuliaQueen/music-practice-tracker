@@ -5,7 +5,8 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Domains\Planning\Models\Exercise;
-use Illuminate\Http\Request;
+use App\Http\Requests\Exercise\StoreExerciseRequest;
+use App\Http\Requests\Exercise\UpdateExerciseRequest;
 use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -37,23 +38,13 @@ class ExerciseController extends Controller
     /**
      * Сохранить новое упражнение
      */
-    public function store(Request $request): RedirectResponse
+    public function store(StoreExerciseRequest $request): RedirectResponse
     {
-        $request->validate([
-            'title' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'type' => 'required|string|in:' . implode(',', Exercise::TYPES),
-            'planned_duration' => 'required|integer|min:1|max:480', // максимум 8 часов
-            'scheduled_for' => 'nullable|date|after:now',
-        ]);
+        $validated = $request->validated();
 
         Exercise::create([
             'user_id' => auth()->id(),
-            'title' => $request->title,
-            'description' => $request->description,
-            'type' => $request->type,
-            'planned_duration' => $request->planned_duration,
-            'scheduled_for' => $request->scheduled_for,
+            ...$validated,
             'status' => Exercise::STATUS_PLANNED,
         ]);
 
@@ -88,25 +79,11 @@ class ExerciseController extends Controller
     /**
      * Обновить упражнение
      */
-    public function update(Request $request, Exercise $exercise): RedirectResponse
+    public function update(UpdateExerciseRequest $request, Exercise $exercise): RedirectResponse
     {
         $this->authorize('update', $exercise);
 
-        $request->validate([
-            'title' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'type' => 'required|string|in:' . implode(',', Exercise::TYPES),
-            'planned_duration' => 'required|integer|min:1|max:480',
-            'scheduled_for' => 'nullable|date|after:now',
-        ]);
-
-        $exercise->update($request->only([
-            'title',
-            'description',
-            'type',
-            'planned_duration',
-            'scheduled_for',
-        ]));
+        $exercise->update($request->validated());
 
         return redirect()->route('exercises.index')
             ->with('success', 'Упражнение успешно обновлено');

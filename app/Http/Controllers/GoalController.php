@@ -5,6 +5,9 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Domains\Goals\Models\Goal;
+use App\Http\Requests\Goal\StoreGoalRequest;
+use App\Http\Requests\Goal\UpdateGoalRequest;
+use App\Http\Resources\GoalResource;
 use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
@@ -21,31 +24,10 @@ class GoalController extends Controller
         $goals = auth()->user()->goals()
             ->orderBy('is_active', 'desc')
             ->orderBy('created_at', 'desc')
-            ->get()
-            ->map(function ($goal) {
-                return [
-                    'id' => $goal->id,
-                    'title' => $goal->title,
-                    'description' => $goal->description,
-                    'type' => $goal->type,
-                    'type_label' => $goal->getTypeLabel(),
-                    'type_icon' => $goal->getTypeIcon(),
-                    'type_color' => $goal->getTypeColor(),
-                    'target' => $goal->target,
-                    'progress' => $goal->progress,
-                    'progress_percentage' => $goal->getProgressPercentage(),
-                    'remaining' => $goal->getRemaining(),
-                    'start_date' => $goal->start_date->format('Y-m-d'),
-                    'end_date' => $goal->end_date?->format('Y-m-d'),
-                    'is_active' => $goal->is_active,
-                    'is_completed' => $goal->is_completed,
-                    'completed_at' => $goal->completed_at?->format('Y-m-d H:i'),
-                    'created_at' => $goal->created_at->format('Y-m-d H:i'),
-                ];
-            });
+            ->get();
 
         return Inertia::render('Goals/Index', [
-            'goals' => $goals,
+            'goals' => GoalResource::collection($goals),
             'goalTypes' => Goal::TYPES,
         ]);
     }
@@ -63,17 +45,9 @@ class GoalController extends Controller
     /**
      * Сохранить новую цель
      */
-    public function store(Request $request): RedirectResponse
+    public function store(StoreGoalRequest $request): RedirectResponse
     {
-        $validated = $request->validate([
-            'title' => 'required|string|max:255',
-            'description' => 'nullable|string|max:1000',
-            'type' => 'required|string|in:' . implode(',', Goal::TYPES),
-            'target' => 'required|array',
-            'target.value' => 'required|integer|min:1',
-            'start_date' => 'required|date',
-            'end_date' => 'nullable|date|after:start_date',
-        ]);
+        $validated = $request->validated();
 
         $goal = auth()->user()->goals()->create([
             'title' => $validated['title'],
@@ -98,27 +72,7 @@ class GoalController extends Controller
         $this->authorize('view', $goal);
 
         return Inertia::render('Goals/Show', [
-            'goal' => [
-                'id' => $goal->id,
-                'title' => $goal->title,
-                'description' => $goal->description,
-                'type' => $goal->type,
-                'type_label' => $goal->getTypeLabel(),
-                'type_icon' => $goal->getTypeIcon(),
-                'type_color' => $goal->getTypeColor(),
-                'target' => $goal->target,
-                'progress' => $goal->progress,
-                'progress_percentage' => $goal->getProgressPercentage(),
-                'remaining' => $goal->getRemaining(),
-                'current_value' => $goal->getCurrentValue(),
-                'target_value' => $goal->getTargetValue(),
-                'start_date' => $goal->start_date->format('Y-m-d'),
-                'end_date' => $goal->end_date?->format('Y-m-d'),
-                'is_active' => $goal->is_active,
-                'is_completed' => $goal->is_completed,
-                'completed_at' => $goal->completed_at?->format('Y-m-d H:i'),
-                'created_at' => $goal->created_at->format('Y-m-d H:i'),
-            ],
+            'goal' => new GoalResource($goal),
         ]);
     }
 
@@ -147,20 +101,11 @@ class GoalController extends Controller
     /**
      * Обновить цель
      */
-    public function update(Request $request, Goal $goal): RedirectResponse
+    public function update(UpdateGoalRequest $request, Goal $goal): RedirectResponse
     {
         $this->authorize('update', $goal);
 
-        $validated = $request->validate([
-            'title' => 'required|string|max:255',
-            'description' => 'nullable|string|max:1000',
-            'type' => 'required|string|in:' . implode(',', Goal::TYPES),
-            'target' => 'required|array',
-            'target.value' => 'required|integer|min:1',
-            'start_date' => 'required|date',
-            'end_date' => 'nullable|date|after:start_date',
-            'is_active' => 'boolean',
-        ]);
+        $validated = $request->validated();
 
         $goal->update([
             'title' => $validated['title'],

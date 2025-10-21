@@ -8,6 +8,8 @@ use App\Domains\Planning\Models\Exercise;
 use App\Domains\Planning\Models\Session;
 use App\Domains\Planning\Models\SessionBlock;
 use App\Domains\Planning\Models\Template;
+use App\Http\Requests\Session\StoreSessionRequest;
+use App\Http\Requests\Session\UpdateSessionBlockRequest;
 use App\Services\GoalProgressService;
 use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
@@ -102,30 +104,21 @@ class SessionController extends Controller
     /**
      * Сохранить новую сессию
      */
-    public function store(Request $request): RedirectResponse
+    public function store(StoreSessionRequest $request): RedirectResponse
     {
-        $request->validate([
-            'title' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'template_id' => 'nullable|exists:practice_templates,id',
-            'blocks' => 'required|array|min:1',
-            'blocks.*.title' => 'required|string|max:255',
-            'blocks.*.description' => 'nullable|string',
-            'blocks.*.duration' => 'required|integer|min:1',
-            'blocks.*.type' => 'required|string',
-        ]);
+        $validated = $request->validated();
 
         $session = Session::create([
             'user_id' => auth()->id(),
-            'practice_template_id' => $request->template_id,
-            'title' => $request->title,
-            'description' => $request->description,
-            'planned_duration' => collect($request->blocks)->sum('duration'),
+            'practice_template_id' => $validated['template_id'] ?? null,
+            'title' => $validated['title'],
+            'description' => $validated['description'] ?? null,
+            'planned_duration' => collect($validated['blocks'])->sum('duration'),
             'status' => Session::STATUS_PLANNED,
         ]);
 
         // Создаем блоки сессии и упражнения
-        foreach ($request->blocks as $index => $blockData) {
+        foreach ($validated['blocks'] as $index => $blockData) {
             // Создаем блок сессии
             $session->blocks()->create([
                 'title' => $blockData['title'],
@@ -246,30 +239,21 @@ class SessionController extends Controller
     /**
      * Обновить блок сессии
      */
-    public function updateBlock(Request $request, Session $session, SessionBlock $block): RedirectResponse
+    public function updateBlock(UpdateSessionBlockRequest $request, Session $session, SessionBlock $block): RedirectResponse
     {
         $this->authorize('update', $session);
 
-        $request->validate([
-            'status' => 'nullable|string|in:' . implode(',', SessionBlock::STATUSES),
-            'actual_duration' => 'nullable|integer|min:0',
-            'started_at' => 'nullable|date',
-            'completed_at' => 'nullable|date',
-            'notes' => 'nullable|string',
-            'planned_duration' => 'nullable|integer|min:1',
-        ]);
+        $updateData = $request->validated();
 
-        $updateData = $request->only(['status', 'actual_duration', 'started_at', 'completed_at', 'notes', 'planned_duration']);
-        
         // Если блок завершается, устанавливаем время завершения если не передано
-        if ($request->status === SessionBlock::STATUS_COMPLETED && !$request->completed_at) {
+        if (isset($updateData['status']) && $updateData['status'] === SessionBlock::STATUS_COMPLETED && !isset($updateData['completed_at'])) {
             $updateData['completed_at'] = now();
         }
 
         $block->update($updateData);
 
         // Обновляем прогресс целей после обновления блока сессии
-        if ($request->status === SessionBlock::STATUS_COMPLETED) {
+        if (isset($updateData['status']) && $updateData['status'] === SessionBlock::STATUS_COMPLETED) {
             $goalProgressService = app(GoalProgressService::class);
             $updatedGoals = $goalProgressService->updateProgressAfterSessionBlock($block);
             $completedGoals = $goalProgressService->checkAndCompleteGoals($session->user);
