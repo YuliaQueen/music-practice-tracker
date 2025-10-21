@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace App\Http\Requests\Goal;
 
 use App\Domains\Goals\Models\Goal;
+use App\Enums\GoalType;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class UpdateGoalRequest extends FormRequest
 {
@@ -28,7 +30,7 @@ class UpdateGoalRequest extends FormRequest
         return [
             'title' => 'required|string|max:255',
             'description' => 'nullable|string|max:1000',
-            'type' => 'required|string|in:' . implode(',', Goal::TYPES),
+            'type' => ['required', 'string', Rule::enum(GoalType::class)],
             'target' => 'required|array',
             'target.value' => 'required|integer|min:1',
             'start_date' => 'required|date',

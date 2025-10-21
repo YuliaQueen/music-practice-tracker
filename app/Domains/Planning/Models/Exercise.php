@@ -6,6 +6,8 @@ namespace App\Domains\Planning\Models;
 
 use App\Domains\Shared\Models\BaseModel;
 use App\Domains\User\Models\User;
+use App\Enums\ExerciseStatus;
+use App\Enums\ExerciseType;
 use App\Models\Note;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
@@ -51,19 +53,19 @@ class Exercise extends BaseModel
     protected $table = 'exercises';
 
     /**
-     * Типы упражнений
+     * Типы упражнений (backward compatibility)
      */
-    public const TYPE_WARMUP        = 'warmup';            // Разминка
-    public const TYPE_TECHNIQUE     = 'technique';         // Техника
-    public const TYPE_REPERTOIRE    = 'repertoire';        // Репертуар
-    public const TYPE_IMPROVISATION = 'improvisation';     // Импровизация
-    public const TYPE_SIGHT_READING = 'sight_reading';     // Чтение с листа
-    public const TYPE_THEORY        = 'theory';            // Теория
-    public const TYPE_BREAK         = 'break';             // Перерыв
-    public const TYPE_CUSTOM        = 'custom';            // Пользовательский
+    public const TYPE_WARMUP        = 'warmup';
+    public const TYPE_TECHNIQUE     = 'technique';
+    public const TYPE_REPERTOIRE    = 'repertoire';
+    public const TYPE_IMPROVISATION = 'improvisation';
+    public const TYPE_SIGHT_READING = 'sight_reading';
+    public const TYPE_THEORY        = 'theory';
+    public const TYPE_BREAK         = 'break';
+    public const TYPE_CUSTOM        = 'custom';
 
     /**
-     * Статусы упражнения
+     * Статусы упражнения (backward compatibility)
      */
     public const STATUS_PLANNED   = 'planned';
     public const STATUS_ACTIVE    = 'active';
@@ -74,27 +76,12 @@ class Exercise extends BaseModel
     /**
      * Все возможные типы
      */
-    public const TYPES = [
-        self::TYPE_WARMUP,
-        self::TYPE_TECHNIQUE,
-        self::TYPE_REPERTOIRE,
-        self::TYPE_IMPROVISATION,
-        self::TYPE_SIGHT_READING,
-        self::TYPE_THEORY,
-        self::TYPE_BREAK,
-        self::TYPE_CUSTOM,
-    ];
+    public const TYPES = ExerciseType::class;
 
     /**
      * Все возможные статусы
      */
-    public const STATUSES = [
-        self::STATUS_PLANNED,
-        self::STATUS_ACTIVE,
-        self::STATUS_PAUSED,
-        self::STATUS_COMPLETED,
-        self::STATUS_CANCELLED,
-    ];
+    public const STATUSES = ExerciseStatus::class;
 
     protected $fillable = [
         'user_id',
@@ -111,6 +98,8 @@ class Exercise extends BaseModel
     ];
 
     protected $casts = [
+        'type'             => ExerciseType::class,
+        'status'           => ExerciseStatus::class,
         'planned_duration' => 'integer',
         'actual_duration'  => 'integer',
         'scheduled_for'    => 'datetime',
@@ -196,18 +185,7 @@ class Exercise extends BaseModel
      */
     public function getTypeLabelAttribute(): string
     {
-        $labels = [
-            self::TYPE_WARMUP => 'Разминка',
-            self::TYPE_TECHNIQUE => 'Техника',
-            self::TYPE_REPERTOIRE => 'Репертуар',
-            self::TYPE_IMPROVISATION => 'Импровизация',
-            self::TYPE_SIGHT_READING => 'Чтение с листа',
-            self::TYPE_THEORY => 'Теория',
-            self::TYPE_BREAK => 'Перерыв',
-            self::TYPE_CUSTOM => 'Пользовательский',
-        ];
-
-        return $labels[$this->type] ?? $this->type;
+        return $this->type instanceof ExerciseType ? $this->type->label() : $this->type;
     }
 
     /**
@@ -215,15 +193,7 @@ class Exercise extends BaseModel
      */
     public function getStatusLabelAttribute(): string
     {
-        $labels = [
-            self::STATUS_PLANNED => 'Запланировано',
-            self::STATUS_ACTIVE => 'Активно',
-            self::STATUS_PAUSED => 'Приостановлено',
-            self::STATUS_COMPLETED => 'Завершено',
-            self::STATUS_CANCELLED => 'Отменено',
-        ];
-
-        return $labels[$this->status] ?? $this->status;
+        return $this->status instanceof ExerciseStatus ? $this->status->label() : $this->status;
     }
 
     /**
@@ -231,18 +201,7 @@ class Exercise extends BaseModel
      */
     public function getTypeIconAttribute(): string
     {
-        $icons = [
-            self::TYPE_WARMUP => '🔥',
-            self::TYPE_TECHNIQUE => '⚡',
-            self::TYPE_REPERTOIRE => '🎵',
-            self::TYPE_IMPROVISATION => '🎨',
-            self::TYPE_SIGHT_READING => '👀',
-            self::TYPE_THEORY => '📚',
-            self::TYPE_BREAK => '☕',
-            self::TYPE_CUSTOM => '⭐',
-        ];
-
-        return $icons[$this->type] ?? '⭐';
+        return $this->type instanceof ExerciseType ? $this->type->icon() : '⭐';
     }
 
     /**
@@ -250,7 +209,7 @@ class Exercise extends BaseModel
      */
     public function canStart(): bool
     {
-        return $this->status === self::STATUS_PLANNED;
+        return $this->status === ExerciseStatus::PLANNED;
     }
 
     /**
@@ -258,7 +217,7 @@ class Exercise extends BaseModel
      */
     public function canPause(): bool
     {
-        return $this->status === self::STATUS_ACTIVE;
+        return $this->status === ExerciseStatus::ACTIVE;
     }
 
     /**
@@ -266,7 +225,7 @@ class Exercise extends BaseModel
      */
     public function canComplete(): bool
     {
-        return in_array($this->status, [self::STATUS_ACTIVE, self::STATUS_PAUSED]);
+        return in_array($this->status, [ExerciseStatus::ACTIVE, ExerciseStatus::PAUSED]);
     }
 
     /**
@@ -274,7 +233,7 @@ class Exercise extends BaseModel
      */
     public function canCancel(): bool
     {
-        return in_array($this->status, [self::STATUS_PLANNED, self::STATUS_ACTIVE, self::STATUS_PAUSED]);
+        return in_array($this->status, [ExerciseStatus::PLANNED, ExerciseStatus::ACTIVE, ExerciseStatus::PAUSED]);
     }
 
     /**

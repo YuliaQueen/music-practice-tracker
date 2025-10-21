@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace App\Http\Requests\Exercise;
 
 use App\Domains\Planning\Models\Exercise;
+use App\Enums\ExerciseType;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class UpdateExerciseRequest extends FormRequest
 {
@@ -28,7 +30,7 @@ class UpdateExerciseRequest extends FormRequest
         return [
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'type' => 'required|string|in:' . implode(',', Exercise::TYPES),
+            'type' => ['required', 'string', Rule::enum(ExerciseType::class)],
             'planned_duration' => 'required|integer|min:1|max:480',
             'scheduled_for' => 'nullable|date|after:now',
         ];
