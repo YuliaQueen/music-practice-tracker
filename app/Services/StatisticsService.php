@@ -289,7 +289,7 @@ class StatisticsService
         return $stats->map(function ($item) {
             return [
                 'type'       => $item->type,
-                'type_label' => ExerciseType::tryFrom($item->type)?->label() ?? $item->type,
+                'type_label' => $item->type instanceof ExerciseType ? $item->type->label() : $item->type,
                 'minutes'    => $item->total_duration ?? 0,
                 'count'      => $item->count,
             ];
