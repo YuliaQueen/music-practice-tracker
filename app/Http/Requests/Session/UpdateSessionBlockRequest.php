@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Requests\Session;
 
-use App\Domains\Planning\Models\SessionBlock;
+use App\Enums\SessionBlockStatus;
 use Illuminate\Foundation\Http\FormRequest;
 
 class UpdateSessionBlockRequest extends FormRequest
@@ -26,7 +26,7 @@ class UpdateSessionBlockRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'status' => 'nullable|string|in:' . implode(',', SessionBlock::STATUSES),
+            'status' => 'nullable|string|in:' . implode(',', SessionBlockStatus::values()),
             'actual_duration' => 'nullable|integer|min:0',
             'started_at' => 'nullable|date',
             'completed_at' => 'nullable|date',
