@@ -8,6 +8,8 @@ use App\Domains\Planning\Models\Exercise;
 use App\Domains\Planning\Models\Session;
 use App\Domains\Planning\Models\SessionBlock;
 use App\Domains\Planning\Models\Template;
+use App\DTOs\Sessions\CreateSessionDTO;
+use App\DTOs\Sessions\UpdateSessionBlockDTO;
 use App\Http\Requests\Session\StoreSessionRequest;
 use App\Http\Requests\Session\UpdateSessionBlockRequest;
 use App\Services\GoalProgressService;
@@ -106,43 +108,41 @@ class SessionController extends Controller
      */
     public function store(StoreSessionRequest $request): RedirectResponse
     {
-        $validated = $request->validated();
+        $dto = CreateSessionDTO::fromRequest($request);
 
         $session = Session::create([
             'user_id' => auth()->id(),
-            'practice_template_id' => $validated['template_id'] ?? null,
-            'title' => $validated['title'],
-            'description' => $validated['description'] ?? null,
-            'planned_duration' => collect($validated['blocks'])->sum('duration'),
+            'practice_template_id' => $dto->template_id,
+            ...$dto->toArray(),
+            'planned_duration' => array_sum(array_column($dto->getBlocksArray(), 'planned_duration')),
             'status' => Session::STATUS_PLANNED,
         ]);
 
         // Создаем блоки сессии и упражнения
-        foreach ($validated['blocks'] as $index => $blockData) {
+        foreach ($dto->blocks as $index => $blockDTO) {
+            $blockData = $blockDTO->toArray();
+
             // Создаем блок сессии
             $session->blocks()->create([
-                'title' => $blockData['title'],
-                'description' => $blockData['description'],
-                'type' => $blockData['type'],
-                'planned_duration' => $blockData['duration'],
+                ...$blockData,
                 'status' => SessionBlock::STATUS_PLANNED,
                 'sort_order' => $index + 1,
             ]);
 
             // Проверяем, существует ли уже такое упражнение у пользователя
             $existingExercise = Exercise::where('user_id', auth()->id())
-                ->where('title', $blockData['title'])
-                ->where('type', $blockData['type'])
+                ->where('title', $blockDTO->title)
+                ->where('type', $blockDTO->type)
                 ->first();
 
             // Если упражнение не существует, создаем его
             if (!$existingExercise) {
                 Exercise::create([
                     'user_id' => auth()->id(),
-                    'title' => $blockData['title'],
-                    'description' => $blockData['description'],
-                    'type' => $blockData['type'],
-                    'planned_duration' => $blockData['duration'],
+                    'title' => $blockDTO->title,
+                    'description' => $blockDTO->description,
+                    'type' => $blockDTO->type,
+                    'planned_duration' => $blockDTO->duration,
                     'status' => Exercise::STATUS_PLANNED,
                 ]);
             }
@@ -243,17 +243,18 @@ class SessionController extends Controller
     {
         $this->authorize('update', $session);
 
-        $updateData = $request->validated();
+        $dto = UpdateSessionBlockDTO::fromRequest($request);
+        $updateData = $dto->toArray();
 
         // Если блок завершается, устанавливаем время завершения если не передано
-        if (isset($updateData['status']) && $updateData['status'] === SessionBlock::STATUS_COMPLETED && !isset($updateData['completed_at'])) {
+        if ($dto->status === SessionBlock::STATUS_COMPLETED && $dto->completed_at === null) {
             $updateData['completed_at'] = now();
         }
 
         $block->update($updateData);
 
         // Обновляем прогресс целей после обновления блока сессии
-        if (isset($updateData['status']) && $updateData['status'] === SessionBlock::STATUS_COMPLETED) {
+        if ($dto->status === SessionBlock::STATUS_COMPLETED) {
             $goalProgressService = app(GoalProgressService::class);
             $updatedGoals = $goalProgressService->updateProgressAfterSessionBlock($block);
             $completedGoals = $goalProgressService->checkAndCompleteGoals($session->user);

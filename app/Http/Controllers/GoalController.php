@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Domains\Goals\Models\Goal;
+use App\DTOs\Goals\CreateGoalDTO;
+use App\DTOs\Goals\UpdateGoalDTO;
 use App\Http\Requests\Goal\StoreGoalRequest;
 use App\Http\Requests\Goal\UpdateGoalRequest;
 use App\Http\Resources\GoalResource;
@@ -68,18 +70,9 @@ class GoalController extends Controller
      */
     public function store(StoreGoalRequest $request): RedirectResponse
     {
-        $validated = $request->validated();
+        $dto = CreateGoalDTO::fromRequest($request);
 
-        $goal = auth()->user()->goals()->create([
-            'title' => $validated['title'],
-            'description' => $validated['description'] ?? null,
-            'type' => $validated['type'],
-            'target' => $validated['target'],
-            'start_date' => $validated['start_date'],
-            'end_date' => $validated['end_date'] ?? null,
-            'is_active' => true,
-            'is_completed' => false,
-        ]);
+        $goal = auth()->user()->goals()->create($dto->toArray());
 
         return redirect()->route('goals.index')
             ->with('success', 'Цель успешно создана');
@@ -126,17 +119,9 @@ class GoalController extends Controller
     {
         $this->authorize('update', $goal);
 
-        $validated = $request->validated();
+        $dto = UpdateGoalDTO::fromRequest($request);
 
-        $goal->update([
-            'title' => $validated['title'],
-            'description' => $validated['description'],
-            'type' => $validated['type'],
-            'target' => $validated['target'],
-            'start_date' => $validated['start_date'],
-            'end_date' => $validated['end_date'],
-            'is_active' => $validated['is_active'] ?? true,
-        ]);
+        $goal->update($dto->toArray());
 
         return redirect()->route('goals.index')
             ->with('success', 'Цель успешно обновлена');

@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Domains\Planning\Models\Exercise;
+use App\DTOs\Exercises\CreateExerciseDTO;
+use App\DTOs\Exercises\UpdateExerciseDTO;
 use App\Http\Requests\Exercise\StoreExerciseRequest;
 use App\Http\Requests\Exercise\UpdateExerciseRequest;
 use Illuminate\Http\RedirectResponse;
@@ -40,11 +42,11 @@ class ExerciseController extends Controller
      */
     public function store(StoreExerciseRequest $request): RedirectResponse
     {
-        $validated = $request->validated();
+        $dto = CreateExerciseDTO::fromRequest($request);
 
         Exercise::create([
             'user_id' => auth()->id(),
-            ...$validated,
+            ...$dto->toArray(),
             'status' => Exercise::STATUS_PLANNED,
         ]);
 
@@ -83,7 +85,9 @@ class ExerciseController extends Controller
     {
         $this->authorize('update', $exercise);
 
-        $exercise->update($request->validated());
+        $dto = UpdateExerciseDTO::fromRequest($request);
+
+        $exercise->update($dto->toArray());
 
         return redirect()->route('exercises.index')
             ->with('success', 'Упражнение успешно обновлено');
