@@ -5,14 +5,14 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Models\Note;
-use App\Domains\Planning\Models\Exercise;
-use Illuminate\Http\Request;
-use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Inertia\Response;
+use Illuminate\Support\Str;
+use Illuminate\Http\Request;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Storage;
+use App\Domains\Planning\Models\Exercise;
 
 class NoteController extends Controller
 {
@@ -37,26 +37,12 @@ class NoteController extends Controller
     }
 
     /**
-     * Показать форму создания ноты
-     */
-    public function create(): Response
-    {
-        $exercises = Exercise::forUser(auth()->id())
-            ->orderBy('title')
-            ->get(['id', 'title']);
-
-        return Inertia::render('Notes/Create', [
-            'exercises' => $exercises,
-        ]);
-    }
-
-    /**
      * Сохранить новую ноту
      */
     public function store(Request $request): RedirectResponse
     {
         $request->validate([
-            'file' => 'required|file|max:' . (Note::MAX_FILE_SIZE / 1024) . '|mimes:pdf,jpg,jpeg,png,gif,webp,mp3,wav,ogg,mxl,musicxml',
+            'file'  => 'required|file|max:' . (Note::MAX_FILE_SIZE / 1024) . '|mimes:pdf,jpg,jpeg,png,gif,webp,mp3,wav,ogg,mxl,musicxml',
             'title' => 'required|string|max:255',
             'description' => 'nullable|string|max:1000',
             'exercise_id' => 'nullable|exists:exercises,id',
@@ -65,7 +51,7 @@ class NoteController extends Controller
 
         $file = $request->file('file');
         $fileHash = hash_file('sha256', $file->getPathname());
-        
+
         // Проверяем, не загружен ли уже такой файл
         $existingNote = Note::where('file_hash', $fileHash)
             ->where('user_id', auth()->id())
@@ -94,9 +80,9 @@ class NoteController extends Controller
 
         // Создаем запись в базе данных
         $note = Note::create([
-            'user_id' => auth()->id(),
+            'user_id'  => auth()->id(),
             'exercise_id' => $request->exercise_id,
-            'title' => $request->title,
+            'title'    => $request->title,
             'description' => $request->description,
             'filename' => $filename,
             'file_path' => $filePath,
@@ -112,6 +98,20 @@ class NoteController extends Controller
 
         return redirect()->route('notes.index')
             ->with('success', 'Ноты успешно загружены');
+    }
+
+    /**
+     * Показать форму создания ноты
+     */
+    public function create(): Response
+    {
+        $exercises = Exercise::forUser(auth()->id())
+            ->orderBy('title')
+            ->get(['id', 'title']);
+
+        return Inertia::render('Notes/Create', [
+            'exercises' => $exercises,
+        ]);
     }
 
     /**

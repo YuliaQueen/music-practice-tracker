@@ -4,11 +4,14 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
-use App\Domains\Planning\Models\Exercise;
-use Illuminate\Http\Request;
-use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
 use Inertia\Response;
+use Illuminate\Http\RedirectResponse;
+use App\Domains\Planning\Models\Exercise;
+use App\DTOs\Exercises\CreateExerciseDTO;
+use App\DTOs\Exercises\UpdateExerciseDTO;
+use App\Http\Requests\Exercise\StoreExerciseRequest;
+use App\Http\Requests\Exercise\UpdateExerciseRequest;
 
 class ExerciseController extends Controller
 {
@@ -27,38 +30,28 @@ class ExerciseController extends Controller
     }
 
     /**
-     * Показать форму создания упражнения
-     */
-    public function create(): Response
-    {
-        return Inertia::render('Exercises/Create');
-    }
-
-    /**
      * Сохранить новое упражнение
      */
-    public function store(Request $request): RedirectResponse
+    public function store(StoreExerciseRequest $request): RedirectResponse
     {
-        $request->validate([
-            'title' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'type' => 'required|string|in:' . implode(',', Exercise::TYPES),
-            'planned_duration' => 'required|integer|min:1|max:480', // максимум 8 часов
-            'scheduled_for' => 'nullable|date|after:now',
-        ]);
+        $dto = CreateExerciseDTO::fromRequest($request);
 
         Exercise::create([
             'user_id' => auth()->id(),
-            'title' => $request->title,
-            'description' => $request->description,
-            'type' => $request->type,
-            'planned_duration' => $request->planned_duration,
-            'scheduled_for' => $request->scheduled_for,
+            ...$dto->toArray(),
             'status' => Exercise::STATUS_PLANNED,
         ]);
 
         return redirect()->route('exercises.index')
             ->with('success', 'Упражнение успешно создано');
+    }
+
+    /**
+     * Показать форму создания упражнения
+     */
+    public function create(): Response
+    {
+        return Inertia::render('Exercises/Create');
     }
 
     /**
@@ -88,25 +81,13 @@ class ExerciseController extends Controller
     /**
      * Обновить упражнение
      */
-    public function update(Request $request, Exercise $exercise): RedirectResponse
+    public function update(UpdateExerciseRequest $request, Exercise $exercise): RedirectResponse
     {
         $this->authorize('update', $exercise);
 
-        $request->validate([
-            'title' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'type' => 'required|string|in:' . implode(',', Exercise::TYPES),
-            'planned_duration' => 'required|integer|min:1|max:480',
-            'scheduled_for' => 'nullable|date|after:now',
-        ]);
+        $dto = UpdateExerciseDTO::fromRequest($request);
 
-        $exercise->update($request->only([
-            'title',
-            'description',
-            'type',
-            'planned_duration',
-            'scheduled_for',
-        ]));
+        $exercise->update($dto->toArray());
 
         return redirect()->route('exercises.index')
             ->with('success', 'Упражнение успешно обновлено');

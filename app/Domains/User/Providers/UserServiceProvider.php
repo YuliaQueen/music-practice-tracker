@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Domains\User\Providers;
 
-use App\Domains\User\Models\User;
 use App\Domains\User\Repositories\UserRepository;
 use App\Domains\User\Repositories\UserRepositoryInterface;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
@@ -25,14 +24,6 @@ class UserServiceProvider extends ServiceProvider
     }
 
     /**
-     * Загрузить сервисы приложения
-     */
-    public function boot(): void
-    {
-        // Будем добавлять observers и events позже
-    }
-
-    /**
      * Зарегистрировать репозитории домена
      */
     private function registerRepositories(): void
@@ -41,5 +32,13 @@ class UserServiceProvider extends ServiceProvider
             UserRepositoryInterface::class,
             UserRepository::class
         );
+    }
+
+    /**
+     * Загрузить сервисы приложения
+     */
+    public function boot(): void
+    {
+        // Будем добавлять observers и events позже
     }
 }

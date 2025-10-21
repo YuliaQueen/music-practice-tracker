@@ -4,37 +4,38 @@ declare(strict_types=1);
 
 namespace App\Domains\Goals\Models;
 
-use App\Domains\Shared\Models\BaseModel;
-use App\Domains\User\Models\User;
 use Carbon\Carbon;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Database\Factories\GoalFactory;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\SoftDeletes;
+use App\Enums\GoalType;
+use App\Domains\User\Models\User;
 use Spatie\Activitylog\LogOptions;
+use Database\Factories\GoalFactory;
+use App\Domains\Shared\Models\BaseModel;
+use Illuminate\Database\Eloquent\Builder;
 use Spatie\Activitylog\Traits\LogsActivity;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 /**
  * Модель цели пользователя
  *
- * @property int           $id
- * @property int           $user_id
- * @property string        $title
- * @property string|null   $description
- * @property string        $type
- * @property array         $target
- * @property array|null    $progress
- * @property Carbon        $start_date
- * @property Carbon|null   $end_date
- * @property bool          $is_active
- * @property bool          $is_completed
- * @property Carbon|null   $completed_at
- * @property Carbon        $created_at
- * @property Carbon        $updated_at
- * @property Carbon|null   $deleted_at
+ * @property int         $id
+ * @property int         $user_id
+ * @property string      $title
+ * @property string|null $description
+ * @property string      $type
+ * @property array       $target
+ * @property array|null  $progress
+ * @property Carbon      $start_date
+ * @property Carbon|null $end_date
+ * @property bool        $is_active
+ * @property bool        $is_completed
+ * @property Carbon|null $completed_at
+ * @property Carbon      $created_at
+ * @property Carbon      $updated_at
+ * @property Carbon|null $deleted_at
  *
- * @property User          $user
+ * @property User        $user
  */
 class Goal extends BaseModel
 {
@@ -43,26 +44,19 @@ class Goal extends BaseModel
     use SoftDeletes;
 
     /**
-     * Типы целей
+     * Типы целей (backward compatibility)
      */
-    public const TYPE_DAILY_MINUTES = 'daily_minutes';        // Ежедневные минуты практики
-    public const TYPE_WEEKLY_SESSIONS = 'weekly_sessions';   // Еженедельные сессии
-    public const TYPE_STREAK_DAYS = 'streak_days';          // Серия дней подряд
-    public const TYPE_EXERCISE_TYPE = 'exercise_type';       // Практика определенного типа упражнений
-    public const TYPE_MONTHLY_MINUTES = 'monthly_minutes';   // Ежемесячные минуты
-    public const TYPE_YEARLY_SESSIONS = 'yearly_sessions';   // Годовые сессии
+    public const TYPE_DAILY_MINUTES = 'daily_minutes';
+    public const TYPE_WEEKLY_SESSIONS = 'weekly_sessions';
+    public const TYPE_STREAK_DAYS = 'streak_days';
+    public const TYPE_EXERCISE_TYPE = 'exercise_type';
+    public const TYPE_MONTHLY_MINUTES = 'monthly_minutes';
+    public const TYPE_YEARLY_SESSIONS = 'yearly_sessions';
 
     /**
      * Все возможные типы
      */
-    public const TYPES = [
-        self::TYPE_DAILY_MINUTES,
-        self::TYPE_WEEKLY_SESSIONS,
-        self::TYPE_STREAK_DAYS,
-        self::TYPE_EXERCISE_TYPE,
-        self::TYPE_MONTHLY_MINUTES,
-        self::TYPE_YEARLY_SESSIONS,
-    ];
+    public const TYPES = GoalType::class;
 
     protected $fillable = [
         'user_id',
@@ -79,14 +73,23 @@ class Goal extends BaseModel
     ];
 
     protected $casts = [
-        'target' => 'array',
-        'progress' => 'array',
+        'type'      => GoalType::class,
+        'target'    => 'array',
+        'progress'  => 'array',
         'start_date' => 'date',
-        'end_date' => 'date',
+        'end_date'  => 'date',
         'is_active' => 'boolean',
         'is_completed' => 'boolean',
         'completed_at' => 'datetime',
     ];
+
+    /**
+     * Create a new factory instance for the model.
+     */
+    protected static function newFactory()
+    {
+        return GoalFactory::new();
+    }
 
     /**
      * Связь с пользователем
@@ -134,11 +137,11 @@ class Goal extends BaseModel
     public function scopeCurrent(Builder $query): Builder
     {
         return $query->where('is_active', true)
-                    ->where('is_completed', false)
-                    ->where(function ($q) {
-                        $q->whereNull('end_date')
-                          ->orWhere('end_date', '>=', now()->toDateString());
-                    });
+            ->where('is_completed', false)
+            ->where(function ($q) {
+                $q->whereNull('end_date')
+                    ->orWhere('end_date', '>=', now()->toDateString());
+            });
     }
 
     /**
@@ -174,14 +177,14 @@ class Goal extends BaseModel
             return 0;
         }
 
-        $current = (int) $this->progress['current'];
-        $total = (int) $this->progress['total'];
+        $current = (int)$this->progress['current'];
+        $total   = (int)$this->progress['total'];
 
         if ($total <= 0) {
             return 0;
         }
 
-        return min(100, (int) round(($current / $total) * 100));
+        return min(100, (int)round(($current / $total) * 100));
     }
 
     /**
@@ -193,8 +196,8 @@ class Goal extends BaseModel
             return $this->getTargetValue();
         }
 
-        $current = (int) $this->progress['current'];
-        $total = (int) $this->progress['total'];
+        $current = (int)$this->progress['current'];
+        $total   = (int)$this->progress['total'];
 
         return max(0, $total - $current);
     }
@@ -208,7 +211,7 @@ class Goal extends BaseModel
             return 0;
         }
 
-        return (int) $this->target['value'];
+        return (int)$this->target['value'];
     }
 
     /**
@@ -220,7 +223,7 @@ class Goal extends BaseModel
             return 0;
         }
 
-        return (int) $this->progress['current'];
+        return (int)$this->progress['current'];
     }
 
     /**
@@ -229,7 +232,7 @@ class Goal extends BaseModel
     public function updateProgress(int $current, int $total = null): self
     {
         $total = $total ?? $this->getTargetValue();
-        
+
         $this->progress = [
             'current' => $current,
             'total' => $total,
@@ -262,15 +265,7 @@ class Goal extends BaseModel
      */
     public function getTypeLabel(): string
     {
-        return match ($this->type) {
-            self::TYPE_DAILY_MINUTES => 'Ежедневные минуты',
-            self::TYPE_WEEKLY_SESSIONS => 'Еженедельные сессии',
-            self::TYPE_STREAK_DAYS => 'Серия дней',
-            self::TYPE_EXERCISE_TYPE => 'Тип упражнений',
-            self::TYPE_MONTHLY_MINUTES => 'Ежемесячные минуты',
-            self::TYPE_YEARLY_SESSIONS => 'Годовые сессии',
-            default => 'Неизвестный тип',
-        };
+        return $this->type instanceof GoalType ? $this->type->label() : 'Неизвестный тип';
     }
 
     /**
@@ -278,15 +273,7 @@ class Goal extends BaseModel
      */
     public function getTypeIcon(): string
     {
-        return match ($this->type) {
-            self::TYPE_DAILY_MINUTES => '📅',
-            self::TYPE_WEEKLY_SESSIONS => '📊',
-            self::TYPE_STREAK_DAYS => '🔥',
-            self::TYPE_EXERCISE_TYPE => '🎵',
-            self::TYPE_MONTHLY_MINUTES => '📈',
-            self::TYPE_YEARLY_SESSIONS => '🎯',
-            default => '❓',
-        };
+        return $this->type instanceof GoalType ? $this->type->icon() : '❓';
     }
 
     /**
@@ -294,15 +281,7 @@ class Goal extends BaseModel
      */
     public function getTypeColor(): string
     {
-        return match ($this->type) {
-            self::TYPE_DAILY_MINUTES => 'blue',
-            self::TYPE_WEEKLY_SESSIONS => 'green',
-            self::TYPE_STREAK_DAYS => 'orange',
-            self::TYPE_EXERCISE_TYPE => 'purple',
-            self::TYPE_MONTHLY_MINUTES => 'indigo',
-            self::TYPE_YEARLY_SESSIONS => 'red',
-            default => 'gray',
-        };
+        return $this->type instanceof GoalType ? $this->type->color() : 'gray';
     }
 
     /**
@@ -311,14 +290,14 @@ class Goal extends BaseModel
     public function getDescription(): string
     {
         $target = $this->getTargetValue();
-        
+
         return match ($this->type) {
-            self::TYPE_DAILY_MINUTES => "Практиковать {$target} минут в день",
-            self::TYPE_WEEKLY_SESSIONS => "Провести {$target} сессий в неделю",
-            self::TYPE_STREAK_DAYS => "Практиковать {$target} дней подряд",
-            self::TYPE_EXERCISE_TYPE => "Практиковать {$target} минут типа '{$this->target['exercise_type']}'",
-            self::TYPE_MONTHLY_MINUTES => "Практиковать {$target} минут в месяц",
-            self::TYPE_YEARLY_SESSIONS => "Провести {$target} сессий в год",
+            GoalType::DAILY_MINUTES => "Практиковать {$target} минут в день",
+            GoalType::WEEKLY_SESSIONS => "Провести {$target} сессий в неделю",
+            GoalType::STREAK_DAYS => "Практиковать {$target} дней подряд",
+            GoalType::EXERCISE_TYPE => "Практиковать {$target} минут типа '{$this->target['exercise_type']}'",
+            GoalType::MONTHLY_MINUTES => "Практиковать {$target} минут в месяц",
+            GoalType::YEARLY_SESSIONS => "Провести {$target} сессий в год",
             default => 'Неизвестная цель',
         };
     }
@@ -332,13 +311,5 @@ class Goal extends BaseModel
             ->logOnly(['title', 'type', 'target', 'progress', 'is_active', 'is_completed'])
             ->logOnlyDirty()
             ->dontSubmitEmptyLogs();
-    }
-
-    /**
-     * Create a new factory instance for the model.
-     */
-    protected static function newFactory()
-    {
-        return GoalFactory::new();
     }
 }

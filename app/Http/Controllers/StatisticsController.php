@@ -6,6 +6,9 @@ namespace App\Http\Controllers;
 
 use App\Domains\Planning\Models\Session;
 use App\Domains\Planning\Models\SessionBlock;
+use App\Enums\ExerciseType;
+use App\Enums\SessionBlockStatus;
+use App\Enums\SessionStatus;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -20,7 +23,7 @@ class StatisticsController extends Controller
     {
         $userId = auth()->id();
         $period = $request->get('period', 'week'); // day, week, month, year
-        
+
         // Получаем статистику для разных периодов
         $statistics = [
             'day' => $this->getDayStatistics($userId),
@@ -28,7 +31,7 @@ class StatisticsController extends Controller
             'month' => $this->getMonthStatistics($userId),
             'year' => $this->getYearStatistics($userId),
         ];
-        
+
         // Получаем данные для графиков
         $chartData = [
             'daily_practice' => $this->getDailyPracticeChart($userId, 30),
@@ -36,41 +39,41 @@ class StatisticsController extends Controller
             'exercise_types' => $this->getExerciseTypesChart($userId, $period),
             'practice_streak' => $this->getPracticeStreak($userId),
         ];
-        
+
         return Inertia::render('Statistics/Index', [
             'statistics' => $statistics,
             'chartData' => $chartData,
             'currentPeriod' => $period,
         ]);
     }
-    
+
     /**
      * Статистика за день
      */
     private function getDayStatistics(int $userId): array
     {
         $today = Carbon::today();
-        
+
         $sessions = Session::where('user_id', $userId)
             ->whereDate('started_at', $today)
-            ->where('status', Session::STATUS_COMPLETED)
+            ->where('status', SessionStatus::COMPLETED->value)
             ->get();
-            
+
         $totalMinutes = $sessions->sum('actual_duration') ?? 0;
         $sessionsCount = $sessions->count();
-        
+
         // Статистика по типам упражнений
         $exerciseStats = SessionBlock::whereHas('session', function ($query) use ($userId, $today) {
-                $query->where('user_id', $userId)
-                      ->whereDate('started_at', $today)
-                      ->where('status', Session::STATUS_COMPLETED);
-            })
-            ->where('status', SessionBlock::STATUS_COMPLETED)
+            $query->where('user_id', $userId)
+                ->whereDate('started_at', $today)
+                ->where('status', SessionStatus::COMPLETED->value);
+        })
+            ->where('status', SessionBlockStatus::COMPLETED->value)
             ->selectRaw('type, SUM(actual_duration) as total_duration, COUNT(*) as count')
             ->groupBy('type')
             ->get()
             ->keyBy('type');
-            
+
         return [
             'total_minutes' => $totalMinutes,
             'sessions_count' => $sessionsCount,
@@ -78,7 +81,7 @@ class StatisticsController extends Controller
             'date' => $today->format('Y-m-d'),
         ];
     }
-    
+
     /**
      * Статистика за неделю
      */
@@ -86,15 +89,15 @@ class StatisticsController extends Controller
     {
         $startOfWeek = Carbon::now()->startOfWeek();
         $endOfWeek = Carbon::now()->endOfWeek();
-        
+
         $sessions = Session::where('user_id', $userId)
             ->whereBetween('started_at', [$startOfWeek, $endOfWeek])
-            ->where('status', Session::STATUS_COMPLETED)
+            ->where('status', SessionStatus::COMPLETED->value)
             ->get();
-            
+
         $totalMinutes = $sessions->sum('actual_duration') ?? 0;
         $sessionsCount = $sessions->count();
-        
+
         // Статистика по дням недели
         $dailyStats = [];
         for ($i = 0; $i < 7; $i++) {
@@ -102,7 +105,7 @@ class StatisticsController extends Controller
             $daySessions = $sessions->filter(function ($session) use ($date) {
                 return $session->started_at && $session->started_at->isSameDay($date);
             });
-            
+
             $dailyStats[] = [
                 'date' => $date->format('Y-m-d'),
                 'day_name' => $date->format('l'),
@@ -110,16 +113,16 @@ class StatisticsController extends Controller
                 'sessions' => $daySessions->count(),
             ];
         }
-        
+
         return [
             'total_minutes' => $totalMinutes,
             'sessions_count' => $sessionsCount,
             'daily_stats' => $dailyStats,
-            'start_date' => $startOfWeek->format('Y-m-d'),
-            'end_date' => $endOfWeek->format('Y-m-d'),
+            'start_date'  => $startOfWeek->format('Y-m-d'),
+            'end_date'    => $endOfWeek->format('Y-m-d'),
         ];
     }
-    
+
     /**
      * Статистика за месяц
      */
@@ -127,50 +130,50 @@ class StatisticsController extends Controller
     {
         $startOfMonth = Carbon::now()->startOfMonth();
         $endOfMonth = Carbon::now()->endOfMonth();
-        
+
         $sessions = Session::where('user_id', $userId)
             ->whereBetween('started_at', [$startOfMonth, $endOfMonth])
-            ->where('status', Session::STATUS_COMPLETED)
+            ->where('status', SessionStatus::COMPLETED->value)
             ->get();
-            
+
         $totalMinutes = $sessions->sum('actual_duration') ?? 0;
         $sessionsCount = $sessions->count();
-        
+
         // Статистика по неделям месяца
         $weeklyStats = [];
         $currentWeek = $startOfMonth->copy()->startOfWeek();
-        
+
         while ($currentWeek->lte($endOfMonth)) {
             $weekEnd = $currentWeek->copy()->endOfWeek();
             if ($weekEnd->gt($endOfMonth)) {
                 $weekEnd = $endOfMonth;
             }
-            
+
             $weekSessions = $sessions->filter(function ($session) use ($currentWeek, $weekEnd) {
-                return $session->started_at && 
-                       $session->started_at->gte($currentWeek) && 
-                       $session->started_at->lte($weekEnd);
+                return $session->started_at &&
+                    $session->started_at->gte($currentWeek) &&
+                    $session->started_at->lte($weekEnd);
             });
-            
+
             $weeklyStats[] = [
                 'week_start' => $currentWeek->format('Y-m-d'),
                 'week_end' => $weekEnd->format('Y-m-d'),
                 'minutes' => $weekSessions->sum('actual_duration') ?? 0,
                 'sessions' => $weekSessions->count(),
             ];
-            
+
             $currentWeek->addWeek();
         }
-        
+
         return [
             'total_minutes' => $totalMinutes,
             'sessions_count' => $sessionsCount,
             'weekly_stats' => $weeklyStats,
-            'start_date' => $startOfMonth->format('Y-m-d'),
-            'end_date' => $endOfMonth->format('Y-m-d'),
+            'start_date'   => $startOfMonth->format('Y-m-d'),
+            'end_date'     => $endOfMonth->format('Y-m-d'),
         ];
     }
-    
+
     /**
      * Статистика за год
      */
@@ -178,35 +181,35 @@ class StatisticsController extends Controller
     {
         $startOfYear = Carbon::now()->startOfYear();
         $endOfYear = Carbon::now()->endOfYear();
-        
+
         $sessions = Session::where('user_id', $userId)
             ->whereBetween('started_at', [$startOfYear, $endOfYear])
-            ->where('status', Session::STATUS_COMPLETED)
+            ->where('status', SessionStatus::COMPLETED->value)
             ->get();
-            
+
         $totalMinutes = $sessions->sum('actual_duration') ?? 0;
         $sessionsCount = $sessions->count();
-        
+
         // Статистика по месяцам года
         $monthlyStats = [];
         for ($i = 1; $i <= 12; $i++) {
             $monthStart = Carbon::create($startOfYear->year, $i, 1)->startOfMonth();
             $monthEnd = $monthStart->copy()->endOfMonth();
-            
+
             $monthSessions = $sessions->filter(function ($session) use ($monthStart, $monthEnd) {
-                return $session->started_at && 
-                       $session->started_at->gte($monthStart) && 
-                       $session->started_at->lte($monthEnd);
+                return $session->started_at &&
+                    $session->started_at->gte($monthStart) &&
+                    $session->started_at->lte($monthEnd);
             });
-            
+
             $monthlyStats[] = [
-                'month' => $i,
+                'month'   => $i,
                 'month_name' => $monthStart->format('F'),
                 'minutes' => $monthSessions->sum('actual_duration') ?? 0,
                 'sessions' => $monthSessions->count(),
             ];
         }
-        
+
         return [
             'total_minutes' => $totalMinutes,
             'sessions_count' => $sessionsCount,
@@ -214,7 +217,7 @@ class StatisticsController extends Controller
             'year' => $startOfYear->year,
         ];
     }
-    
+
     /**
      * Данные для графика ежедневной практики
      */
@@ -222,32 +225,32 @@ class StatisticsController extends Controller
     {
         $startDate = Carbon::now()->subDays($days - 1)->startOfDay();
         $endDate = Carbon::now()->endOfDay();
-        
+
         $sessions = Session::where('user_id', $userId)
             ->whereBetween('started_at', [$startDate, $endDate])
-            ->where('status', Session::STATUS_COMPLETED)
+            ->where('status', SessionStatus::COMPLETED->value)
             ->get();
-            
+
         $chartData = [];
         $currentDate = $startDate->copy();
-        
+
         while ($currentDate->lte($endDate)) {
             $daySessions = $sessions->filter(function ($session) use ($currentDate) {
                 return $session->started_at && $session->started_at->isSameDay($currentDate);
             });
-            
+
             $chartData[] = [
                 'date' => $currentDate->format('Y-m-d'),
                 'minutes' => $daySessions->sum('actual_duration') ?? 0,
                 'sessions' => $daySessions->count(),
             ];
-            
+
             $currentDate->addDay();
         }
-        
+
         return $chartData;
     }
-    
+
     /**
      * Данные для графика еженедельной практики
      */
@@ -255,36 +258,36 @@ class StatisticsController extends Controller
     {
         $startDate = Carbon::now()->subWeeks($weeks - 1)->startOfWeek();
         $endDate = Carbon::now()->endOfWeek();
-        
+
         $sessions = Session::where('user_id', $userId)
             ->whereBetween('started_at', [$startDate, $endDate])
-            ->where('status', Session::STATUS_COMPLETED)
+            ->where('status', SessionStatus::COMPLETED->value)
             ->get();
-            
+
         $chartData = [];
         $currentWeek = $startDate->copy();
-        
+
         while ($currentWeek->lte($endDate)) {
-            $weekEnd = $currentWeek->copy()->endOfWeek();
+            $weekEnd      = $currentWeek->copy()->endOfWeek();
             $weekSessions = $sessions->filter(function ($session) use ($currentWeek, $weekEnd) {
-                return $session->started_at && 
-                       $session->started_at->gte($currentWeek) && 
-                       $session->started_at->lte($weekEnd);
+                return $session->started_at &&
+                    $session->started_at->gte($currentWeek) &&
+                    $session->started_at->lte($weekEnd);
             });
-            
+
             $chartData[] = [
                 'week_start' => $currentWeek->format('Y-m-d'),
                 'week_end' => $weekEnd->format('Y-m-d'),
                 'minutes' => $weekSessions->sum('actual_duration') ?? 0,
                 'sessions' => $weekSessions->count(),
             ];
-            
+
             $currentWeek->addWeek();
         }
-        
+
         return $chartData;
     }
-    
+
     /**
      * Статистика по типам упражнений
      */
@@ -292,9 +295,9 @@ class StatisticsController extends Controller
     {
         $query = SessionBlock::whereHas('session', function ($q) use ($userId) {
             $q->where('user_id', $userId)
-              ->where('status', Session::STATUS_COMPLETED);
-        })->where('status', SessionBlock::STATUS_COMPLETED);
-        
+                ->where('status', SessionStatus::COMPLETED->value);
+        })->where('status', SessionBlockStatus::COMPLETED->value);
+
         // Применяем фильтр по периоду
         switch ($period) {
             case 'day':
@@ -319,13 +322,13 @@ class StatisticsController extends Controller
                 ]);
                 break;
         }
-        
+
         return $query->selectRaw('type, SUM(actual_duration) as total_duration, COUNT(*) as count')
             ->groupBy('type')
             ->get()
             ->map(function ($item) {
                 return [
-                    'type' => $item->type,
+                    'type'  => $item->type,
                     'type_label' => $this->getTypeLabel($item->type),
                     'minutes' => $item->total_duration ?? 0,
                     'count' => $item->count,
@@ -333,7 +336,15 @@ class StatisticsController extends Controller
             })
             ->toArray();
     }
-    
+
+    /**
+     * Получить читаемое название типа упражнения
+     */
+    private function getTypeLabel(ExerciseType $type): string
+    {
+        return $type->label();
+    }
+
     /**
      * Получить серию практики (дни подряд)
      */
@@ -342,67 +353,48 @@ class StatisticsController extends Controller
         $currentStreak = 0;
         $longestStreak = 0;
         $tempStreak = 0;
-        
+
         // Получаем все завершенные сессии за последний год
         $sessions = Session::where('user_id', $userId)
-            ->where('status', Session::STATUS_COMPLETED)
+            ->where('status', SessionStatus::COMPLETED->value)
             ->where('started_at', '>=', Carbon::now()->subYear())
             ->orderBy('started_at', 'desc')
             ->get();
-            
+
         $practiceDays = $sessions->map(function ($session) {
             return $session->started_at->format('Y-m-d');
         })->unique()->sort()->values();
-        
+
         // Подсчитываем текущую серию
-        $today = Carbon::today();
+        $today    = Carbon::today();
         $checkDate = $today->copy();
-        
+
         while ($practiceDays->contains($checkDate->format('Y-m-d'))) {
             $currentStreak++;
             $checkDate->subDay();
         }
-        
+
         // Подсчитываем самую длинную серию
         $tempStreak = 0;
         $lastDate = null;
-        
+
         foreach ($practiceDays as $date) {
             $currentDate = Carbon::parse($date);
-            
+
             if ($lastDate && $currentDate->diffInDays($lastDate) === 1) {
                 $tempStreak++;
             } else {
                 $tempStreak = 1;
             }
-            
+
             $longestStreak = max($longestStreak, $tempStreak);
             $lastDate = $currentDate;
         }
-        
+
         return [
             'current_streak' => $currentStreak,
             'longest_streak' => $longestStreak,
             'total_practice_days' => $practiceDays->count(),
         ];
-    }
-    
-    /**
-     * Получить читаемое название типа упражнения
-     */
-    private function getTypeLabel(string $type): string
-    {
-        $labels = [
-            'warmup' => 'Разминка',
-            'technique' => 'Техника',
-            'repertoire' => 'Репертуар',
-            'improvisation' => 'Импровизация',
-            'sight_reading' => 'Чтение с листа',
-            'theory' => 'Теория',
-            'break' => 'Перерыв',
-            'custom' => 'Пользовательский',
-        ];
-        
-        return $labels[$type] ?? $type;
     }
 }

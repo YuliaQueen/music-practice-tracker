@@ -4,17 +4,17 @@ declare(strict_types=1);
 
 namespace App\Domains\Planning\Models;
 
-use App\Domains\Shared\Models\BaseModel;
-use App\Domains\User\Models\User;
 use Carbon\Carbon;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Database\Factories\TemplateFactory;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\SoftDeletes;
+use App\Domains\User\Models\User;
 use Spatie\Activitylog\LogOptions;
+use Database\Factories\TemplateFactory;
+use App\Domains\Shared\Models\BaseModel;
+use Illuminate\Database\Eloquent\Builder;
 use Spatie\Activitylog\Traits\LogsActivity;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 /**
  * Модель шаблона сессии - переиспользуемая структура занятия
@@ -46,11 +46,6 @@ class Template extends BaseModel
     use SoftDeletes;
 
     /**
-     * Название таблицы
-     */
-    protected $table = 'practice_templates';
-
-    /**
      * Категории шаблонов
      */
     public const CATEGORY_BEGINNER         = 'beginner';
@@ -61,7 +56,6 @@ class Template extends BaseModel
     public const CATEGORY_QUICK_PRACTICE   = 'quick_practice';
     public const CATEGORY_WARM_UP          = 'warm_up';
     public const CATEGORY_CUSTOM           = 'custom';
-
     /**
      * Уровни сложности
      */
@@ -69,7 +63,6 @@ class Template extends BaseModel
     public const DIFFICULTY_INTERMEDIATE = 'intermediate';
     public const DIFFICULTY_ADVANCED     = 'advanced';
     public const DIFFICULTY_EXPERT       = 'expert';
-
     /**
      * Все возможные категории
      */
@@ -83,7 +76,6 @@ class Template extends BaseModel
         self::CATEGORY_WARM_UP,
         self::CATEGORY_CUSTOM,
     ];
-
     /**
      * Все возможные уровни сложности
      */
@@ -93,7 +85,10 @@ class Template extends BaseModel
         self::DIFFICULTY_ADVANCED,
         self::DIFFICULTY_EXPERT,
     ];
-
+    /**
+     * Название таблицы
+     */
+    protected $table = 'practice_templates';
     protected $fillable = [
         'user_id',
         'name',
@@ -118,19 +113,19 @@ class Template extends BaseModel
     ];
 
     /**
+     * Create a new factory instance for the model.
+     */
+    protected static function newFactory()
+    {
+        return TemplateFactory::new();
+    }
+
+    /**
      * Связь с пользователем
      */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
-    }
-
-    /**
-     * Связь с блоками шаблона
-     */
-    public function blocks(): HasMany
-    {
-        return $this->hasMany(TemplateBlock::class, 'practice_template_id')->orderBy('sort_order');
     }
 
     /**
@@ -266,11 +261,11 @@ class Template extends BaseModel
     }
 
     /**
-     * Увеличить счетчик использований
+     * Проверить, доступен ли шаблон для пользователя
      */
-    public function incrementUsage(): void
+    public function isAvailableFor(int $userId): bool
     {
-        $this->increment('usage_count');
+        return $this->belongsToUser($userId) || $this->is_public;
     }
 
     /**
@@ -282,11 +277,11 @@ class Template extends BaseModel
     }
 
     /**
-     * Проверить, доступен ли шаблон для пользователя
+     * Синхронизировать общую длительность с блоками
      */
-    public function isAvailableFor(int $userId): bool
+    public function syncTotalDuration(): void
     {
-        return $this->belongsToUser($userId) || $this->is_public;
+        $this->update(['total_duration' => $this->calculateTotalDuration()]);
     }
 
     /**
@@ -295,14 +290,6 @@ class Template extends BaseModel
     public function calculateTotalDuration(): int
     {
         return $this->blocks->sum('duration');
-    }
-
-    /**
-     * Синхронизировать общую длительность с блоками
-     */
-    public function syncTotalDuration(): void
-    {
-        $this->update(['total_duration' => $this->calculateTotalDuration()]);
     }
 
     /**
@@ -395,6 +382,22 @@ class Template extends BaseModel
     }
 
     /**
+     * Связь с блоками шаблона
+     */
+    public function blocks(): HasMany
+    {
+        return $this->hasMany(TemplateBlock::class, 'practice_template_id')->orderBy('sort_order');
+    }
+
+    /**
+     * Увеличить счетчик использований
+     */
+    public function incrementUsage(): void
+    {
+        $this->increment('usage_count');
+    }
+
+    /**
      * Настройки логирования активности
      */
     public function getActivitylogOptions(): LogOptions
@@ -403,13 +406,5 @@ class Template extends BaseModel
             ->logOnly(['name', 'category', 'difficulty_level', 'is_public', 'usage_count'])
             ->logOnlyDirty()
             ->dontSubmitEmptyLogs();
-    }
-
-    /**
-     * Create a new factory instance for the model.
-     */
-    protected static function newFactory()
-    {
-        return TemplateFactory::new();
     }
 }

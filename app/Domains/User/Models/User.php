@@ -5,20 +5,19 @@ declare(strict_types=1);
 namespace App\Domains\User\Models;
 
 use Carbon\Carbon;
-use App\Domains\Planning\Models\Session;
-use App\Domains\Planning\Models\Template;
-use App\Domains\Goals\Models\Goal;
-use App\Domains\Shared\Models\BaseModel;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Database\Factories\UserFactory;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
+use App\Domains\Goals\Models\Goal;
 use Spatie\Activitylog\LogOptions;
-use Spatie\Activitylog\Traits\LogsActivity;
+use Database\Factories\UserFactory;
 use Spatie\Permission\Traits\HasRoles;
+use App\Domains\Planning\Models\Session;
+use Illuminate\Notifications\Notifiable;
+use App\Domains\Planning\Models\Template;
+use Spatie\Activitylog\Traits\LogsActivity;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Foundation\Auth\User as Authenticatable;
 
 /**
  * Доменная модель пользователя системы
@@ -52,6 +51,14 @@ class User extends Authenticatable
         'total_sessions',
         'total_practice_minutes',
         'last_practice_date',
+        'description',
+        'title',
+        'type',
+        'target',
+        'end_date',
+        'start_date',
+        'is_completed',
+        'is_active',
     ];
 
     protected $hidden = [
@@ -66,19 +73,11 @@ class User extends Authenticatable
     ];
 
     /**
-     * Получить все сессии занятий пользователя
+     * Create a new factory instance for the model.
      */
-    public function sessions(): HasMany
+    protected static function newFactory()
     {
-        return $this->hasMany(Session::class);
-    }
-
-    /**
-     * Получить все шаблоны занятий пользователя
-     */
-    public function templates(): HasMany
-    {
-        return $this->hasMany(Template::class);
+        return UserFactory::new();
     }
 
     /**
@@ -88,7 +87,6 @@ class User extends Authenticatable
     {
         return $this->hasMany(Goal::class);
     }
-
 
     /**
      * Получить предпочтения пользователя с значениями по умолчанию
@@ -140,6 +138,22 @@ class User extends Authenticatable
     }
 
     /**
+     * Получить все сессии занятий пользователя
+     */
+    public function sessions(): HasMany
+    {
+        return $this->hasMany(Session::class);
+    }
+
+    /**
+     * Получить все шаблоны занятий пользователя
+     */
+    public function templates(): HasMany
+    {
+        return $this->hasMany(Template::class);
+    }
+
+    /**
      * Настройки логирования активности
      */
     public function getActivitylogOptions(): LogOptions
@@ -148,13 +162,5 @@ class User extends Authenticatable
             ->logOnly(['name', 'email', 'preferences'])
             ->logOnlyDirty()
             ->dontSubmitEmptyLogs();
-    }
-
-    /**
-     * Create a new factory instance for the model.
-     */
-    protected static function newFactory()
-    {
-        return UserFactory::new();
     }
 }

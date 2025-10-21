@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace App\Domains\User\Repositories;
 
 use App\Domains\User\Models\User;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
-use Illuminate\Support\Facades\Cache;
 
 /**
  * Репозиторий для работы с пользователями
@@ -53,16 +53,11 @@ class UserRepository implements UserRepositoryInterface
     }
 
     /**
-     * Обновить данные пользователя
+     * Очистить кеш пользователя
      */
-    public function update(User $user, array $data): User
+    private function clearUserCache(int $userId): void
     {
-        $user->update($data);
-
-        // Очистить кеш при обновлении
-        $this->clearUserCache($user->id);
-
-        return $user->fresh();
+        Cache::forget(self::CACHE_PREFIX . $userId);
     }
 
     /**
@@ -154,11 +149,16 @@ class UserRepository implements UserRepositoryInterface
     }
 
     /**
-     * Очистить кеш пользователя
+     * Обновить данные пользователя
      */
-    private function clearUserCache(int $userId): void
+    public function update(User $user, array $data): User
     {
-        Cache::forget(self::CACHE_PREFIX . $userId);
+        $user->update($data);
+
+        // Очистить кеш при обновлении
+        $this->clearUserCache($user->id);
+
+        return $user->fresh();
     }
 
     /**

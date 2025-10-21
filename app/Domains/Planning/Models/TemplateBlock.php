@@ -4,15 +4,15 @@ declare(strict_types=1);
 
 namespace App\Domains\Planning\Models;
 
-use App\Domains\Shared\Models\BaseModel;
 use Carbon\Carbon;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\SoftDeletes;
 use Spatie\Activitylog\LogOptions;
+use App\Domains\Shared\Models\BaseModel;
+use Illuminate\Database\Eloquent\Builder;
 use Spatie\Activitylog\Traits\LogsActivity;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 /**
  * Модель блока шаблона - элемент структуры шаблона
@@ -71,14 +71,6 @@ class TemplateBlock extends BaseModel
     public function template(): BelongsTo
     {
         return $this->belongsTo(Template::class, 'practice_template_id');
-    }
-
-    /**
-     * Связь с блоками сессий, созданными из этого блока шаблона
-     */
-    public function sessionBlocks(): HasMany
-    {
-        return $this->hasMany(SessionBlock::class, 'practice_template_block_id');
     }
 
     /**
@@ -253,6 +245,14 @@ class TemplateBlock extends BaseModel
     public function isUsedInSessions(): bool
     {
         return $this->sessionBlocks()->exists();
+    }
+
+    /**
+     * Связь с блоками сессий, созданными из этого блока шаблона
+     */
+    public function sessionBlocks(): HasMany
+    {
+        return $this->hasMany(SessionBlock::class, 'practice_template_block_id');
     }
 
     /**

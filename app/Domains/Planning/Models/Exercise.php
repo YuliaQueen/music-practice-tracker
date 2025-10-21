@@ -4,39 +4,41 @@ declare(strict_types=1);
 
 namespace App\Domains\Planning\Models;
 
-use App\Domains\Shared\Models\BaseModel;
-use App\Domains\User\Models\User;
-use App\Models\Note;
 use Carbon\Carbon;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Database\Factories\ExerciseFactory;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\SoftDeletes;
+use App\Models\Note;
+use App\Enums\ExerciseType;
+use App\Enums\ExerciseStatus;
+use App\Domains\User\Models\User;
 use Spatie\Activitylog\LogOptions;
+use Database\Factories\ExerciseFactory;
+use App\Domains\Shared\Models\BaseModel;
+use Illuminate\Database\Eloquent\Builder;
 use Spatie\Activitylog\Traits\LogsActivity;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 /**
  * Модель отдельного упражнения - упражнение вне сессии
  *
- * @property int           $id
- * @property int           $user_id
- * @property string        $title                Название упражнения
- * @property string|null   $description          Описание упражнения
- * @property string        $type                 Тип упражнения
- * @property int           $planned_duration      Запланированная длительность в минутах
- * @property int|null      $actual_duration      Фактическая длительность в минутах
- * @property string        $status               Статус упражнения
- * @property Carbon|null   $scheduled_for        Запланированное время выполнения
- * @property Carbon|null   $started_at           Фактическое время начала
- * @property Carbon|null   $completed_at         Время завершения
- * @property array         $metadata             Дополнительные данные упражнения
- * @property Carbon        $created_at
- * @property Carbon        $updated_at
- * @property Carbon|null   $deleted_at
+ * @property int         $id
+ * @property int         $user_id
+ * @property string      $title                 Название упражнения
+ * @property string|null $description           Описание упражнения
+ * @property string      $type                  Тип упражнения
+ * @property int         $planned_duration      Запланированная длительность в минутах
+ * @property int|null    $actual_duration       Фактическая длительность в минутах
+ * @property string      $status                Статус упражнения
+ * @property Carbon|null $scheduled_for         Запланированное время выполнения
+ * @property Carbon|null $started_at            Фактическое время начала
+ * @property Carbon|null $completed_at          Время завершения
+ * @property array       $metadata              Дополнительные данные упражнения
+ * @property Carbon      $created_at
+ * @property Carbon      $updated_at
+ * @property Carbon|null $deleted_at
  *
- * @property User          $user
+ * @property User        $user
  * @property SessionBlock[] $sessionBlocks
  */
 class Exercise extends BaseModel
@@ -46,56 +48,36 @@ class Exercise extends BaseModel
     use SoftDeletes;
 
     /**
-     * Название таблицы
+     * Типы упражнений (backward compatibility)
      */
-    protected $table = 'exercises';
-
+    public const TYPE_WARMUP        = 'warmup';
+    public const TYPE_TECHNIQUE     = 'technique';
+    public const TYPE_REPERTOIRE    = 'repertoire';
+    public const TYPE_IMPROVISATION = 'improvisation';
+    public const TYPE_SIGHT_READING = 'sight_reading';
+    public const TYPE_THEORY        = 'theory';
+    public const TYPE_BREAK         = 'break';
+    public const TYPE_CUSTOM        = 'custom';
     /**
-     * Типы упражнений
-     */
-    public const TYPE_WARMUP        = 'warmup';            // Разминка
-    public const TYPE_TECHNIQUE     = 'technique';         // Техника
-    public const TYPE_REPERTOIRE    = 'repertoire';        // Репертуар
-    public const TYPE_IMPROVISATION = 'improvisation';     // Импровизация
-    public const TYPE_SIGHT_READING = 'sight_reading';     // Чтение с листа
-    public const TYPE_THEORY        = 'theory';            // Теория
-    public const TYPE_BREAK         = 'break';             // Перерыв
-    public const TYPE_CUSTOM        = 'custom';            // Пользовательский
-
-    /**
-     * Статусы упражнения
+     * Статусы упражнения (backward compatibility)
      */
     public const STATUS_PLANNED   = 'planned';
     public const STATUS_ACTIVE    = 'active';
     public const STATUS_PAUSED    = 'paused';
     public const STATUS_COMPLETED = 'completed';
     public const STATUS_CANCELLED = 'cancelled';
-
     /**
      * Все возможные типы
      */
-    public const TYPES = [
-        self::TYPE_WARMUP,
-        self::TYPE_TECHNIQUE,
-        self::TYPE_REPERTOIRE,
-        self::TYPE_IMPROVISATION,
-        self::TYPE_SIGHT_READING,
-        self::TYPE_THEORY,
-        self::TYPE_BREAK,
-        self::TYPE_CUSTOM,
-    ];
-
+    public const TYPES = ExerciseType::class;
     /**
      * Все возможные статусы
      */
-    public const STATUSES = [
-        self::STATUS_PLANNED,
-        self::STATUS_ACTIVE,
-        self::STATUS_PAUSED,
-        self::STATUS_COMPLETED,
-        self::STATUS_CANCELLED,
-    ];
-
+    public const STATUSES = ExerciseStatus::class;
+    /**
+     * Название таблицы
+     */
+    protected $table = 'exercises';
     protected $fillable = [
         'user_id',
         'title',
@@ -111,6 +93,8 @@ class Exercise extends BaseModel
     ];
 
     protected $casts = [
+        'type'             => ExerciseType::class,
+        'status'           => ExerciseStatus::class,
         'planned_duration' => 'integer',
         'actual_duration'  => 'integer',
         'scheduled_for'    => 'datetime',
@@ -118,6 +102,14 @@ class Exercise extends BaseModel
         'completed_at'     => 'datetime',
         'metadata'         => 'array',
     ];
+
+    /**
+     * Create a new factory instance for the model.
+     */
+    protected static function newFactory()
+    {
+        return ExerciseFactory::new();
+    }
 
     /**
      * Связь с пользователем
@@ -196,18 +188,7 @@ class Exercise extends BaseModel
      */
     public function getTypeLabelAttribute(): string
     {
-        $labels = [
-            self::TYPE_WARMUP => 'Разминка',
-            self::TYPE_TECHNIQUE => 'Техника',
-            self::TYPE_REPERTOIRE => 'Репертуар',
-            self::TYPE_IMPROVISATION => 'Импровизация',
-            self::TYPE_SIGHT_READING => 'Чтение с листа',
-            self::TYPE_THEORY => 'Теория',
-            self::TYPE_BREAK => 'Перерыв',
-            self::TYPE_CUSTOM => 'Пользовательский',
-        ];
-
-        return $labels[$this->type] ?? $this->type;
+        return $this->type instanceof ExerciseType ? $this->type->label() : $this->type;
     }
 
     /**
@@ -215,15 +196,7 @@ class Exercise extends BaseModel
      */
     public function getStatusLabelAttribute(): string
     {
-        $labels = [
-            self::STATUS_PLANNED => 'Запланировано',
-            self::STATUS_ACTIVE => 'Активно',
-            self::STATUS_PAUSED => 'Приостановлено',
-            self::STATUS_COMPLETED => 'Завершено',
-            self::STATUS_CANCELLED => 'Отменено',
-        ];
-
-        return $labels[$this->status] ?? $this->status;
+        return $this->status instanceof ExerciseStatus ? $this->status->label() : $this->status;
     }
 
     /**
@@ -231,18 +204,7 @@ class Exercise extends BaseModel
      */
     public function getTypeIconAttribute(): string
     {
-        $icons = [
-            self::TYPE_WARMUP => '🔥',
-            self::TYPE_TECHNIQUE => '⚡',
-            self::TYPE_REPERTOIRE => '🎵',
-            self::TYPE_IMPROVISATION => '🎨',
-            self::TYPE_SIGHT_READING => '👀',
-            self::TYPE_THEORY => '📚',
-            self::TYPE_BREAK => '☕',
-            self::TYPE_CUSTOM => '⭐',
-        ];
-
-        return $icons[$this->type] ?? '⭐';
+        return $this->type instanceof ExerciseType ? $this->type->icon() : '⭐';
     }
 
     /**
@@ -250,7 +212,7 @@ class Exercise extends BaseModel
      */
     public function canStart(): bool
     {
-        return $this->status === self::STATUS_PLANNED;
+        return $this->status === ExerciseStatus::PLANNED;
     }
 
     /**
@@ -258,7 +220,7 @@ class Exercise extends BaseModel
      */
     public function canPause(): bool
     {
-        return $this->status === self::STATUS_ACTIVE;
+        return $this->status === ExerciseStatus::ACTIVE;
     }
 
     /**
@@ -266,7 +228,7 @@ class Exercise extends BaseModel
      */
     public function canComplete(): bool
     {
-        return in_array($this->status, [self::STATUS_ACTIVE, self::STATUS_PAUSED]);
+        return in_array($this->status, [ExerciseStatus::ACTIVE, ExerciseStatus::PAUSED]);
     }
 
     /**
@@ -274,7 +236,7 @@ class Exercise extends BaseModel
      */
     public function canCancel(): bool
     {
-        return in_array($this->status, [self::STATUS_PLANNED, self::STATUS_ACTIVE, self::STATUS_PAUSED]);
+        return in_array($this->status, [ExerciseStatus::PLANNED, ExerciseStatus::ACTIVE, ExerciseStatus::PAUSED]);
     }
 
     /**
@@ -286,13 +248,5 @@ class Exercise extends BaseModel
             ->logOnly(['title', 'description', 'type', 'planned_duration', 'status', 'scheduled_for'])
             ->logOnlyDirty()
             ->dontSubmitEmptyLogs();
-    }
-
-    /**
-     * Create a new factory instance for the model.
-     */
-    protected static function newFactory()
-    {
-        return ExerciseFactory::new();
     }
 }
