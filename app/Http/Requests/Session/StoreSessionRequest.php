@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Http\Requests\Session;
 
-use App\Domains\Planning\Models\SessionBlock;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Contracts\Validation\ValidationRule;
 
 class StoreSessionRequest extends FormRequest
 {
@@ -20,19 +20,19 @@ class StoreSessionRequest extends FormRequest
     /**
      * Get the validation rules that apply to the request.
      *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
+     * @return array<string, ValidationRule|array<mixed>|string>
      */
     public function rules(): array
     {
         return [
-            'title' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'template_id' => 'nullable|exists:practice_templates,id',
-            'blocks' => 'required|array|min:1',
+            'title'          => 'required|string|max:255',
+            'description'    => 'nullable|string',
+            'template_id'    => 'nullable|exists:practice_templates,id',
+            'blocks'         => 'required|array|min:1',
             'blocks.*.title' => 'required|string|max:255',
             'blocks.*.description' => 'nullable|string',
             'blocks.*.duration' => 'required|integer|min:1',
-            'blocks.*.type' => 'required|string',
+            'blocks.*.type'  => 'required|string',
         ];
     }
 
@@ -44,12 +44,12 @@ class StoreSessionRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'title.required' => 'Название сессии обязательно',
-            'blocks.required' => 'Необходимо добавить хотя бы один блок упражнения',
-            'blocks.min' => 'Необходимо добавить хотя бы один блок упражнения',
+            'title.required'         => 'Название сессии обязательно',
+            'blocks.required'        => 'Необходимо добавить хотя бы один блок упражнения',
+            'blocks.min'             => 'Необходимо добавить хотя бы один блок упражнения',
             'blocks.*.title.required' => 'Название упражнения обязательно',
             'blocks.*.duration.required' => 'Длительность упражнения обязательна',
-            'blocks.*.duration.min' => 'Длительность должна быть не менее 1 минуты',
+            'blocks.*.duration.min'  => 'Длительность должна быть не менее 1 минуты',
             'blocks.*.type.required' => 'Тип упражнения обязателен',
         ];
     }

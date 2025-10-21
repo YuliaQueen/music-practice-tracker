@@ -15,20 +15,19 @@ final readonly class UpdateSessionBlockDTO
         public ?string $completed_at,
         public ?string $notes,
         public ?int $planned_duration,
-    ) {
-    }
+    ) {}
 
     public static function fromRequest(UpdateSessionBlockRequest $request): self
     {
         $validated = $request->validated();
 
         return new self(
-            status: $validated['status'] ?? null,
-            actual_duration: isset($validated['actual_duration']) ? (int) $validated['actual_duration'] : null,
-            started_at: $validated['started_at'] ?? null,
-            completed_at: $validated['completed_at'] ?? null,
-            notes: $validated['notes'] ?? null,
-            planned_duration: isset($validated['planned_duration']) ? (int) $validated['planned_duration'] : null,
+            status          : $validated['status'] ?? null,
+            actual_duration : isset($validated['actual_duration']) ? (int)$validated['actual_duration'] : null,
+            started_at      : $validated['started_at'] ?? null,
+            completed_at    : $validated['completed_at'] ?? null,
+            notes           : $validated['notes'] ?? null,
+            planned_duration: isset($validated['planned_duration']) ? (int)$validated['planned_duration'] : null,
         );
     }
 

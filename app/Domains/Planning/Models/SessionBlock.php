@@ -4,17 +4,17 @@ declare(strict_types=1);
 
 namespace App\Domains\Planning\Models;
 
-use App\Domains\Shared\Models\BaseModel;
+use Carbon\Carbon;
 use App\Enums\ExerciseType;
 use App\Enums\SessionBlockStatus;
-use Carbon\Carbon;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Database\Factories\SessionBlockFactory;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\SoftDeletes;
 use Spatie\Activitylog\LogOptions;
+use App\Domains\Shared\Models\BaseModel;
+use Illuminate\Database\Eloquent\Builder;
+use Database\Factories\SessionBlockFactory;
 use Spatie\Activitylog\Traits\LogsActivity;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 /**
  * Модель блока сессии - конкретный элемент занятия
@@ -46,11 +46,6 @@ class SessionBlock extends BaseModel
     use SoftDeletes;
 
     /**
-     * Название таблицы
-     */
-    protected $table = 'practice_session_blocks';
-
-    /**
      * Типы блоков (backward compatibility)
      */
     public const TYPE_WARMUP        = 'warmup';
@@ -61,7 +56,6 @@ class SessionBlock extends BaseModel
     public const TYPE_THEORY        = 'theory';
     public const TYPE_BREAK         = 'break';
     public const TYPE_CUSTOM        = 'custom';
-
     /**
      * Статусы блока (backward compatibility)
      */
@@ -70,17 +64,18 @@ class SessionBlock extends BaseModel
     public const STATUS_PAUSED    = 'paused';
     public const STATUS_COMPLETED = 'completed';
     public const STATUS_SKIPPED   = 'skipped';
-
     /**
      * Все возможные типы
      */
     public const TYPES = ExerciseType::class;
-
     /**
      * Все возможные статусы
      */
     public const STATUSES = SessionBlockStatus::class;
-
+    /**
+     * Название таблицы
+     */
+    protected $table = 'practice_session_blocks';
     protected $fillable = [
         'practice_session_id',
         'practice_template_block_id',
@@ -108,6 +103,14 @@ class SessionBlock extends BaseModel
     ];
 
     /**
+     * Create a new factory instance for the model.
+     */
+    protected static function newFactory()
+    {
+        return SessionBlockFactory::new();
+    }
+
+    /**
      * Связь с сессией
      */
     public function session(): BelongsTo
@@ -122,7 +125,6 @@ class SessionBlock extends BaseModel
     {
         return $this->belongsTo(TemplateBlock::class, 'practice_template_block_id');
     }
-
 
     /**
      * Scope: активные блоки
@@ -269,13 +271,5 @@ class SessionBlock extends BaseModel
             ->logOnly(['title', 'status', 'type', 'planned_duration', 'actual_duration'])
             ->logOnlyDirty()
             ->dontSubmitEmptyLogs();
-    }
-
-    /**
-     * Create a new factory instance for the model.
-     */
-    protected static function newFactory()
-    {
-        return SessionBlockFactory::new();
     }
 }

@@ -15,34 +15,33 @@ final readonly class UpdateGoalDTO
         public array $target,
         public string $start_date,
         public ?string $end_date,
-        public bool $is_active,
-    ) {
-    }
+        public bool  $is_active,
+    ) {}
 
     public static function fromRequest(UpdateGoalRequest $request): self
     {
         $validated = $request->validated();
 
         return new self(
-            title: $validated['title'],
+            title      : $validated['title'],
             description: $validated['description'] ?? null,
-            type: $validated['type'],
-            target: $validated['target'],
-            start_date: $validated['start_date'],
-            end_date: $validated['end_date'] ?? null,
-            is_active: $validated['is_active'] ?? true,
+            type       : $validated['type'],
+            target     : $validated['target'],
+            start_date : $validated['start_date'],
+            end_date   : $validated['end_date'] ?? null,
+            is_active  : $validated['is_active'] ?? true,
         );
     }
 
     public function toArray(): array
     {
         return [
-            'title' => $this->title,
+            'title'     => $this->title,
             'description' => $this->description,
-            'type' => $this->type,
-            'target' => $this->target,
+            'type'      => $this->type,
+            'target'    => $this->target,
             'start_date' => $this->start_date,
-            'end_date' => $this->end_date,
+            'end_date'  => $this->end_date,
             'is_active' => $this->is_active,
         ];
     }

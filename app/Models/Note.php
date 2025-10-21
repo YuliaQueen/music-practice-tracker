@@ -4,16 +4,17 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-use App\Domains\Planning\Models\Exercise;
+use Carbon\Carbon;
 use App\Domains\User\Models\User;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Support\Facades\Storage;
 use Spatie\Activitylog\LogOptions;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Storage;
+use App\Domains\Planning\Models\Exercise;
+use Illuminate\Database\Eloquent\Builder;
 use Spatie\Activitylog\Traits\LogsActivity;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 /**
  * Модель нот - файлы нот, прикрепленные к упражнениям
@@ -30,9 +31,9 @@ use Spatie\Activitylog\Traits\LogsActivity;
  * @property string        $file_hash            Хеш файла для дедупликации
  * @property array         $metadata             Дополнительные метаданные
  * @property bool          $is_public            Публичный доступ
- * @property \Carbon\Carbon $created_at
- * @property \Carbon\Carbon $updated_at
- * @property \Carbon\Carbon|null $deleted_at
+ * @property Carbon      $created_at
+ * @property Carbon      $updated_at
+ * @property Carbon|null $deleted_at
  *
  * @property User          $user
  * @property Exercise|null $exercise
@@ -42,11 +43,6 @@ class Note extends Model
     use HasFactory;
     use LogsActivity;
     use SoftDeletes;
-
-    /**
-     * Название таблицы
-     */
-    protected $table = 'notes';
 
     /**
      * Разрешенные MIME типы для нот
@@ -63,12 +59,14 @@ class Note extends Model
         'audio/wav',
         'audio/ogg',
     ];
-
     /**
      * Максимальный размер файла в байтах (50MB)
      */
     public const MAX_FILE_SIZE = 50 * 1024 * 1024;
-
+    /**
+     * Название таблицы
+     */
+    protected $table = 'notes';
     protected $fillable = [
         'user_id',
         'exercise_id',
@@ -197,11 +195,11 @@ class Note extends Model
     {
         $bytes = $this->file_size;
         $units = ['B', 'KB', 'MB', 'GB'];
-        
+
         for ($i = 0; $bytes > 1024 && $i < count($units) - 1; $i++) {
             $bytes /= 1024;
         }
-        
+
         return round($bytes, 2) . ' ' . $units[$i];
     }
 

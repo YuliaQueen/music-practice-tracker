@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use Inertia\Inertia;
+use Inertia\Response;
+use Illuminate\Http\RedirectResponse;
 use App\Domains\Planning\Models\Exercise;
 use App\DTOs\Exercises\CreateExerciseDTO;
 use App\DTOs\Exercises\UpdateExerciseDTO;
 use App\Http\Requests\Exercise\StoreExerciseRequest;
 use App\Http\Requests\Exercise\UpdateExerciseRequest;
-use Illuminate\Http\RedirectResponse;
-use Inertia\Inertia;
-use Inertia\Response;
 
 class ExerciseController extends Controller
 {
@@ -30,14 +30,6 @@ class ExerciseController extends Controller
     }
 
     /**
-     * Показать форму создания упражнения
-     */
-    public function create(): Response
-    {
-        return Inertia::render('Exercises/Create');
-    }
-
-    /**
      * Сохранить новое упражнение
      */
     public function store(StoreExerciseRequest $request): RedirectResponse
@@ -52,6 +44,14 @@ class ExerciseController extends Controller
 
         return redirect()->route('exercises.index')
             ->with('success', 'Упражнение успешно создано');
+    }
+
+    /**
+     * Показать форму создания упражнения
+     */
+    public function create(): Response
+    {
+        return Inertia::render('Exercises/Create');
     }
 
     /**

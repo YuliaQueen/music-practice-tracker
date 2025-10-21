@@ -6,14 +6,24 @@ namespace App\Enums;
 
 enum ExerciseType: string
 {
-    case WARMUP = 'warmup';
+    case WARMUP    = 'warmup';
     case TECHNIQUE = 'technique';
     case REPERTOIRE = 'repertoire';
     case IMPROVISATION = 'improvisation';
     case SIGHT_READING = 'sight_reading';
-    case THEORY = 'theory';
-    case BREAK = 'break';
-    case CUSTOM = 'custom';
+    case THEORY    = 'theory';
+    case BREAK     = 'break';
+    case CUSTOM    = 'custom';
+
+    /**
+     * Получить все возможные значения в виде массива строк
+     *
+     * @return array<string>
+     */
+    public static function values(): array
+    {
+        return array_map(fn(self $case) => $case->value, self::cases());
+    }
 
     /**
      * Получить человекочитаемое название типа
@@ -64,15 +74,5 @@ enum ExerciseType: string
             self::BREAK => 'slate',
             self::CUSTOM => 'pink',
         };
-    }
-
-    /**
-     * Получить все возможные значения в виде массива строк
-     *
-     * @return array<string>
-     */
-    public static function values(): array
-    {
-        return array_map(fn(self $case) => $case->value, self::cases());
     }
 }

@@ -13,6 +13,16 @@ enum SessionBlockStatus: string
     case SKIPPED = 'skipped';
 
     /**
+     * Получить все возможные значения в виде массива строк
+     *
+     * @return array<string>
+     */
+    public static function values(): array
+    {
+        return array_map(fn(self $case) => $case->value, self::cases());
+    }
+
+    /**
      * Получить человекочитаемое название статуса
      */
     public function label(): string
@@ -24,15 +34,5 @@ enum SessionBlockStatus: string
             self::COMPLETED => 'Завершен',
             self::SKIPPED => 'Пропущен',
         };
-    }
-
-    /**
-     * Получить все возможные значения в виде массива строк
-     *
-     * @return array<string>
-     */
-    public static function values(): array
-    {
-        return array_map(fn(self $case) => $case->value, self::cases());
     }
 }

@@ -4,17 +4,16 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
-use App\Domains\Goals\Models\Goal;
-use App\DTOs\Goals\CreateGoalDTO;
-use App\DTOs\Goals\UpdateGoalDTO;
-use App\Http\Requests\Goal\StoreGoalRequest;
-use App\Http\Requests\Goal\UpdateGoalRequest;
-use App\Http\Resources\GoalResource;
-use Illuminate\Http\Request;
-use Illuminate\Http\RedirectResponse;
-use Illuminate\View\View;
 use Inertia\Inertia;
 use Inertia\Response;
+use Illuminate\Http\Request;
+use App\DTOs\Goals\CreateGoalDTO;
+use App\DTOs\Goals\UpdateGoalDTO;
+use App\Domains\Goals\Models\Goal;
+use App\Http\Resources\GoalResource;
+use Illuminate\Http\RedirectResponse;
+use App\Http\Requests\Goal\StoreGoalRequest;
+use App\Http\Requests\Goal\UpdateGoalRequest;
 
 class GoalController extends Controller
 {
@@ -29,38 +28,28 @@ class GoalController extends Controller
             ->get()
             ->map(function ($goal) {
                 return [
-                    'id' => $goal->id,
-                    'title' => $goal->title,
+                    'id'          => $goal->id,
+                    'title'       => $goal->title,
                     'description' => $goal->description,
-                    'type' => $goal->type,
-                    'type_label' => $goal->getTypeLabel(),
-                    'type_icon' => $goal->getTypeIcon(),
-                    'type_color' => $goal->getTypeColor(),
-                    'target' => $goal->target,
-                    'progress' => $goal->progress,
+                    'type'        => $goal->type,
+                    'type_label'  => $goal->getTypeLabel(),
+                    'type_icon'   => $goal->getTypeIcon(),
+                    'type_color'  => $goal->getTypeColor(),
+                    'target'      => $goal->target,
+                    'progress'    => $goal->progress,
                     'progress_percentage' => $goal->getProgressPercentage(),
-                    'remaining' => $goal->getRemaining(),
-                    'start_date' => $goal->start_date->format('Y-m-d'),
-                    'end_date' => $goal->end_date?->format('Y-m-d'),
-                    'is_active' => $goal->is_active,
+                    'remaining'   => $goal->getRemaining(),
+                    'start_date'  => $goal->start_date->format('Y-m-d'),
+                    'end_date'    => $goal->end_date?->format('Y-m-d'),
+                    'is_active'   => $goal->is_active,
                     'is_completed' => $goal->is_completed,
                     'completed_at' => $goal->completed_at?->format('Y-m-d H:i'),
-                    'created_at' => $goal->created_at->format('Y-m-d H:i'),
+                    'created_at'  => $goal->created_at->format('Y-m-d H:i'),
                 ];
             });
 
         return Inertia::render('Goals/Index', [
             'goals' => $goals,
-            'goalTypes' => Goal::TYPES,
-        ]);
-    }
-
-    /**
-     * Показать форму создания цели
-     */
-    public function create(): Response
-    {
-        return Inertia::render('Goals/Create', [
             'goalTypes' => Goal::TYPES,
         ]);
     }
@@ -76,6 +65,16 @@ class GoalController extends Controller
 
         return redirect()->route('goals.index')
             ->with('success', 'Цель успешно создана');
+    }
+
+    /**
+     * Показать форму создания цели
+     */
+    public function create(): Response
+    {
+        return Inertia::render('Goals/Create', [
+            'goalTypes' => Goal::TYPES,
+        ]);
     }
 
     /**
@@ -99,13 +98,13 @@ class GoalController extends Controller
 
         return Inertia::render('Goals/Edit', [
             'goal' => [
-                'id' => $goal->id,
-                'title' => $goal->title,
+                'id'        => $goal->id,
+                'title'     => $goal->title,
                 'description' => $goal->description,
-                'type' => $goal->type,
-                'target' => $goal->target,
+                'type'      => $goal->type,
+                'target'    => $goal->target,
                 'start_date' => $goal->start_date->format('Y-m-d'),
-                'end_date' => $goal->end_date?->format('Y-m-d'),
+                'end_date'  => $goal->end_date?->format('Y-m-d'),
                 'is_active' => $goal->is_active,
             ],
             'goalTypes' => Goal::TYPES,

@@ -4,38 +4,38 @@ declare(strict_types=1);
 
 namespace App\Domains\Goals\Models;
 
-use App\Domains\Shared\Models\BaseModel;
-use App\Domains\User\Models\User;
-use App\Enums\GoalType;
 use Carbon\Carbon;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Database\Factories\GoalFactory;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\SoftDeletes;
+use App\Enums\GoalType;
+use App\Domains\User\Models\User;
 use Spatie\Activitylog\LogOptions;
+use Database\Factories\GoalFactory;
+use App\Domains\Shared\Models\BaseModel;
+use Illuminate\Database\Eloquent\Builder;
 use Spatie\Activitylog\Traits\LogsActivity;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 /**
  * Модель цели пользователя
  *
- * @property int           $id
- * @property int           $user_id
- * @property string        $title
- * @property string|null   $description
- * @property string        $type
- * @property array         $target
- * @property array|null    $progress
- * @property Carbon        $start_date
- * @property Carbon|null   $end_date
- * @property bool          $is_active
- * @property bool          $is_completed
- * @property Carbon|null   $completed_at
- * @property Carbon        $created_at
- * @property Carbon        $updated_at
- * @property Carbon|null   $deleted_at
+ * @property int         $id
+ * @property int         $user_id
+ * @property string      $title
+ * @property string|null $description
+ * @property string      $type
+ * @property array       $target
+ * @property array|null  $progress
+ * @property Carbon      $start_date
+ * @property Carbon|null $end_date
+ * @property bool        $is_active
+ * @property bool        $is_completed
+ * @property Carbon|null $completed_at
+ * @property Carbon      $created_at
+ * @property Carbon      $updated_at
+ * @property Carbon|null $deleted_at
  *
- * @property User          $user
+ * @property User        $user
  */
 class Goal extends BaseModel
 {
@@ -73,15 +73,23 @@ class Goal extends BaseModel
     ];
 
     protected $casts = [
-        'type' => GoalType::class,
-        'target' => 'array',
-        'progress' => 'array',
+        'type'      => GoalType::class,
+        'target'    => 'array',
+        'progress'  => 'array',
         'start_date' => 'date',
-        'end_date' => 'date',
+        'end_date'  => 'date',
         'is_active' => 'boolean',
         'is_completed' => 'boolean',
         'completed_at' => 'datetime',
     ];
+
+    /**
+     * Create a new factory instance for the model.
+     */
+    protected static function newFactory()
+    {
+        return GoalFactory::new();
+    }
 
     /**
      * Связь с пользователем
@@ -129,11 +137,11 @@ class Goal extends BaseModel
     public function scopeCurrent(Builder $query): Builder
     {
         return $query->where('is_active', true)
-                    ->where('is_completed', false)
-                    ->where(function ($q) {
-                        $q->whereNull('end_date')
-                          ->orWhere('end_date', '>=', now()->toDateString());
-                    });
+            ->where('is_completed', false)
+            ->where(function ($q) {
+                $q->whereNull('end_date')
+                    ->orWhere('end_date', '>=', now()->toDateString());
+            });
     }
 
     /**
@@ -169,14 +177,14 @@ class Goal extends BaseModel
             return 0;
         }
 
-        $current = (int) $this->progress['current'];
-        $total = (int) $this->progress['total'];
+        $current = (int)$this->progress['current'];
+        $total   = (int)$this->progress['total'];
 
         if ($total <= 0) {
             return 0;
         }
 
-        return min(100, (int) round(($current / $total) * 100));
+        return min(100, (int)round(($current / $total) * 100));
     }
 
     /**
@@ -188,8 +196,8 @@ class Goal extends BaseModel
             return $this->getTargetValue();
         }
 
-        $current = (int) $this->progress['current'];
-        $total = (int) $this->progress['total'];
+        $current = (int)$this->progress['current'];
+        $total   = (int)$this->progress['total'];
 
         return max(0, $total - $current);
     }
@@ -203,7 +211,7 @@ class Goal extends BaseModel
             return 0;
         }
 
-        return (int) $this->target['value'];
+        return (int)$this->target['value'];
     }
 
     /**
@@ -215,7 +223,7 @@ class Goal extends BaseModel
             return 0;
         }
 
-        return (int) $this->progress['current'];
+        return (int)$this->progress['current'];
     }
 
     /**
@@ -224,7 +232,7 @@ class Goal extends BaseModel
     public function updateProgress(int $current, int $total = null): self
     {
         $total = $total ?? $this->getTargetValue();
-        
+
         $this->progress = [
             'current' => $current,
             'total' => $total,
@@ -303,13 +311,5 @@ class Goal extends BaseModel
             ->logOnly(['title', 'type', 'target', 'progress', 'is_active', 'is_completed'])
             ->logOnlyDirty()
             ->dontSubmitEmptyLogs();
-    }
-
-    /**
-     * Create a new factory instance for the model.
-     */
-    protected static function newFactory()
-    {
-        return GoalFactory::new();
     }
 }

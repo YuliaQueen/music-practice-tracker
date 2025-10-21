@@ -21,16 +21,16 @@ class UpdateSessionBlockRequest extends FormRequest
     /**
      * Get the validation rules that apply to the request.
      *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
+     * @return array<string, ValidationRule|array<mixed>|string>
      */
     public function rules(): array
     {
         return [
-            'status' => 'nullable|string|in:' . implode(',', SessionBlockStatus::values()),
+            'status'       => 'nullable|string|in:' . implode(',', SessionBlockStatus::values()),
             'actual_duration' => 'nullable|integer|min:0',
-            'started_at' => 'nullable|date',
+            'started_at'   => 'nullable|date',
             'completed_at' => 'nullable|date',
-            'notes' => 'nullable|string',
+            'notes'        => 'nullable|string',
             'planned_duration' => 'nullable|integer|min:1',
         ];
     }

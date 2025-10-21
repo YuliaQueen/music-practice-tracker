@@ -4,19 +4,19 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
-use App\Domains\Planning\Models\Exercise;
-use App\Domains\Planning\Models\Session;
-use App\Domains\Planning\Models\SessionBlock;
-use App\Domains\Planning\Models\Template;
-use App\DTOs\Sessions\CreateSessionDTO;
-use App\DTOs\Sessions\UpdateSessionBlockDTO;
-use App\Http\Requests\Session\StoreSessionRequest;
-use App\Http\Requests\Session\UpdateSessionBlockRequest;
-use App\Services\SessionService;
-use Illuminate\Http\Request;
-use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
 use Inertia\Response;
+use Illuminate\Http\Request;
+use App\Services\SessionService;
+use Illuminate\Http\RedirectResponse;
+use App\DTOs\Sessions\CreateSessionDTO;
+use App\Domains\Planning\Models\Session;
+use App\Domains\Planning\Models\Exercise;
+use App\Domains\Planning\Models\Template;
+use App\DTOs\Sessions\UpdateSessionBlockDTO;
+use App\Domains\Planning\Models\SessionBlock;
+use App\Http\Requests\Session\StoreSessionRequest;
+use App\Http\Requests\Session\UpdateSessionBlockRequest;
 
 class SessionController extends Controller
 {
@@ -52,8 +52,8 @@ class SessionController extends Controller
 
         // Получаем упражнения из всех сессий пользователя (включая незавершенные)
         $previousExercises = SessionBlock::whereHas('session', function ($query) {
-                $query->where('user_id', auth()->id());
-            })
+            $query->where('user_id', auth()->id());
+        })
             ->select('title', 'description', 'type', 'planned_duration')
             ->distinct()
             ->orderBy('title')
@@ -85,7 +85,7 @@ class SessionController extends Controller
                         'usage_count' => 0, // Упражнения из библиотеки еще не использовались
                     ];
                 });
-            
+
             $previousExercises = $previousExercises->concat($exerciseLibrary);
         }
 
@@ -93,7 +93,7 @@ class SessionController extends Controller
         $exerciseData = null;
         if ($request->has('exercise_id')) {
             $exerciseData = [
-                'id' => $request->get('exercise_id'),
+                'id'   => $request->get('exercise_id'),
                 'title' => $request->get('exercise_title'),
                 'type' => $request->get('exercise_type'),
                 'duration' => $request->get('exercise_duration'),
@@ -177,7 +177,7 @@ class SessionController extends Controller
         $result = $this->sessionService->completeSession($session);
 
         if (!$result['success']) {
-            return back()->with('error', $result['message']);
+            return back()->with('error', $result['message    ']);
         }
 
         return back()->with('success', $result['message']);
@@ -191,6 +191,7 @@ class SessionController extends Controller
         $this->authorize('update', $session);
 
         $dto = UpdateSessionBlockDTO::fromRequest($request);
+
 
         $result = $this->sessionService->updateSessionBlock($session, $block, $dto);
 

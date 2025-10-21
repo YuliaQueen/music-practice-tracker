@@ -15,23 +15,22 @@ final readonly class CreateGoalDTO
         public array $target,
         public string $start_date,
         public ?string $end_date,
-        public bool $is_active = true,
-        public bool $is_completed = false,
-    ) {
-    }
+        public bool  $is_active = true,
+        public bool  $is_completed = false,
+    ) {}
 
     public static function fromRequest(StoreGoalRequest $request): self
     {
         $validated = $request->validated();
 
         return new self(
-            title: $validated['title'],
-            description: $validated['description'] ?? null,
-            type: $validated['type'],
-            target: $validated['target'],
-            start_date: $validated['start_date'],
-            end_date: $validated['end_date'] ?? null,
-            is_active: true,
+            title       : $validated['title'],
+            description : $validated['description'] ?? null,
+            type        : $validated['type'],
+            target      : $validated['target'],
+            start_date  : $validated['start_date'],
+            end_date    : $validated['end_date'] ?? null,
+            is_active   : true,
             is_completed: false,
         );
     }
@@ -39,13 +38,13 @@ final readonly class CreateGoalDTO
     public function toArray(): array
     {
         return [
-            'title' => $this->title,
+            'title'      => $this->title,
             'description' => $this->description,
-            'type' => $this->type,
-            'target' => $this->target,
+            'type'       => $this->type,
+            'target'     => $this->target,
             'start_date' => $this->start_date,
-            'end_date' => $this->end_date,
-            'is_active' => $this->is_active,
+            'end_date'   => $this->end_date,
+            'is_active'  => $this->is_active,
             'is_completed' => $this->is_completed,
         ];
     }

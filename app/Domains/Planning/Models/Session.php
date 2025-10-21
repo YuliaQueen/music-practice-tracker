@@ -4,19 +4,18 @@ declare(strict_types=1);
 
 namespace App\Domains\Planning\Models;
 
-use App\Domains\Shared\Models\BaseModel;
-use App\Domains\User\Models\User;
-use App\Enums\SessionStatus;
 use Carbon\Carbon;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Attributes\Scope;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Database\Factories\SessionFactory;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\SoftDeletes;
+use App\Enums\SessionStatus;
+use App\Domains\User\Models\User;
 use Spatie\Activitylog\LogOptions;
+use Database\Factories\SessionFactory;
+use App\Domains\Shared\Models\BaseModel;
+use Illuminate\Database\Eloquent\Builder;
 use Spatie\Activitylog\Traits\LogsActivity;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 /**
  * Модель сессии занятий - основная единица планирования
@@ -48,11 +47,6 @@ class Session extends BaseModel
     use SoftDeletes;
 
     /**
-     * Название таблицы
-     */
-    protected $table = 'practice_sessions';
-
-    /**
      * Статусы сессии (backward compatibility)
      */
     public const STATUS_PLANNED   = 'planned';
@@ -60,12 +54,14 @@ class Session extends BaseModel
     public const STATUS_PAUSED    = 'paused';
     public const STATUS_COMPLETED = 'completed';
     public const STATUS_CANCELLED = 'cancelled';
-
     /**
      * Все возможные статусы
      */
     public const STATUSES = SessionStatus::class;
-
+    /**
+     * Название таблицы
+     */
+    protected $table = 'practice_sessions';
     protected $fillable = [
         'user_id',
         'practice_template_id',
@@ -91,6 +87,14 @@ class Session extends BaseModel
     ];
 
     /**
+     * Create a new factory instance for the model.
+     */
+    protected static function newFactory()
+    {
+        return SessionFactory::new();
+    }
+
+    /**
      * Связь с пользователем
      */
     public function user(): BelongsTo
@@ -113,7 +117,6 @@ class Session extends BaseModel
     {
         return $this->hasMany(SessionBlock::class, 'practice_session_id')->orderBy('sort_order');
     }
-
 
     /**
      * Scope: активные сессии
@@ -276,13 +279,5 @@ class Session extends BaseModel
             ->logOnly(['title', 'status', 'planned_duration', 'actual_duration'])
             ->logOnlyDirty()
             ->dontSubmitEmptyLogs();
-    }
-
-    /**
-     * Create a new factory instance for the model.
-     */
-    protected static function newFactory()
-    {
-        return SessionFactory::new();
     }
 }

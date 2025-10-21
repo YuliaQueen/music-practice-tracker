@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\Http\Requests\Goal;
 
-use App\Domains\Goals\Models\Goal;
 use App\Enums\GoalType;
-use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
+use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Contracts\Validation\ValidationRule;
 
 class StoreGoalRequest extends FormRequest
 {
@@ -22,18 +22,18 @@ class StoreGoalRequest extends FormRequest
     /**
      * Get the validation rules that apply to the request.
      *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
+     * @return array<string, ValidationRule|array<mixed>|string>
      */
     public function rules(): array
     {
         return [
-            'title' => 'required|string|max:255',
+            'title'      => 'required|string|max:255',
             'description' => 'nullable|string|max:1000',
-            'type' => ['required', 'string', Rule::enum(GoalType::class)],
-            'target' => 'required|array',
+            'type'       => ['required', 'string', Rule::enum(GoalType::class)],
+            'target'     => 'required|array',
             'target.value' => 'required|integer|min:1',
             'start_date' => 'required|date',
-            'end_date' => 'nullable|date|after:start_date',
+            'end_date'   => 'nullable|date|after:start_date',
         ];
     }
 
@@ -45,14 +45,14 @@ class StoreGoalRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'title.required' => 'Название цели обязательно',
-            'type.required' => 'Тип цели обязателен',
-            'type.in' => 'Недопустимый тип цели',
-            'target.required' => 'Целевое значение обязательно',
+            'title.required'   => 'Название цели обязательно',
+            'type.required'    => 'Тип цели обязателен',
+            'type.in'          => 'Недопустимый тип цели',
+            'target.required'  => 'Целевое значение обязательно',
             'target.value.required' => 'Укажите целевое значение',
             'target.value.min' => 'Целевое значение должно быть больше 0',
             'start_date.required' => 'Дата начала обязательна',
-            'end_date.after' => 'Дата окончания должна быть после даты начала',
+            'end_date.after'   => 'Дата окончания должна быть после даты начала',
         ];
     }
 }

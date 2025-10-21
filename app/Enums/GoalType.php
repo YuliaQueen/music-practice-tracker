@@ -14,6 +14,16 @@ enum GoalType: string
     case YEARLY_SESSIONS = 'yearly_sessions';
 
     /**
+     * Получить все возможные значения в виде массива строк
+     *
+     * @return array<string>
+     */
+    public static function values(): array
+    {
+        return array_map(fn(self $case) => $case->value, self::cases());
+    }
+
+    /**
      * Получить человекочитаемое название типа
      */
     public function label(): string
@@ -56,15 +66,5 @@ enum GoalType: string
             self::MONTHLY_MINUTES => 'indigo',
             self::YEARLY_SESSIONS => 'red',
         };
-    }
-
-    /**
-     * Получить все возможные значения в виде массива строк
-     *
-     * @return array<string>
-     */
-    public static function values(): array
-    {
-        return array_map(fn(self $case) => $case->value, self::cases());
     }
 }

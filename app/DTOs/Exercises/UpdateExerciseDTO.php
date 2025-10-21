@@ -14,28 +14,27 @@ final readonly class UpdateExerciseDTO
         public string $type,
         public int $planned_duration,
         public ?string $scheduled_for,
-    ) {
-    }
+    ) {}
 
     public static function fromRequest(UpdateExerciseRequest $request): self
     {
         $validated = $request->validated();
 
         return new self(
-            title: $validated['title'],
-            description: $validated['description'] ?? null,
-            type: $validated['type'],
-            planned_duration: (int) $validated['planned_duration'],
-            scheduled_for: $validated['scheduled_for'] ?? null,
+            title           : $validated['title'],
+            description     : $validated['description'] ?? null,
+            type            : $validated['type'],
+            planned_duration: (int)$validated['planned_duration'],
+            scheduled_for   : $validated['scheduled_for'] ?? null,
         );
     }
 
     public function toArray(): array
     {
         return [
-            'title' => $this->title,
-            'description' => $this->description,
-            'type' => $this->type,
+            'title'         => $this->title,
+            'description'   => $this->description,
+            'type'          => $this->type,
             'planned_duration' => $this->planned_duration,
             'scheduled_for' => $this->scheduled_for,
         ];

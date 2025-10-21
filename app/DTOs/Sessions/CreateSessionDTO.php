@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\DTOs\Sessions;
 
-use App\DTOs\Sessions\CreateSessionBlockDTO;
 use App\Http\Requests\Session\StoreSessionRequest;
 
 final readonly class CreateSessionDTO
@@ -15,10 +14,9 @@ final readonly class CreateSessionDTO
     public function __construct(
         public string $title,
         public ?string $description,
-        public ?int $template_id,
+        public ?int  $template_id,
         public array $blocks,
-    ) {
-    }
+    ) {}
 
     public static function fromRequest(StoreSessionRequest $request): self
     {
@@ -30,20 +28,11 @@ final readonly class CreateSessionDTO
         );
 
         return new self(
-            title: $validated['title'],
+            title      : $validated['title'],
             description: $validated['description'] ?? null,
             template_id: $validated['template_id'] ?? null,
-            blocks: $blocks,
+            blocks     : $blocks,
         );
-    }
-
-    public function toArray(): array
-    {
-        return [
-            'title' => $this->title,
-            'description' => $this->description,
-            'template_id' => $this->template_id,
-        ];
     }
 
     /**
@@ -57,5 +46,14 @@ final readonly class CreateSessionDTO
             fn(CreateSessionBlockDTO $block) => $block->toArray(),
             $this->blocks
         );
+    }
+
+    public function toArray(): array
+    {
+        return [
+            'title'       => $this->title,
+            'description' => $this->description,
+            'template_id' => $this->template_id,
+        ];
     }
 }

@@ -4,41 +4,41 @@ declare(strict_types=1);
 
 namespace App\Domains\Planning\Models;
 
-use App\Domains\Shared\Models\BaseModel;
-use App\Domains\User\Models\User;
-use App\Enums\ExerciseStatus;
-use App\Enums\ExerciseType;
-use App\Models\Note;
 use Carbon\Carbon;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Database\Factories\ExerciseFactory;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\SoftDeletes;
+use App\Models\Note;
+use App\Enums\ExerciseType;
+use App\Enums\ExerciseStatus;
+use App\Domains\User\Models\User;
 use Spatie\Activitylog\LogOptions;
+use Database\Factories\ExerciseFactory;
+use App\Domains\Shared\Models\BaseModel;
+use Illuminate\Database\Eloquent\Builder;
 use Spatie\Activitylog\Traits\LogsActivity;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 /**
  * Модель отдельного упражнения - упражнение вне сессии
  *
- * @property int           $id
- * @property int           $user_id
- * @property string        $title                Название упражнения
- * @property string|null   $description          Описание упражнения
- * @property string        $type                 Тип упражнения
- * @property int           $planned_duration      Запланированная длительность в минутах
- * @property int|null      $actual_duration      Фактическая длительность в минутах
- * @property string        $status               Статус упражнения
- * @property Carbon|null   $scheduled_for        Запланированное время выполнения
- * @property Carbon|null   $started_at           Фактическое время начала
- * @property Carbon|null   $completed_at         Время завершения
- * @property array         $metadata             Дополнительные данные упражнения
- * @property Carbon        $created_at
- * @property Carbon        $updated_at
- * @property Carbon|null   $deleted_at
+ * @property int         $id
+ * @property int         $user_id
+ * @property string      $title                 Название упражнения
+ * @property string|null $description           Описание упражнения
+ * @property string      $type                  Тип упражнения
+ * @property int         $planned_duration      Запланированная длительность в минутах
+ * @property int|null    $actual_duration       Фактическая длительность в минутах
+ * @property string      $status                Статус упражнения
+ * @property Carbon|null $scheduled_for         Запланированное время выполнения
+ * @property Carbon|null $started_at            Фактическое время начала
+ * @property Carbon|null $completed_at          Время завершения
+ * @property array       $metadata              Дополнительные данные упражнения
+ * @property Carbon      $created_at
+ * @property Carbon      $updated_at
+ * @property Carbon|null $deleted_at
  *
- * @property User          $user
+ * @property User        $user
  * @property SessionBlock[] $sessionBlocks
  */
 class Exercise extends BaseModel
@@ -46,11 +46,6 @@ class Exercise extends BaseModel
     use HasFactory;
     use LogsActivity;
     use SoftDeletes;
-
-    /**
-     * Название таблицы
-     */
-    protected $table = 'exercises';
 
     /**
      * Типы упражнений (backward compatibility)
@@ -63,7 +58,6 @@ class Exercise extends BaseModel
     public const TYPE_THEORY        = 'theory';
     public const TYPE_BREAK         = 'break';
     public const TYPE_CUSTOM        = 'custom';
-
     /**
      * Статусы упражнения (backward compatibility)
      */
@@ -72,17 +66,18 @@ class Exercise extends BaseModel
     public const STATUS_PAUSED    = 'paused';
     public const STATUS_COMPLETED = 'completed';
     public const STATUS_CANCELLED = 'cancelled';
-
     /**
      * Все возможные типы
      */
     public const TYPES = ExerciseType::class;
-
     /**
      * Все возможные статусы
      */
     public const STATUSES = ExerciseStatus::class;
-
+    /**
+     * Название таблицы
+     */
+    protected $table = 'exercises';
     protected $fillable = [
         'user_id',
         'title',
@@ -107,6 +102,14 @@ class Exercise extends BaseModel
         'completed_at'     => 'datetime',
         'metadata'         => 'array',
     ];
+
+    /**
+     * Create a new factory instance for the model.
+     */
+    protected static function newFactory()
+    {
+        return ExerciseFactory::new();
+    }
 
     /**
      * Связь с пользователем
@@ -245,13 +248,5 @@ class Exercise extends BaseModel
             ->logOnly(['title', 'description', 'type', 'planned_duration', 'status', 'scheduled_for'])
             ->logOnlyDirty()
             ->dontSubmitEmptyLogs();
-    }
-
-    /**
-     * Create a new factory instance for the model.
-     */
-    protected static function newFactory()
-    {
-        return ExerciseFactory::new();
     }
 }

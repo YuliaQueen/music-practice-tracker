@@ -4,19 +4,18 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use Carbon\Carbon;
+use App\Domains\User\Models\User;
 use App\Domains\Goals\Models\Goal;
 use App\Domains\Planning\Models\Session;
 use App\Domains\Planning\Models\SessionBlock;
-use App\Domains\User\Models\User;
+use App\Services\GoalProgress\Strategies\StreakDaysStrategy;
 use App\Services\GoalProgress\Contracts\GoalProgressStrategy;
 use App\Services\GoalProgress\Strategies\DailyMinutesStrategy;
 use App\Services\GoalProgress\Strategies\ExerciseTypeStrategy;
 use App\Services\GoalProgress\Strategies\MonthlyMinutesStrategy;
-use App\Services\GoalProgress\Strategies\StreakDaysStrategy;
 use App\Services\GoalProgress\Strategies\WeeklySessionsStrategy;
 use App\Services\GoalProgress\Strategies\YearlySessionsStrategy;
-use Carbon\Carbon;
-use Illuminate\Support\Collection;
 
 class GoalProgressService
 {
@@ -58,15 +57,15 @@ class GoalProgressService
     {
         $fromDate = $fromDate ?? Carbon::now()->startOfDay();
         $toDate = $toDate ?? Carbon::now()->endOfDay();
-        
+
         $activeGoals = $user->goals()->active()->get();
         $updatedGoals = [];
-        
+
         foreach ($activeGoals as $goal) {
             $updatedGoal = $this->updateGoalProgress($goal, $fromDate, $toDate);
             $updatedGoals[] = $updatedGoal; // Всегда возвращаем обновленную цель
         }
-        
+
         return $updatedGoals;
     }
 
@@ -77,10 +76,10 @@ class GoalProgressService
     {
         $fromDate = $fromDate ?? Carbon::now()->startOfDay();
         $toDate = $toDate ?? Carbon::now()->endOfDay();
-        
+
         $currentValue = $this->calculateCurrentValue($goal, $fromDate, $toDate);
         $totalValue = $this->calculateTotalValue($goal, $fromDate, $toDate);
-        
+
         // Всегда обновляем прогресс, даже если значение не изменилось
         $goal->updateProgress($currentValue, $totalValue);
         return $goal;
@@ -122,11 +121,11 @@ class GoalProgressService
     {
         $user = $session->user;
         $sessionDate = $session->created_at;
-        
+
         // Обновляем прогресс за день сессии
         $dayStart = $sessionDate->copy()->startOfDay();
         $dayEnd = $sessionDate->copy()->endOfDay();
-        
+
         return $this->updateProgressFromSessions($user, $dayStart, $dayEnd);
     }
 
@@ -138,11 +137,11 @@ class GoalProgressService
         $session = $sessionBlock->session;
         $user = $session->user;
         $sessionDate = $session->created_at;
-        
+
         // Обновляем прогресс за день сессии
         $dayStart = $sessionDate->copy()->startOfDay();
         $dayEnd = $sessionDate->copy()->endOfDay();
-        
+
         return $this->updateProgressFromSessions($user, $dayStart, $dayEnd);
     }
 
@@ -153,14 +152,14 @@ class GoalProgressService
     {
         $completedGoals = [];
         $activeGoals = $user->goals()->active()->get();
-        
+
         foreach ($activeGoals as $goal) {
             if ($goal->getProgressPercentage() >= 100 && !$goal->is_completed) {
                 $goal->markAsCompleted();
                 $completedGoals[] = $goal;
             }
         }
-        
+
         return $completedGoals;
     }
 
@@ -171,18 +170,18 @@ class GoalProgressService
     {
         $fromDate = $fromDate ?? Carbon::now()->subMonth();
         $toDate = $toDate ?? Carbon::now();
-        
+
         $goals = $user->goals()->active()->get();
         $stats = [
-            'total_goals' => $goals->count(),
+            'total_goals'   => $goals->count(),
             'completed_goals' => $goals->where('is_completed', true)->count(),
-            'active_goals' => $goals->where('is_completed', false)->count(),
+            'active_goals'  => $goals->where('is_completed', false)->count(),
             'goals_by_type' => [],
             'average_progress' => 0,
         ];
-        
+
         $totalProgress = 0;
-        
+
         foreach ($goals as $goal) {
             $type = $goal->type;
             if (!isset($stats['goals_by_type'][$type])) {
@@ -192,29 +191,29 @@ class GoalProgressService
                     'average_progress' => 0,
                 ];
             }
-            
+
             $stats['goals_by_type'][$type]['count']++;
             if ($goal->is_completed) {
                 $stats['goals_by_type'][$type]['completed']++;
             }
-            
+
             $progress = $goal->getProgressPercentage();
             $stats['goals_by_type'][$type]['average_progress'] += $progress;
             $totalProgress += $progress;
         }
-        
+
         // Рассчитываем средний прогресс
         if ($goals->count() > 0) {
             $stats['average_progress'] = round($totalProgress / $goals->count(), 2);
         }
-        
+
         // Рассчитываем средний прогресс по типам
         foreach ($stats['goals_by_type'] as $type => &$typeStats) {
             if ($typeStats['count'] > 0) {
                 $typeStats['average_progress'] = round($typeStats['average_progress'] / $typeStats['count'], 2);
             }
         }
-        
+
         return $stats;
     }
 }

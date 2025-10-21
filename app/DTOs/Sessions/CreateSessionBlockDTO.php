@@ -11,16 +11,15 @@ final readonly class CreateSessionBlockDTO
         public ?string $description,
         public int $duration,
         public string $type,
-    ) {
-    }
+    ) {}
 
     public static function fromArray(array $data): self
     {
         return new self(
-            title: $data['title'],
+            title      : $data['title'],
             description: $data['description'] ?? null,
-            duration: (int) $data['duration'],
-            type: $data['type'],
+            duration   : (int)$data['duration'],
+            type       : $data['type'],
         );
     }
 
@@ -30,7 +29,7 @@ final readonly class CreateSessionBlockDTO
             'title' => $this->title,
             'description' => $this->description,
             'planned_duration' => $this->duration,
-            'type' => $this->type,
+            'type'  => $this->type,
         ];
     }
 }
