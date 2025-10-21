@@ -67,7 +67,7 @@ class SessionService
         foreach ($blocks as $blockDTO) {
             $existingExercise = Exercise::where('user_id', $user->id)
                 ->where('title', $blockDTO->title)
-                ->where('type', $blockDTO->type->value)
+                ->where('type', $blockDTO->type)
                 ->first();
 
             if (!$existingExercise) {
