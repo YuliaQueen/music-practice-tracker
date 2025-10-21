@@ -24,10 +24,31 @@ class GoalController extends Controller
         $goals = auth()->user()->goals()
             ->orderBy('is_active', 'desc')
             ->orderBy('created_at', 'desc')
-            ->get();
+            ->get()
+            ->map(function ($goal) {
+                return [
+                    'id' => $goal->id,
+                    'title' => $goal->title,
+                    'description' => $goal->description,
+                    'type' => $goal->type,
+                    'type_label' => $goal->getTypeLabel(),
+                    'type_icon' => $goal->getTypeIcon(),
+                    'type_color' => $goal->getTypeColor(),
+                    'target' => $goal->target,
+                    'progress' => $goal->progress,
+                    'progress_percentage' => $goal->getProgressPercentage(),
+                    'remaining' => $goal->getRemaining(),
+                    'start_date' => $goal->start_date->format('Y-m-d'),
+                    'end_date' => $goal->end_date?->format('Y-m-d'),
+                    'is_active' => $goal->is_active,
+                    'is_completed' => $goal->is_completed,
+                    'completed_at' => $goal->completed_at?->format('Y-m-d H:i'),
+                    'created_at' => $goal->created_at->format('Y-m-d H:i'),
+                ];
+            });
 
         return Inertia::render('Goals/Index', [
-            'goals' => GoalResource::collection($goals),
+            'goals' => $goals,
             'goalTypes' => Goal::TYPES,
         ]);
     }
@@ -72,7 +93,7 @@ class GoalController extends Controller
         $this->authorize('view', $goal);
 
         return Inertia::render('Goals/Show', [
-            'goal' => new GoalResource($goal),
+            'goal' => (new GoalResource($goal))->toArray(request()),
         ]);
     }
 
