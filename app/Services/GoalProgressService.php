@@ -8,11 +8,49 @@ use App\Domains\Goals\Models\Goal;
 use App\Domains\Planning\Models\Session;
 use App\Domains\Planning\Models\SessionBlock;
 use App\Domains\User\Models\User;
+use App\Services\GoalProgress\Contracts\GoalProgressStrategy;
+use App\Services\GoalProgress\Strategies\DailyMinutesStrategy;
+use App\Services\GoalProgress\Strategies\ExerciseTypeStrategy;
+use App\Services\GoalProgress\Strategies\MonthlyMinutesStrategy;
+use App\Services\GoalProgress\Strategies\StreakDaysStrategy;
+use App\Services\GoalProgress\Strategies\WeeklySessionsStrategy;
+use App\Services\GoalProgress\Strategies\YearlySessionsStrategy;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
 
 class GoalProgressService
 {
+    /**
+     * @var array<GoalProgressStrategy>
+     */
+    private array $strategies = [];
+
+    public function __construct()
+    {
+        $this->strategies = [
+            new DailyMinutesStrategy(),
+            new WeeklySessionsStrategy(),
+            new StreakDaysStrategy(),
+            new ExerciseTypeStrategy(),
+            new MonthlyMinutesStrategy(),
+            new YearlySessionsStrategy(),
+        ];
+    }
+
+    /**
+     * Получить стратегию для конкретной цели
+     */
+    private function getStrategy(Goal $goal): ?GoalProgressStrategy
+    {
+        foreach ($this->strategies as $strategy) {
+            if ($strategy->supports($goal)) {
+                return $strategy;
+            }
+        }
+
+        return null;
+    }
+
     /**
      * Обновить прогресс всех активных целей пользователя на основе сессий
      */
@@ -53,15 +91,13 @@ class GoalProgressService
      */
     private function calculateCurrentValue(Goal $goal, Carbon $fromDate, Carbon $toDate): int
     {
-        return match ($goal->type) {
-            Goal::TYPE_DAILY_MINUTES => $this->calculateDailyMinutes($goal->user, $fromDate, $toDate),
-            Goal::TYPE_WEEKLY_SESSIONS => $this->calculateWeeklySessions($goal->user, $fromDate, $toDate),
-            Goal::TYPE_STREAK_DAYS => $this->calculateStreakDays($goal->user, $fromDate, $toDate),
-            Goal::TYPE_EXERCISE_TYPE => $this->calculateExerciseTypeProgress($goal, $fromDate, $toDate),
-            Goal::TYPE_MONTHLY_MINUTES => $this->calculateMonthlyMinutes($goal->user, $fromDate, $toDate),
-            Goal::TYPE_YEARLY_SESSIONS => $this->calculateYearlySessions($goal->user, $fromDate, $toDate),
-            default => 0,
-        };
+        $strategy = $this->getStrategy($goal);
+
+        if (!$strategy) {
+            return 0;
+        }
+
+        return $strategy->calculateCurrentValue($goal->user, $goal, $fromDate, $toDate);
     }
 
     /**
@@ -69,186 +105,15 @@ class GoalProgressService
      */
     private function calculateTotalValue(Goal $goal, Carbon $fromDate, Carbon $toDate): int
     {
-        return match ($goal->type) {
-            Goal::TYPE_DAILY_MINUTES => $this->calculateDailyTotal($goal, $fromDate, $toDate),
-            Goal::TYPE_WEEKLY_SESSIONS => $this->calculateWeeklyTotal($goal, $fromDate, $toDate),
-            Goal::TYPE_STREAK_DAYS => $this->calculateStreakTotal($goal, $fromDate, $toDate),
-            Goal::TYPE_EXERCISE_TYPE => $this->calculateExerciseTypeTotal($goal, $fromDate, $toDate),
-            Goal::TYPE_MONTHLY_MINUTES => $this->calculateMonthlyTotal($goal, $fromDate, $toDate),
-            Goal::TYPE_YEARLY_SESSIONS => $this->calculateYearlyTotal($goal, $fromDate, $toDate),
-            default => $goal->getTargetValue(),
-        };
-    }
+        $strategy = $this->getStrategy($goal);
 
-    /**
-     * Рассчитать ежедневные минуты практики
-     */
-    private function calculateDailyMinutes(User $user, Carbon $fromDate, Carbon $toDate): int
-    {
-        $sessions = $this->getSessionsInPeriod($user, $fromDate, $toDate);
-        
-        return $sessions->sum(function (Session $session) {
-            return $session->blocks()
-                ->where('status', SessionBlock::STATUS_COMPLETED)
-                ->sum('actual_duration');
-        });
-    }
-
-    /**
-     * Рассчитать еженедельные сессии
-     */
-    private function calculateWeeklySessions(User $user, Carbon $fromDate, Carbon $toDate): int
-    {
-        // Для еженедельных целей считаем сессии за неделю
-        $weekStart = $fromDate->copy()->startOfWeek();
-        $weekEnd = $toDate->copy()->endOfWeek();
-        
-        $sessions = $this->getSessionsInPeriod($user, $weekStart, $weekEnd);
-        
-        return $sessions->count();
-    }
-
-    /**
-     * Рассчитать серию дней практики
-     */
-    private function calculateStreakDays(User $user, Carbon $fromDate, Carbon $toDate): int
-    {
-        // Для расчета серии дней нужно получить сессии за больший период
-        $extendedFromDate = $fromDate->copy()->subDays(30); // Проверяем последние 30 дней
-        
-        $sessions = $this->getSessionsInPeriod($user, $extendedFromDate, $toDate);
-        
-        // Группируем сессии по дням
-        $daysWithPractice = $sessions
-            ->groupBy(function (Session $session) {
-                return $session->created_at->format('Y-m-d');
-            })
-            ->keys()
-            ->sort()
-            ->values();
-        
-        if ($daysWithPractice->isEmpty()) {
-            return 0;
+        if (!$strategy) {
+            return $goal->getTargetValue();
         }
-        
-        // Рассчитываем текущую серию дней
-        $currentStreak = 0;
-        $currentDate = $toDate->copy()->startOfDay();
-        
-        while ($currentDate->gte($extendedFromDate)) {
-            $dateString = $currentDate->format('Y-m-d');
-            
-            if ($daysWithPractice->contains($dateString)) {
-                $currentStreak++;
-                $currentDate->subDay();
-            } else {
-                break;
-            }
-        }
-        
-        return $currentStreak;
+
+        return $strategy->calculateTotalValue($goal, $fromDate, $toDate);
     }
 
-    /**
-     * Рассчитать прогресс по типу упражнения
-     */
-    private function calculateExerciseTypeProgress(Goal $goal, Carbon $fromDate, Carbon $toDate): int
-    {
-        $exerciseType = $goal->target['exercise_type'] ?? null;
-        if (!$exerciseType) {
-            return 0;
-        }
-        
-        $sessions = $this->getSessionsInPeriod($goal->user, $fromDate, $toDate);
-        
-        return $sessions->sum(function (Session $session) use ($exerciseType) {
-            return $session->blocks()
-                ->where('status', SessionBlock::STATUS_COMPLETED)
-                ->where('type', $exerciseType)
-                ->sum('actual_duration');
-        });
-    }
-
-    /**
-     * Рассчитать месячные минуты практики
-     */
-    private function calculateMonthlyMinutes(User $user, Carbon $fromDate, Carbon $toDate): int
-    {
-        return $this->calculateDailyMinutes($user, $fromDate, $toDate);
-    }
-
-    /**
-     * Рассчитать годовые сессии
-     */
-    private function calculateYearlySessions(User $user, Carbon $fromDate, Carbon $toDate): int
-    {
-        return $this->calculateWeeklySessions($user, $fromDate, $toDate);
-    }
-
-    /**
-     * Рассчитать общее значение для ежедневных минут
-     */
-    private function calculateDailyTotal(Goal $goal, Carbon $fromDate, Carbon $toDate): int
-    {
-        // Для ежедневных целей общее значение - это целевое значение за день
-        return $goal->getTargetValue();
-    }
-
-    /**
-     * Рассчитать общее значение для еженедельных сессий
-     */
-    private function calculateWeeklyTotal(Goal $goal, Carbon $fromDate, Carbon $toDate): int
-    {
-        $targetValue = $goal->getTargetValue();
-        $weeksInPeriod = (int) ceil($fromDate->diffInDays($toDate) / 7);
-        
-        return $targetValue * $weeksInPeriod;
-    }
-
-    /**
-     * Рассчитать общее значение для серии дней
-     */
-    private function calculateStreakTotal(Goal $goal, Carbon $fromDate, Carbon $toDate): int
-    {
-        return $goal->getTargetValue();
-    }
-
-    /**
-     * Рассчитать общее значение для типа упражнения
-     */
-    private function calculateExerciseTypeTotal(Goal $goal, Carbon $fromDate, Carbon $toDate): int
-    {
-        // Для типа упражнения общее значение - это целевое значение за день
-        return $goal->getTargetValue();
-    }
-
-    /**
-     * Рассчитать общее значение для месячных минут
-     */
-    private function calculateMonthlyTotal(Goal $goal, Carbon $fromDate, Carbon $toDate): int
-    {
-        return $this->calculateDailyTotal($goal, $fromDate, $toDate);
-    }
-
-    /**
-     * Рассчитать общее значение для годовых сессий
-     */
-    private function calculateYearlyTotal(Goal $goal, Carbon $fromDate, Carbon $toDate): int
-    {
-        return $this->calculateWeeklyTotal($goal, $fromDate, $toDate);
-    }
-
-    /**
-     * Получить сессии пользователя за период
-     */
-    private function getSessionsInPeriod(User $user, Carbon $fromDate, Carbon $toDate): Collection
-    {
-        return $user->sessions()
-            ->whereBetween('created_at', [$fromDate, $toDate])
-            ->where('status', Session::STATUS_COMPLETED)
-            ->with(['blocks'])
-            ->get();
-    }
 
     /**
      * Обновить прогресс целей после завершения сессии
