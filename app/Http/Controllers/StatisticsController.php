@@ -4,12 +4,15 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
-use Carbon\Carbon;
-use Inertia\Inertia;
-use Inertia\Response;
-use Illuminate\Http\Request;
 use App\Domains\Planning\Models\Session;
 use App\Domains\Planning\Models\SessionBlock;
+use App\Enums\ExerciseType;
+use App\Enums\SessionBlockStatus;
+use App\Enums\SessionStatus;
+use Carbon\Carbon;
+use Illuminate\Http\Request;
+use Inertia\Inertia;
+use Inertia\Response;
 
 class StatisticsController extends Controller
 {
@@ -53,7 +56,7 @@ class StatisticsController extends Controller
 
         $sessions = Session::where('user_id', $userId)
             ->whereDate('started_at', $today)
-            ->where('status', Session::STATUS_COMPLETED)
+            ->where('status', SessionStatus::COMPLETED->value)
             ->get();
 
         $totalMinutes = $sessions->sum('actual_duration') ?? 0;
@@ -63,9 +66,9 @@ class StatisticsController extends Controller
         $exerciseStats = SessionBlock::whereHas('session', function ($query) use ($userId, $today) {
             $query->where('user_id', $userId)
                 ->whereDate('started_at', $today)
-                ->where('status', Session::STATUS_COMPLETED);
+                ->where('status', SessionStatus::COMPLETED->value);
         })
-            ->where('status', SessionBlock::STATUS_COMPLETED)
+            ->where('status', SessionBlockStatus::COMPLETED->value)
             ->selectRaw('type, SUM(actual_duration) as total_duration, COUNT(*) as count')
             ->groupBy('type')
             ->get()
@@ -89,7 +92,7 @@ class StatisticsController extends Controller
 
         $sessions = Session::where('user_id', $userId)
             ->whereBetween('started_at', [$startOfWeek, $endOfWeek])
-            ->where('status', Session::STATUS_COMPLETED)
+            ->where('status', SessionStatus::COMPLETED->value)
             ->get();
 
         $totalMinutes = $sessions->sum('actual_duration') ?? 0;
@@ -130,7 +133,7 @@ class StatisticsController extends Controller
 
         $sessions = Session::where('user_id', $userId)
             ->whereBetween('started_at', [$startOfMonth, $endOfMonth])
-            ->where('status', Session::STATUS_COMPLETED)
+            ->where('status', SessionStatus::COMPLETED->value)
             ->get();
 
         $totalMinutes = $sessions->sum('actual_duration') ?? 0;
@@ -181,7 +184,7 @@ class StatisticsController extends Controller
 
         $sessions = Session::where('user_id', $userId)
             ->whereBetween('started_at', [$startOfYear, $endOfYear])
-            ->where('status', Session::STATUS_COMPLETED)
+            ->where('status', SessionStatus::COMPLETED->value)
             ->get();
 
         $totalMinutes = $sessions->sum('actual_duration') ?? 0;
@@ -225,7 +228,7 @@ class StatisticsController extends Controller
 
         $sessions = Session::where('user_id', $userId)
             ->whereBetween('started_at', [$startDate, $endDate])
-            ->where('status', Session::STATUS_COMPLETED)
+            ->where('status', SessionStatus::COMPLETED->value)
             ->get();
 
         $chartData = [];
@@ -258,7 +261,7 @@ class StatisticsController extends Controller
 
         $sessions = Session::where('user_id', $userId)
             ->whereBetween('started_at', [$startDate, $endDate])
-            ->where('status', Session::STATUS_COMPLETED)
+            ->where('status', SessionStatus::COMPLETED->value)
             ->get();
 
         $chartData = [];
@@ -292,8 +295,8 @@ class StatisticsController extends Controller
     {
         $query = SessionBlock::whereHas('session', function ($q) use ($userId) {
             $q->where('user_id', $userId)
-                ->where('status', Session::STATUS_COMPLETED);
-        })->where('status', SessionBlock::STATUS_COMPLETED);
+                ->where('status', SessionStatus::COMPLETED->value);
+        })->where('status', SessionBlockStatus::COMPLETED->value);
 
         // Применяем фильтр по периоду
         switch ($period) {
@@ -337,20 +340,9 @@ class StatisticsController extends Controller
     /**
      * Получить читаемое название типа упражнения
      */
-    private function getTypeLabel(string $type): string
+    private function getTypeLabel(ExerciseType $type): string
     {
-        $labels = [
-            'warmup'        => 'Разминка',
-            'technique'     => 'Техника',
-            'repertoire'    => 'Репертуар',
-            'improvisation' => 'Импровизация',
-            'sight_reading' => 'Чтение с листа',
-            'theory'        => 'Теория',
-            'break'         => 'Перерыв',
-            'custom'        => 'Пользовательский',
-        ];
-
-        return $labels[$type] ?? $type;
+        return $type->label();
     }
 
     /**
@@ -364,7 +356,7 @@ class StatisticsController extends Controller
 
         // Получаем все завершенные сессии за последний год
         $sessions = Session::where('user_id', $userId)
-            ->where('status', Session::STATUS_COMPLETED)
+            ->where('status', SessionStatus::COMPLETED->value)
             ->where('started_at', '>=', Carbon::now()->subYear())
             ->orderBy('started_at', 'desc')
             ->get();
