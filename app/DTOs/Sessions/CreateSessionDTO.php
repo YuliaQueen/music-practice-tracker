@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\DTOs\Sessions;
 
+use App\DTOs\Sessions\CreateSessionBlockDTO;
 use App\Http\Requests\Session\StoreSessionRequest;
 
 final readonly class CreateSessionDTO
