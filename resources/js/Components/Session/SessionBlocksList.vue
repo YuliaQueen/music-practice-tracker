@@ -104,6 +104,8 @@ interface SessionBlock {
     planned_duration: number
     actual_duration: number | null
     status: string
+    started_at: string | null
+    completed_at: string | null
 }
 
 interface Props {
