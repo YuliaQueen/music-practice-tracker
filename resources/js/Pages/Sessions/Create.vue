@@ -1,7 +1,7 @@
 <template>
     <AuthenticatedLayout>
         <template #header>
-            <h2 class="font-semibold text-xl text-amber-800 dark:text-neutral-200 leading-tight">
+            <h2 class="font-semibold text-xl text-primary-800 dark:text-neutral-200 leading-tight">
                 Создать занятие
             </h2>
         </template>
@@ -9,11 +9,11 @@
         <div class="py-12">
             <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
                 <div class="bg-primary-50 overflow-hidden shadow-sm sm:rounded-lg dark:bg-neutral-800 dark:shadow-neutral-900/20">
-                    <div class="p-6 text-amber-900 dark:text-neutral-100">
+                    <div class="p-6 text-primary-900 dark:text-neutral-100">
                         <form @submit.prevent="submit">
                             <!-- Основная информация -->
                             <div class="mb-6">
-                                <h3 class="text-lg font-medium text-amber-900 dark:text-neutral-100 mb-4">Основная информация</h3>
+                                <h3 class="text-lg font-medium text-primary-900 dark:text-neutral-100 mb-4">Основная информация</h3>
                                 
                                 <!-- Уведомление о добавленном упражнении -->
                                 <div v-if="exerciseData" class="mb-4 p-4 bg-primary-100 border border-primary-200 rounded-lg dark:bg-success-900/20 dark:border-success-800">

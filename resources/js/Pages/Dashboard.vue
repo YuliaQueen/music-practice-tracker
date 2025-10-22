@@ -42,7 +42,7 @@ const getTypeIcon = (type: string): string => {
 const getStatusBadgeClass = (status: string): string => {
     const baseClass = 'px-2 py-1 text-xs font-medium rounded-full'
     const statusClasses = {
-        planned: 'bg-amber-100 text-amber-800 dark:bg-neutral-600 dark:text-neutral-200',
+        planned: 'bg-primary-100 text-primary-800 dark:bg-neutral-600 dark:text-neutral-200',
         active: 'bg-primary-100 text-primary-800 dark:bg-success-900 dark:text-success-200',
         paused: 'bg-warning-100 text-warning-800 dark:bg-warning-900 dark:text-warning-200',
         completed: 'bg-danger-100 text-danger-800 dark:bg-accent-900 dark:text-accent-200',
@@ -59,7 +59,7 @@ const getStatusBadgeClass = (status: string): string => {
     <AuthenticatedLayout>
         <template #header>
             <h2
-                class="text-xl font-semibold leading-tight text-amber-800 dark:text-neutral-200"
+                class="text-xl font-semibold leading-tight text-primary-800 dark:text-neutral-200"
             >
                 {{ t('dashboard.title') }}
             </h2>
@@ -78,8 +78,8 @@ const getStatusBadgeClass = (status: string): string => {
                                     </svg>
                                 </div>
                                 <div class="ml-4">
-                                    <h3 class="text-lg font-medium text-amber-900 dark:text-neutral-100">Создать занятие</h3>
-                                    <p class="text-sm text-amber-600 dark:text-neutral-400">Начните новое музыкальное занятие</p>
+                                    <h3 class="text-lg font-medium text-primary-900 dark:text-neutral-100">Создать занятие</h3>
+                                    <p class="text-sm text-primary-600 dark:text-neutral-400">Начните новое музыкальное занятие</p>
                                 </div>
                             </div>
                             <div class="mt-4">
@@ -100,8 +100,8 @@ const getStatusBadgeClass = (status: string): string => {
                                     </svg>
                                 </div>
                                 <div class="ml-4">
-                                    <h3 class="text-lg font-medium text-amber-900 dark:text-neutral-100">Мои занятия</h3>
-                                    <p class="text-sm text-amber-600 dark:text-neutral-400">Просмотр и управление занятиями</p>
+                                    <h3 class="text-lg font-medium text-primary-900 dark:text-neutral-100">Мои занятия</h3>
+                                    <p class="text-sm text-primary-600 dark:text-neutral-400">Просмотр и управление занятиями</p>
                                 </div>
                             </div>
                             <div class="mt-4">
@@ -122,8 +122,8 @@ const getStatusBadgeClass = (status: string): string => {
                                     </svg>
                                 </div>
                                 <div class="ml-4">
-                                    <h3 class="text-lg font-medium text-amber-900 dark:text-neutral-100">Статистика</h3>
-                                    <p class="text-sm text-amber-600 dark:text-neutral-400">Ваш прогресс в обучении</p>
+                                    <h3 class="text-lg font-medium text-primary-900 dark:text-neutral-100">Статистика</h3>
+                                    <p class="text-sm text-primary-600 dark:text-neutral-400">Ваш прогресс в обучении</p>
                                 </div>
                             </div>
                             <div class="mt-4">

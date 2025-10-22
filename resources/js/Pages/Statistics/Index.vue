@@ -4,11 +4,11 @@
     <AuthenticatedLayout>
         <template #header>
             <div class="flex items-center justify-between">
-                <h2 class="text-xl font-semibold leading-tight text-amber-800 dark:text-neutral-200">
+                <h2 class="text-xl font-semibold leading-tight text-primary-800 dark:text-neutral-200">
                     Статистика занятий
                 </h2>
                 <div class="flex gap-2">
-                    <select v-model="selectedPeriod" @change="updatePeriod" class="text-sm border-amber-300 dark:border-neutral-600 focus:border-primary-500 dark:focus:border-accent-400 focus:ring-primary-500 dark:focus:ring-accent-400 rounded-md shadow-sm bg-primary-50 dark:bg-neutral-800 text-amber-900 dark:text-neutral-100">
+                    <select v-model="selectedPeriod" @change="updatePeriod" class="text-sm border-primary-300 dark:border-neutral-600 focus:border-primary-500 dark:focus:border-accent-400 focus:ring-primary-500 dark:focus:ring-accent-400 rounded-md shadow-sm bg-primary-50 dark:bg-neutral-800 text-primary-900 dark:text-neutral-100">
                         <option value="day">День</option>
                         <option value="week">Неделя</option>
                         <option value="month">Месяц</option>
@@ -32,7 +32,7 @@
                                     </svg>
                                 </div>
                                 <div class="ml-4">
-                                    <h3 class="text-lg font-medium text-amber-900 dark:text-neutral-100">Время практики</h3>
+                                    <h3 class="text-lg font-medium text-primary-900 dark:text-neutral-100">Время практики</h3>
                                     <p class="text-2xl font-bold text-warning-600 dark:text-accent-400">{{ formatMinutes(currentStats.total_minutes) }}</p>
                                 </div>
                             </div>

@@ -2,7 +2,7 @@
     <AuthenticatedLayout>
         <template #header>
             <div class="flex justify-between items-center">
-                <h2 class="font-semibold text-xl text-amber-800 dark:text-neutral-200 leading-tight">
+                <h2 class="font-semibold text-xl text-primary-800 dark:text-neutral-200 leading-tight">
                     {{ session.title }}
                 </h2>
                 <div class="flex space-x-2">

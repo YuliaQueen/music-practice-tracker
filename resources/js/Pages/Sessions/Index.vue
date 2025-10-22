@@ -2,7 +2,7 @@
     <AuthenticatedLayout>
         <template #header>
             <div class="flex justify-between items-center">
-                <h2 class="font-semibold text-xl text-amber-800 dark:text-neutral-200 leading-tight">
+                <h2 class="font-semibold text-xl text-primary-800 dark:text-neutral-200 leading-tight">
                     Мои занятия
                 </h2>
                 <PrimaryButton @click="$inertia.visit(route('sessions.create'))">
@@ -14,15 +14,15 @@
         <div class="py-12">
             <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
                 <div class="bg-primary-50 overflow-hidden shadow-sm sm:rounded-lg dark:bg-neutral-800 dark:shadow-neutral-900/20">
-                    <div class="p-6 text-amber-900 dark:text-neutral-100">
+                    <div class="p-6 text-primary-900 dark:text-neutral-100">
                         <div v-if="sessions.data.length === 0" class="text-center py-12">
-                            <div class="text-amber-500 mb-4">
-                                <svg class="mx-auto h-12 w-12 text-amber-400 dark:text-neutral-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <div class="text-primary-500 mb-4">
+                                <svg class="mx-auto h-12 w-12 text-primary-400 dark:text-neutral-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
                                 </svg>
                             </div>
-                            <h3 class="text-lg font-medium text-amber-900 dark:text-neutral-100 mb-2">У вас пока нет занятий</h3>
-                            <p class="text-amber-600 dark:text-neutral-400 mb-4">Создайте ваше первое занятие, чтобы начать отслеживать прогресс</p>
+                            <h3 class="text-lg font-medium text-primary-900 dark:text-neutral-100 mb-2">У вас пока нет занятий</h3>
+                            <p class="text-primary-600 dark:text-neutral-400 mb-4">Создайте ваше первое занятие, чтобы начать отслеживать прогресс</p>
                             <PrimaryButton @click="$inertia.visit(route('sessions.create'))">
                                 Создать первое занятие
                             </PrimaryButton>
@@ -32,12 +32,12 @@
                             <div
                                 v-for="session in sessions.data"
                                 :key="session.id"
-                                class="border border-amber-200 dark:border-neutral-700 rounded-lg p-6 hover:shadow-md dark:hover:shadow-neutral-900/20 transition-shadow"
+                                class="border border-primary-200 dark:border-neutral-700 rounded-lg p-6 hover:shadow-md dark:hover:shadow-neutral-900/20 transition-shadow"
                             >
                                 <div class="flex justify-between items-start">
                                     <div class="flex-1">
                                         <div class="flex items-center space-x-3 mb-2">
-                                            <h3 class="text-lg font-medium text-amber-900 dark:text-neutral-100">
+                                            <h3 class="text-lg font-medium text-primary-900 dark:text-neutral-100">
                                                 {{ session.title }}
                                             </h3>
                                             <span :class="getStatusBadgeClass(session.status)">
@@ -45,7 +45,7 @@
                                             </span>
                                         </div>
                                         
-                                        <p v-if="session.description" class="text-amber-700 dark:text-neutral-300 mb-3">
+                                        <p v-if="session.description" class="text-primary-700 dark:text-neutral-300 mb-3">
                                             {{ session.description }}
                                         </p>
                                         
@@ -262,13 +262,13 @@ const getStatusLabel = (status: string) => {
 const getStatusBadgeClass = (status: string) => {
     const baseClass = 'px-2 py-1 rounded-full text-xs font-medium'
     const statusClasses = {
-        planned: 'bg-amber-100 text-amber-800 dark:bg-neutral-600 dark:text-neutral-200',
+        planned: 'bg-primary-100 text-primary-800 dark:bg-neutral-600 dark:text-neutral-200',
         active: 'bg-primary-100 text-primary-800 dark:bg-success-900 dark:text-success-200',
         paused: 'bg-warning-100 text-warning-800 dark:bg-warning-900 dark:text-warning-200',
         completed: 'bg-danger-100 text-danger-800 dark:bg-accent-900 dark:text-accent-200',
         cancelled: 'bg-danger-200 text-danger-800 dark:bg-danger-900 dark:text-danger-200',
     }
-    return `${baseClass} ${statusClasses[status as keyof typeof statusClasses] || 'bg-amber-100 text-amber-800 dark:bg-neutral-600 dark:text-neutral-200'}`
+    return `${baseClass} ${statusClasses[status as keyof typeof statusClasses] || 'bg-primary-100 text-primary-800 dark:bg-neutral-600 dark:text-neutral-200'}`
 }
 
 const getProgressPercentage = (session: Session) => {

@@ -2,7 +2,7 @@
     <AuthenticatedLayout>
         <template #header>
             <div class="flex justify-between items-center">
-                <h2 class="font-semibold text-xl text-amber-800 dark:text-neutral-200 leading-tight">
+                <h2 class="font-semibold text-xl text-primary-800 dark:text-neutral-200 leading-tight">
                     Мои цели
                 </h2>
                 <Link
@@ -17,17 +17,17 @@
         <div class="py-12">
             <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
                 <div class="bg-primary-50 dark:bg-neutral-800 overflow-hidden shadow-sm sm:rounded-lg">
-                    <div class="p-6 text-amber-900 dark:text-neutral-100">
+                    <div class="p-6 text-primary-900 dark:text-neutral-100">
                         <div v-if="goals.length === 0" class="text-center py-8">
-                            <div class="text-amber-500 dark:text-neutral-400 mb-4">
+                            <div class="text-primary-500 dark:text-neutral-400 mb-4">
                                 <svg class="mx-auto h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                                 </svg>
                             </div>
-                            <h3 class="text-lg font-medium text-amber-900 dark:text-neutral-100 mb-2">
+                            <h3 class="text-lg font-medium text-primary-900 dark:text-neutral-100 mb-2">
                                 У вас пока нет целей
                             </h3>
-                            <p class="text-amber-600 dark:text-neutral-400 mb-4">
+                            <p class="text-primary-600 dark:text-neutral-400 mb-4">
                                 Создайте свою первую цель для отслеживания прогресса в музыке
                             </p>
                             <Link
@@ -42,7 +42,7 @@
                             <div
                                 v-for="goal in goals"
                                 :key="goal.id"
-                                class="bg-primary-50 dark:bg-neutral-700 rounded-lg shadow-md p-6 border border-amber-200 dark:border-neutral-600"
+                                class="bg-primary-50 dark:bg-neutral-700 rounded-lg shadow-md p-6 border border-primary-200 dark:border-neutral-600"
                             >
                                 <div class="flex items-start justify-between mb-4">
                                     <div class="flex items-center">
