@@ -96,6 +96,7 @@
             @start="startSession"
             @pause="pauseSession"
             @complete="completeSession"
+            @start-next-block="startNextBlock"
         />
     </AuthenticatedLayout>
 </template>
@@ -507,6 +508,14 @@ const completeSession = () => {
     form.post(route('sessions.complete', props.session.id), {
         preserveScroll: true,
     })
+}
+
+const startNextBlock = () => {
+    // Находим первый блок со статусом 'planned'
+    const nextBlock = props.session.blocks.find(block => block.status === 'planned')
+    if (nextBlock) {
+        startBlock(nextBlock)
+    }
 }
 
 const deleteSession = () => {
