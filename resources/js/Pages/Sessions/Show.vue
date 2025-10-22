@@ -522,16 +522,29 @@ const showExtensionNotification = (minutes: number, blockTitle?: string, action?
 const startSession = () => {
     form.post(route('sessions.start', props.session.id), {
         preserveScroll: true,
+        onSuccess: () => {
+            // После успешного старта сессии, запускаем таймер если есть активный блок
+            if (currentBlock.value) {
+                startTimer()
+            }
+        }
     })
 }
 
 const pauseSession = () => {
+    // Сначала останавливаем таймер локально
+    pauseTimer()
+
+    // Затем отправляем запрос на сервер
     form.post(route('sessions.pause', props.session.id), {
         preserveScroll: true,
     })
 }
 
 const completeSession = () => {
+    // Останавливаем таймер при завершении сессии
+    pauseTimer()
+
     form.post(route('sessions.complete', props.session.id), {
         preserveScroll: true,
     })
