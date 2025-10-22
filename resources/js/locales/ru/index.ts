@@ -355,4 +355,22 @@ export default {
     zoom_in: 'Увеличить',
     zoom_out: 'Уменьшить',
   },
+
+  // Метроном
+  metronome: {
+    title: 'Метроном',
+    bpm: 'BPM',
+    timeSignature: 'Размер',
+    volume: 'Громкость',
+    soundType: 'Тип звука',
+    accentFirstBeat: 'Акцент на первую долю',
+    start: 'Старт',
+    stop: 'Стоп',
+    tap: 'Tap',
+    sounds: {
+      click: 'Клик',
+      beep: 'Бип',
+      wood: 'Дерево',
+    },
+  },
 };

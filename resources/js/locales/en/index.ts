@@ -355,4 +355,22 @@ export default {
     zoom_in: 'Zoom In',
     zoom_out: 'Zoom Out',
   },
+
+  // Metronome
+  metronome: {
+    title: 'Metronome',
+    bpm: 'BPM',
+    timeSignature: 'Time Signature',
+    volume: 'Volume',
+    soundType: 'Sound Type',
+    accentFirstBeat: 'Accent first beat',
+    start: 'Start',
+    stop: 'Stop',
+    tap: 'Tap',
+    sounds: {
+      click: 'Click',
+      beep: 'Beep',
+      wood: 'Wood',
+    },
+  },
 };
