@@ -226,9 +226,9 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { useMetronome, TimeSignature } from '@/composables/useMetronome';
-import { useI18n } from 'vue-i18n';
+import { useSimpleI18n } from '@/composables/useSimpleI18n';
 
-const { t } = useI18n();
+const { t } = useSimpleI18n();
 
 const {
     isPlaying,
