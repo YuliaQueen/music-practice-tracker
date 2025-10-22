@@ -150,7 +150,7 @@
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     {{ t('metronome.soundType') }}
                 </label>
-                <div class="grid grid-cols-3 gap-2">
+                <div class="grid grid-cols-2 gap-2">
                     <button
                         @click="setSoundType('click')"
                         class="sound-type-btn"
@@ -164,13 +164,6 @@
                         :class="{ 'active': soundType === 'beep' }"
                     >
                         {{ t('metronome.sounds.beep') }}
-                    </button>
-                    <button
-                        @click="setSoundType('wood')"
-                        class="sound-type-btn"
-                        :class="{ 'active': soundType === 'wood' }"
-                    >
-                        {{ t('metronome.sounds.wood') }}
                     </button>
                 </div>
             </div>

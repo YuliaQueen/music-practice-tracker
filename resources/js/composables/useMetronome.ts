@@ -39,7 +39,8 @@ export function useMetronome() {
                 bpm.value = settings.bpm || 120;
                 timeSignature.value = settings.timeSignature || '4/4';
                 volume.value = settings.volume !== undefined ? settings.volume : 0.5;
-                soundType.value = settings.soundType || 'click';
+                // Remove wood sound - if it was saved, default to click
+                soundType.value = (settings.soundType === 'wood') ? 'click' : (settings.soundType || 'click');
                 accentFirstBeat.value = settings.accentFirstBeat !== undefined ? settings.accentFirstBeat : true;
             } catch (e) {
                 console.error('Failed to load metronome settings:', e);
@@ -100,6 +101,9 @@ export function useMetronome() {
         }
     };
 
+    // Internal beat counter for scheduling
+    let schedulerBeatCounter = 0;
+
     /**
      * Schedule note to be played
      */
@@ -133,8 +137,8 @@ export function useMetronome() {
         const maxIterations = 10; // Защита от бесконечного цикла
 
         while (nextNoteTime < currentTime + scheduleAheadTime && iterationCount < maxIterations) {
-            // Calculate which beat we're on
-            let beatInMeasure = currentBeat.value % displayBeatsPerMeasure.value;
+            // Calculate which beat we're on (0-based)
+            const beatInMeasure = schedulerBeatCounter % displayBeatsPerMeasure.value;
 
             // Schedule this note
             scheduleNote(beatInMeasure, nextNoteTime);
@@ -144,7 +148,7 @@ export function useMetronome() {
             audioEngine.setNextNoteTime(nextNoteTime);
 
             // Increment beat counter
-            currentBeat.value = (currentBeat.value + 1) % displayBeatsPerMeasure.value;
+            schedulerBeatCounter++;
 
             iterationCount++;
         }
@@ -167,6 +171,7 @@ export function useMetronome() {
 
         // Reset state
         currentBeat.value = 0;
+        schedulerBeatCounter = 0;
         audioEngine.setNextNoteTime(audioEngine.getCurrentTime());
 
         // Start scheduler
