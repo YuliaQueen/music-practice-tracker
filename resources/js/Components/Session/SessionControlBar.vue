@@ -5,22 +5,27 @@
             <div class="flex items-center justify-between gap-3">
                 <!-- Информация о текущем статусе (слева) -->
                 <div class="flex items-center gap-2 min-w-0">
+                    <!-- Статус-бейдж -->
                     <div class="flex-shrink-0">
-                        <div
-                            class="w-3 h-3 rounded-full animate-pulse"
-                            :class="{
-                                'bg-success-500': session.status === 'active',
-                                'bg-warning-500': session.status === 'paused',
-                                'bg-neutral-400': session.status === 'planned',
-                                'bg-accent-500': session.status === 'completed'
-                            }"
-                        ></div>
-                    </div>
-                    <div class="min-w-0">
-                        <p class="text-xs sm:text-sm font-medium text-neutral-700 dark:text-neutral-300 truncate">
+                        <span
+                            class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold whitespace-nowrap"
+                            :class="getStatusBadgeClass(session.status)"
+                        >
+                            <span
+                                class="w-2 h-2 rounded-full animate-pulse"
+                                :class="{
+                                    'bg-success-600': session.status === 'active',
+                                    'bg-warning-600': session.status === 'paused',
+                                    'bg-neutral-500': session.status === 'planned',
+                                    'bg-accent-600': session.status === 'completed'
+                                }"
+                            ></span>
                             {{ getStatusText(session.status) }}
-                        </p>
-                        <p v-if="currentBlock" class="text-xs text-neutral-500 dark:text-neutral-400 truncate hidden sm:block">
+                        </span>
+                    </div>
+                    <!-- Текущий блок (только на больших экранах) -->
+                    <div v-if="currentBlock" class="min-w-0 hidden md:block">
+                        <p class="text-xs text-neutral-600 dark:text-neutral-400 truncate">
                             {{ currentBlock.title }}
                         </p>
                     </div>
@@ -166,6 +171,17 @@ const getStatusText = (status: string): string => {
         'cancelled': 'Отменено'
     };
     return statusMap[status] || status;
+};
+
+const getStatusBadgeClass = (status: string): string => {
+    const badgeClasses: Record<string, string> = {
+        'planned': 'bg-neutral-100 text-neutral-800 dark:bg-neutral-700 dark:text-neutral-300',
+        'active': 'bg-success-100 text-success-800 dark:bg-success-900/40 dark:text-success-300',
+        'paused': 'bg-warning-100 text-warning-800 dark:bg-warning-900/40 dark:text-warning-300',
+        'completed': 'bg-accent-100 text-accent-800 dark:bg-accent-900/40 dark:text-accent-300',
+        'cancelled': 'bg-danger-100 text-danger-800 dark:bg-danger-900/40 dark:text-danger-300'
+    };
+    return badgeClasses[status] || 'bg-neutral-100 text-neutral-800 dark:bg-neutral-700 dark:text-neutral-300';
 };
 
 const confirmComplete = () => {
