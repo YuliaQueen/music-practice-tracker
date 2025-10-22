@@ -2,7 +2,7 @@
     <AuthenticatedLayout>
         <template #header>
             <div class="flex justify-between items-center">
-                <h2 class="font-semibold text-xl text-amber-800 dark:text-gray-200 leading-tight">
+                <h2 class="font-semibold text-xl text-primary-800 dark:text-neutral-200 leading-tight">
                     {{ session.title }}
                 </h2>
                 <div class="flex space-x-2">
@@ -18,7 +18,8 @@
             </div>
         </template>
 
-        <div class="py-4 sm:py-6">
+        <!-- Основной контент -->
+        <div class="py-4 sm:py-6 pb-24 sm:pb-28">
             <div class="max-w-7xl mx-auto sm:px-4 lg:px-6">
                 <!-- Уведомление о продлении времени -->
                 <Transition
@@ -31,16 +32,16 @@
                 >
                     <div
                         v-if="extensionNotification.show"
-                        class="mb-4 p-4 bg-green-100 border border-green-200 rounded-lg shadow-sm dark:bg-green-900/20 dark:border-green-800"
+                        class="mb-4 p-4 bg-success-100 border border-success-200 rounded-lg shadow-sm dark:bg-success-900/20 dark:border-success-800"
                     >
                         <div class="flex items-center">
                             <div class="flex-shrink-0">
-                                <svg class="h-5 w-5 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                                <svg class="h-5 w-5 text-success-500" fill="currentColor" viewBox="0 0 20 20">
                                     <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
                                 </svg>
                             </div>
                             <div class="ml-3">
-                                <h4 class="text-sm font-medium text-green-800 dark:text-green-200">
+                                <h4 class="text-sm font-medium text-success-800 dark:text-success-200">
                                     {{ extensionNotification.message }}
                                 </h4>
                             </div>
@@ -51,10 +52,6 @@
                 <!-- Информация о сессии -->
                 <SessionInfo
                     :session="session"
-                    :processing="form.processing"
-                    @start="startSession"
-                    @pause="pauseSession"
-                    @complete="completeSession"
                 />
 
                 <!-- Таймер и текущий блок -->
@@ -64,13 +61,6 @@
                     :time-remaining="currentBlockTime"
                     :progress="currentBlockProgress"
                     :is-running="timerRunning"
-                    :sound-enabled="soundSettings.enabled"
-                    :can-start="session.status === 'active'"
-                    @start-timer="startTimer"
-                    @pause-timer="pauseTimer"
-                    @complete-timer="completeCurrentBlock"
-                    @toggle-sound="toggleSoundSettings"
-                    @show-sound-settings="showSoundSettings = true"
                 />
 
                 <!-- Управление продлением времени -->
@@ -85,10 +75,6 @@
                 <!-- Список блоков -->
                 <SessionBlocksList
                     :blocks="session.blocks"
-                    :can-control="session.status === 'active'"
-                    @start-block="startBlock"
-                    @pause-block="pauseBlock"
-                    @complete-block="completeBlock"
                 />
             </div>
         </div>
@@ -101,6 +87,16 @@
             @close="showSoundSettings = false"
             @save="saveSoundSettings"
         />
+
+        <!-- Фиксированная панель управления -->
+        <SessionControlBar
+            :session="session"
+            :current-block="currentBlock"
+            :processing="form.processing"
+            @start="startSession"
+            @pause="pauseSession"
+            @complete="completeSession"
+        />
     </AuthenticatedLayout>
 </template>
 
@@ -112,6 +108,7 @@ import DangerButton from '@/Components/DangerButton.vue'
 import SessionInfo from '@/Components/Session/SessionInfo.vue'
 import SessionTimer from '@/Components/Session/SessionTimer.vue'
 import SessionBlocksList from '@/Components/Session/SessionBlocksList.vue'
+import SessionControlBar from '@/Components/Session/SessionControlBar.vue'
 import SoundSettingsModal from '@/Components/Session/SoundSettingsModal.vue'
 import TimerExtensionControls from '@/Components/Session/TimerExtensionControls.vue'
 import { useTimerSounds } from '@/composables/useTimerSounds'
@@ -484,16 +481,29 @@ const showExtensionNotification = (minutes: number, blockTitle?: string, action?
 const startSession = () => {
     form.post(route('sessions.start', props.session.id), {
         preserveScroll: true,
+        onSuccess: () => {
+            // После успешного старта сессии, запускаем таймер если есть активный блок
+            if (currentBlock.value) {
+                startTimer()
+            }
+        }
     })
 }
 
 const pauseSession = () => {
+    // Сначала останавливаем таймер локально
+    pauseTimer()
+
+    // Затем отправляем запрос на сервер
     form.post(route('sessions.pause', props.session.id), {
         preserveScroll: true,
     })
 }
 
 const completeSession = () => {
+    // Останавливаем таймер при завершении сессии
+    pauseTimer()
+
     form.post(route('sessions.complete', props.session.id), {
         preserveScroll: true,
     })

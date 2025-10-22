@@ -23,14 +23,14 @@ const verificationLinkSent = computed(
     <GuestLayout>
         <Head title="Подтверждение email" />
 
-        <div class="mb-4 text-sm text-gray-600 dark:text-gray-400">
+        <div class="mb-4 text-sm text-neutral-600 dark:text-neutral-400">
             Спасибо за регистрацию! Перед началом работы, пожалуйста, подтвердите ваш
             email адрес, нажав на ссылку, которую мы только что отправили вам. Если вы
             не получили письмо, мы с радостью отправим вам другое.
         </div>
 
         <div
-            class="mb-4 text-sm font-medium text-green-600 dark:text-green-400"
+            class="mb-4 text-sm font-medium text-success-600 dark:text-success-400"
             v-if="verificationLinkSent"
         >
             Новая ссылка для подтверждения была отправлена на email адрес,
@@ -50,7 +50,7 @@ const verificationLinkSent = computed(
                     :href="route('logout')"
                     method="post"
                     as="button"
-                    class="rounded-md text-sm text-gray-600 dark:text-gray-400 underline hover:text-gray-900 dark:hover:text-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                    class="rounded-md text-sm text-neutral-600 dark:text-neutral-400 underline hover:text-neutral-900 dark:hover:text-neutral-200 focus:outline-none focus:ring-2 focus:ring-accent-500 focus:ring-offset-2"
                     >Выйти</Link
                 >
             </div>

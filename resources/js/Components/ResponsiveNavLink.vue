@@ -9,8 +9,8 @@ const props = defineProps<{
 
 const classes = computed(() =>
     props.active
-        ? 'block w-full ps-3 pe-4 py-2 border-l-4 border-orange-400 text-start text-base font-medium text-orange-700 bg-orange-50 focus:outline-none focus:text-orange-800 focus:bg-orange-100 focus:border-orange-700 transition duration-150 ease-in-out dark:text-indigo-300 dark:bg-indigo-900/50 dark:focus:text-indigo-200 dark:focus:bg-indigo-900/70 dark:focus:border-indigo-300'
-        : 'block w-full ps-3 pe-4 py-2 border-l-4 border-transparent text-start text-base font-medium text-amber-600 hover:text-amber-800 hover:bg-orange-50 hover:border-orange-300 focus:outline-none focus:text-amber-800 focus:bg-orange-50 focus:border-orange-300 transition duration-150 ease-in-out dark:text-gray-400 dark:hover:text-gray-200 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:text-gray-200 dark:focus:bg-gray-700 dark:focus:border-gray-600',
+        ? 'block w-full ps-3 pe-4 py-2 border-l-4 border-primary-400 text-start text-base font-medium text-primary-700 bg-primary-50 focus:outline-none focus:text-primary-800 focus:bg-primary-100 focus:border-primary-600 transition duration-150 ease-in-out dark:text-accent-300 dark:bg-accent-900/40 dark:border-accent-400 dark:focus:text-accent-200 dark:focus:bg-accent-900/60 dark:focus:border-accent-500'
+        : 'block w-full ps-3 pe-4 py-2 border-l-4 border-transparent text-start text-base font-medium text-primary-600 hover:text-primary-700 hover:bg-primary-50 hover:border-primary-300 focus:outline-none focus:text-primary-700 focus:bg-primary-50 focus:border-primary-300 transition duration-150 ease-in-out dark:text-neutral-400 dark:hover:text-neutral-200 dark:hover:bg-neutral-700 dark:hover:border-neutral-600 dark:focus:text-neutral-200 dark:focus:bg-neutral-700 dark:focus:border-neutral-600',
 );
 </script>
 
