@@ -88,7 +88,7 @@ export function getStatusLabel(status: string): string {
  */
 export function getStatusBadgeClass(status: string): string {
     const baseClass = 'px-2 py-1 text-xs font-medium rounded-full';
-    const statusClass = STATUS_BADGE_CLASSES[status as Status] || 'bg-gray-100 text-gray-800 dark:bg-gray-600 dark:text-gray-200';
+    const statusClass = STATUS_BADGE_CLASSES[status as Status] || 'bg-neutral-100 text-neutral-800 dark:bg-neutral-600 dark:text-neutral-200';
     return `${baseClass} ${statusClass}`;
 }
 
