@@ -1,6 +1,6 @@
 <template>
     <!-- Сайдбар для десктопа (lg+) -->
-    <div class="hidden lg:block fixed top-16 right-0 bottom-0 w-96 bg-white dark:bg-neutral-800 border-l border-neutral-200 dark:border-neutral-700 shadow-xl overflow-y-auto z-30">
+    <div class="hidden lg:block lg:sticky lg:top-0 lg:self-start w-96 bg-white dark:bg-neutral-800 border-l border-neutral-200 dark:border-neutral-700 shadow-xl overflow-y-auto max-h-screen">
         <div class="p-6 space-y-6">
             <!-- Заголовок с статусом -->
             <div class="flex items-center justify-between">

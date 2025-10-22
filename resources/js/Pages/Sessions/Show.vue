@@ -18,8 +18,11 @@
             </div>
         </template>
 
-        <div class="py-4 sm:py-6 pb-24 sm:pb-28 lg:pb-6 lg:pr-96">
-            <div class="max-w-7xl mx-auto sm:px-4 lg:px-6">
+        <!-- Контейнер с flex для десктопа -->
+        <div class="lg:flex lg:gap-0">
+            <!-- Основной контент -->
+            <div class="flex-1 py-4 sm:py-6 pb-24 sm:pb-28 lg:pb-6">
+                <div class="max-w-7xl mx-auto sm:px-4 lg:px-6">
                 <!-- Уведомление о продлении времени -->
                 <Transition
                     enter-active-class="transition ease-out duration-300"
@@ -88,7 +91,31 @@
                     @pause-block="pauseBlock"
                     @complete-block="completeBlock"
                 />
+                </div>
             </div>
+
+            <!-- Сайдбар с управлением (видим только на десктопе lg+) -->
+            <SessionSidebar
+                :session="session"
+                :blocks="session.blocks"
+                :current-block="currentBlock"
+                :selected-block-id="selectedBlockForExtension"
+                :time-remaining="currentBlockTime"
+                :progress="currentBlockProgress"
+                :is-running="timerRunning"
+                :can-start="session.status === 'active'"
+                :processing="form.processing"
+                @start="startSession"
+                @pause="pauseSession"
+                @complete="completeSession"
+                @start-timer="startTimer"
+                @pause-timer="pauseTimer"
+                @complete-timer="completeCurrentBlock"
+                @update:selectedBlockId="selectedBlockForExtension = $event"
+                @extend="extendTimer"
+                @restart="restartTimerForBlock"
+                @toggle-sound-settings="showSoundSettings = !showSoundSettings"
+            />
         </div>
 
         <!-- Модальное окно настроек звука -->
@@ -109,29 +136,6 @@
             @start="startSession"
             @pause="pauseSession"
             @complete="completeSession"
-        />
-
-        <!-- Сайдбар с управлением (видим только на десктопе lg+) -->
-        <SessionSidebar
-            :session="session"
-            :blocks="session.blocks"
-            :current-block="currentBlock"
-            :selected-block-id="selectedBlockForExtension"
-            :time-remaining="currentBlockTime"
-            :progress="currentBlockProgress"
-            :is-running="timerRunning"
-            :can-start="session.status === 'active'"
-            :processing="form.processing"
-            @start="startSession"
-            @pause="pauseSession"
-            @complete="completeSession"
-            @start-timer="startTimer"
-            @pause-timer="pauseTimer"
-            @complete-timer="completeCurrentBlock"
-            @update:selectedBlockId="selectedBlockForExtension = $event"
-            @extend="extendTimer"
-            @restart="restartTimerForBlock"
-            @toggle-sound-settings="showSoundSettings = !showSoundSettings"
         />
     </AuthenticatedLayout>
 </template>
