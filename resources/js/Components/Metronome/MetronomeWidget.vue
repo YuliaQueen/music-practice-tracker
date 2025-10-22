@@ -168,6 +168,43 @@
                 </div>
             </div>
 
+            <!-- Subdivision -->
+            <div class="mb-6">
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    {{ t('metronome.subdivision') }}
+                </label>
+                <div class="grid grid-cols-4 gap-2">
+                    <button
+                        @click="subdivision = 'none'"
+                        class="sound-type-btn text-xs"
+                        :class="{ 'active': subdivision === 'none' }"
+                    >
+                        {{ t('metronome.subdivisions.none') }}
+                    </button>
+                    <button
+                        @click="subdivision = 'eighth'"
+                        class="sound-type-btn text-xs"
+                        :class="{ 'active': subdivision === 'eighth' }"
+                    >
+                        {{ t('metronome.subdivisions.eighth') }}
+                    </button>
+                    <button
+                        @click="subdivision = 'triplet'"
+                        class="sound-type-btn text-xs"
+                        :class="{ 'active': subdivision === 'triplet' }"
+                    >
+                        {{ t('metronome.subdivisions.triplet') }}
+                    </button>
+                    <button
+                        @click="subdivision = 'sixteenth'"
+                        class="sound-type-btn text-xs"
+                        :class="{ 'active': subdivision === 'sixteenth' }"
+                    >
+                        {{ t('metronome.subdivisions.sixteenth') }}
+                    </button>
+                </div>
+            </div>
+
             <!-- Accent First Beat Toggle -->
             <div class="mb-6">
                 <label class="flex items-center cursor-pointer">
@@ -317,6 +354,7 @@ const {
     volume,
     soundType,
     accentFirstBeat,
+    subdivision,
     autoIncrement,
     autoIncrementInterval,
     autoIncrementAmount,

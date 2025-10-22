@@ -3,6 +3,7 @@ import MetronomeAudioEngine from '@/utils/metronomeAudioEngine';
 
 export type TimeSignature = '2/4' | '3/4' | '4/4' | '5/4' | '6/8' | '7/8' | '9/8' | '12/8';
 export type SoundType = 'click' | 'beep' | 'wood';
+export type Subdivision = 'none' | 'eighth' | 'triplet' | 'sixteenth';
 
 interface MetronomeSettings {
     bpm: number;
@@ -10,6 +11,7 @@ interface MetronomeSettings {
     volume: number;
     soundType: SoundType;
     accentFirstBeat: boolean;
+    subdivision: Subdivision;
     autoIncrement: boolean;
     autoIncrementInterval: number; // seconds
     autoIncrementAmount: number; // BPM to add
@@ -31,6 +33,7 @@ export function useMetronome() {
     const volume = ref(0.5);
     const soundType = ref<SoundType>('click');
     const accentFirstBeat = ref(true);
+    const subdivision = ref<Subdivision>('none');
 
     // Auto-increment state
     const autoIncrement = ref(false);
@@ -57,6 +60,7 @@ export function useMetronome() {
                 // Remove wood sound - if it was saved, default to click
                 soundType.value = (settings.soundType === 'wood') ? 'click' : (settings.soundType || 'click');
                 accentFirstBeat.value = settings.accentFirstBeat !== undefined ? settings.accentFirstBeat : true;
+                subdivision.value = settings.subdivision || 'none';
                 autoIncrement.value = settings.autoIncrement || false;
                 autoIncrementInterval.value = settings.autoIncrementInterval || 60;
                 autoIncrementAmount.value = settings.autoIncrementAmount || 5;
@@ -76,6 +80,7 @@ export function useMetronome() {
             volume: volume.value,
             soundType: soundType.value,
             accentFirstBeat: accentFirstBeat.value,
+            subdivision: subdivision.value,
             autoIncrement: autoIncrement.value,
             autoIncrementInterval: autoIncrementInterval.value,
             autoIncrementAmount: autoIncrementAmount.value,
@@ -130,14 +135,52 @@ export function useMetronome() {
     let schedulerBeatCounter = 0;
 
     /**
-     * Schedule note to be played
+     * Get number of subdivisions per beat
+     */
+    const getSubdivisionCount = (): number => {
+        switch (subdivision.value) {
+            case 'eighth': return 2;
+            case 'triplet': return 3;
+            case 'sixteenth': return 4;
+            default: return 1;
+        }
+    };
+
+    /**
+     * Schedule note to be played with subdivisions
      */
     const scheduleNote = (beatNumber: number, time: number): void => {
         // Determine if this beat should be accented
         const isAccent = accentFirstBeat.value && beatNumber === 0;
 
-        // Schedule the sound
+        // Schedule the main beat sound
         playSound(time, isAccent);
+
+        // Schedule subdivision sounds if enabled
+        if (subdivision.value !== 'none') {
+            const subdivisionCount = getSubdivisionCount();
+            const subdivisionInterval = secondsPerBeat.value / subdivisionCount;
+
+            // Schedule subdivision clicks (skip the first one as it's the main beat)
+            for (let i = 1; i < subdivisionCount; i++) {
+                const subdivTime = time + (subdivisionInterval * i);
+                // Subdivision sounds are quieter (60% of main volume)
+                const subdivVolume = volume.value * 0.6;
+
+                switch (soundType.value) {
+                    case 'beep':
+                        audioEngine.playBeep(subdivTime, false, subdivVolume);
+                        break;
+                    case 'wood':
+                        audioEngine.playWoodBlock(subdivTime, false, subdivVolume);
+                        break;
+                    case 'click':
+                    default:
+                        audioEngine.playClick(subdivTime, false, subdivVolume);
+                        break;
+                }
+            }
+        }
 
         // Update visual indicator (in sync with audio)
         // We schedule the visual update slightly before the audio for better perceived sync
@@ -422,6 +465,7 @@ export function useMetronome() {
         volume,
         soundType,
         accentFirstBeat,
+        subdivision,
         autoIncrement,
         autoIncrementInterval,
         autoIncrementAmount,
