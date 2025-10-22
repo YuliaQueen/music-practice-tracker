@@ -87,7 +87,7 @@ export function getStatusLabel(status: string): string {
  * Получить CSS классы для бейджа статуса
  */
 export function getStatusBadgeClass(status: string): string {
-    const baseClass = 'px-2 py-1 text-xs font-medium rounded-full';
+    const baseClass = 'inline-flex items-center px-2 py-1 text-xs font-medium rounded-full';
     const statusClass = STATUS_BADGE_CLASSES[status as Status] || 'bg-neutral-100 text-neutral-800 dark:bg-neutral-600 dark:text-neutral-200';
     return `${baseClass} ${statusClass}`;
 }
