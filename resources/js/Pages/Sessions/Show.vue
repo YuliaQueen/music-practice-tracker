@@ -18,11 +18,9 @@
             </div>
         </template>
 
-        <!-- Контейнер с flex для десктопа -->
-        <div class="lg:flex lg:gap-0">
-            <!-- Основной контент -->
-            <div class="flex-1 py-4 sm:py-6 pb-24 sm:pb-28 lg:pb-6">
-                <div class="max-w-7xl mx-auto sm:px-4 lg:px-6">
+        <!-- Основной контент -->
+        <div class="py-4 sm:py-6 pb-24 sm:pb-28">
+            <div class="max-w-7xl mx-auto sm:px-4 lg:px-6">
                 <!-- Уведомление о продлении времени -->
                 <Transition
                     enter-active-class="transition ease-out duration-300"
@@ -56,20 +54,18 @@
                     :session="session"
                 />
 
-                <!-- Таймер и текущий блок (скрыт на десктопе lg+) -->
+                <!-- Таймер и текущий блок -->
                 <SessionTimer
                     v-if="currentBlock"
-                    class="lg:hidden"
                     :current-block="currentBlock"
                     :time-remaining="currentBlockTime"
                     :progress="currentBlockProgress"
                     :is-running="timerRunning"
                 />
 
-                <!-- Управление продлением времени (скрыто на десктопе lg+) -->
+                <!-- Управление продлением времени -->
                 <TimerExtensionControls
                     v-if="session.status === 'active' && session.blocks.length > 0"
-                    class="lg:hidden"
                     :blocks="session.blocks"
                     v-model:selectedBlockId="selectedBlockForExtension"
                     @extend="extendTimer"
@@ -80,28 +76,7 @@
                 <SessionBlocksList
                     :blocks="session.blocks"
                 />
-                </div>
             </div>
-
-            <!-- Сайдбар с управлением (видим только на десктопе lg+) -->
-            <SessionSidebar
-                :session="session"
-                :blocks="session.blocks"
-                :current-block="currentBlock"
-                :selected-block-id="selectedBlockForExtension"
-                :time-remaining="currentBlockTime"
-                :progress="currentBlockProgress"
-                :is-running="timerRunning"
-                :can-start="session.status === 'active'"
-                :processing="form.processing"
-                @start="startSession"
-                @pause="pauseSession"
-                @complete="completeSession"
-                @update:selectedBlockId="selectedBlockForExtension = $event"
-                @extend="extendTimer"
-                @restart="restartTimerForBlock"
-                @toggle-sound-settings="showSoundSettings = !showSoundSettings"
-            />
         </div>
 
         <!-- Модальное окно настроек звука -->
@@ -113,9 +88,8 @@
             @save="saveSoundSettings"
         />
 
-        <!-- Фиксированная панель управления (скрыта на десктопе lg+) -->
+        <!-- Фиксированная панель управления -->
         <SessionControlBar
-            class="lg:hidden"
             :session="session"
             :current-block="currentBlock"
             :processing="form.processing"
@@ -135,7 +109,6 @@ import SessionInfo from '@/Components/Session/SessionInfo.vue'
 import SessionTimer from '@/Components/Session/SessionTimer.vue'
 import SessionBlocksList from '@/Components/Session/SessionBlocksList.vue'
 import SessionControlBar from '@/Components/Session/SessionControlBar.vue'
-import SessionSidebar from '@/Components/Session/SessionSidebar.vue'
 import SoundSettingsModal from '@/Components/Session/SoundSettingsModal.vue'
 import TimerExtensionControls from '@/Components/Session/TimerExtensionControls.vue'
 import { useTimerSounds } from '@/composables/useTimerSounds'
