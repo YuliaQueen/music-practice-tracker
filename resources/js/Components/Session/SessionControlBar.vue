@@ -47,6 +47,20 @@
                         <span class="sm:hidden">{{ session.status === 'paused' ? 'Продолжить' : 'Старт' }}</span>
                     </button>
 
+                    <!-- Кнопка "Следующее упражнение" (когда сессия активна, но нет текущего блока) -->
+                    <button
+                        v-if="session.status === 'active' && !currentBlock && hasPlannedBlocks"
+                        @click="$emit('start-next-block')"
+                        :disabled="processing"
+                        class="inline-flex items-center gap-1.5 px-4 sm:px-6 py-2 sm:py-2.5 bg-success-500 hover:bg-success-600 text-white font-semibold rounded-lg shadow-md hover:shadow-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base animate-pulse"
+                    >
+                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd" />
+                        </svg>
+                        <span class="hidden sm:inline">Следующее упражнение</span>
+                        <span class="sm:hidden">Далее</span>
+                    </button>
+
                     <!-- Кнопка "Пауза" -->
                     <button
                         v-if="session.status === 'active'"
@@ -119,7 +133,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 
 interface SessionBlock {
     id: number
@@ -149,7 +163,7 @@ interface Props {
     processing?: boolean
 }
 
-withDefaults(defineProps<Props>(), {
+const props = withDefaults(defineProps<Props>(), {
     processing: false,
     currentBlock: null
 });
@@ -158,7 +172,12 @@ const emit = defineEmits<{
     start: []
     pause: []
     complete: []
+    'start-next-block': []
 }>();
+
+const hasPlannedBlocks = computed(() => {
+    return props.session.blocks.some(block => block.status === 'planned');
+});
 
 const showConfirmComplete = ref(false);
 
