@@ -82,38 +82,12 @@
                 </div>
 
                 <!-- Линейный прогресс -->
-                <div class="w-full bg-primary-200 dark:bg-neutral-700 rounded-full h-2 overflow-hidden mb-4">
+                <div class="w-full bg-primary-200 dark:bg-neutral-700 rounded-full h-2 overflow-hidden">
                     <div
                         class="h-2 rounded-full transition-all duration-1000"
                         :class="progress >= 100 ? 'bg-gradient-to-r from-danger-400 to-danger-500' : 'bg-gradient-to-r from-primary-400 to-danger-500'"
                         :style="{ width: Math.min(progress, 100) + '%' }"
                     ></div>
-                </div>
-
-                <!-- Кнопки управления таймером -->
-                <div class="flex gap-2">
-                    <button
-                        v-if="!isRunning"
-                        @click="$emit('start-timer')"
-                        :disabled="!canStart"
-                        class="flex-1 px-3 py-2 bg-success-500 text-white font-medium rounded-lg shadow hover:bg-success-600 transition-colors disabled:opacity-50 text-sm"
-                    >
-                        ▶ Запустить
-                    </button>
-                    <button
-                        v-if="isRunning"
-                        @click="$emit('pause-timer')"
-                        class="flex-1 px-3 py-2 bg-warning-500 text-white font-medium rounded-lg shadow hover:bg-warning-600 transition-colors text-sm"
-                    >
-                        ⏸ Пауза
-                    </button>
-                    <button
-                        @click="$emit('complete-timer')"
-                        :disabled="!canStart"
-                        class="flex-1 px-3 py-2 bg-danger-500 text-white font-medium rounded-lg shadow hover:bg-danger-600 transition-colors disabled:opacity-50 text-sm"
-                    >
-                        ✓ Завершить
-                    </button>
                 </div>
             </div>
 
@@ -316,9 +290,6 @@ const emit = defineEmits<{
     start: []
     pause: []
     complete: []
-    'start-timer': []
-    'pause-timer': []
-    'complete-timer': []
     'update:selectedBlockId': [value: number]
     extend: [minutes: number]
     restart: []

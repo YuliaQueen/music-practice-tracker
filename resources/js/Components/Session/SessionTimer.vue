@@ -72,45 +72,6 @@
                     </div>
                 </div>
             </div>
-
-            <!-- Управление таймером -->
-            <div class="flex justify-center gap-2 mt-4">
-                <button
-                    v-if="!isRunning"
-                    @click="$emit('start-timer')"
-                    :disabled="!canStart"
-                    class="px-4 py-2 bg-success-500 text-white font-medium rounded-lg shadow hover:bg-success-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm"
-                >
-                    ▶ Запустить
-                </button>
-
-                <button
-                    v-if="isRunning"
-                    @click="$emit('pause-timer')"
-                    class="px-4 py-2 bg-warning-500 text-white font-medium rounded-lg shadow hover:bg-warning-600 transition-colors text-sm"
-                >
-                    ⏸ Пауза
-                </button>
-
-                <button
-                    @click="$emit('complete-timer')"
-                    :disabled="!canStart"
-                    class="px-4 py-2 bg-danger-500 text-white font-medium rounded-lg shadow hover:bg-danger-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm"
-                >
-                    ✓ Завершить
-                </button>
-
-                <!-- Кнопка управления звуками -->
-                <button
-                    @click="$emit('toggle-sound')"
-                    @dblclick="$emit('show-sound-settings')"
-                    :class="soundEnabled ? 'bg-accent-500 hover:bg-accent-600' : 'bg-neutral-500 hover:bg-neutral-600'"
-                    class="px-3 py-2 text-white font-medium rounded-lg shadow transition-colors text-sm"
-                    :title="soundEnabled ? 'Звуки включены (двойной клик для настроек)' : 'Звуки выключены (двойной клик для настроек)'"
-                >
-                    {{ soundEnabled ? '🔊' : '🔇' }}
-                </button>
-            </div>
         </div>
     </div>
 </template>
@@ -137,19 +98,9 @@ interface Props {
     timeRemaining: number
     progress: number
     isRunning: boolean
-    soundEnabled: boolean
-    canStart: boolean
 }
 
 const props = defineProps<Props>();
-
-defineEmits<{
-    'start-timer': []
-    'pause-timer': []
-    'complete-timer': []
-    'toggle-sound': []
-    'show-sound-settings': []
-}>();
 
 const circumference = computed(() => {
     return 2 * Math.PI * 40; // радиус 40

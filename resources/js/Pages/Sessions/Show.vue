@@ -64,13 +64,6 @@
                     :time-remaining="currentBlockTime"
                     :progress="currentBlockProgress"
                     :is-running="timerRunning"
-                    :sound-enabled="soundSettings.enabled"
-                    :can-start="session.status === 'active'"
-                    @start-timer="startTimer"
-                    @pause-timer="pauseTimer"
-                    @complete-timer="completeCurrentBlock"
-                    @toggle-sound="toggleSoundSettings"
-                    @show-sound-settings="showSoundSettings = true"
                 />
 
                 <!-- Управление продлением времени (скрыто на десктопе lg+) -->
@@ -86,10 +79,6 @@
                 <!-- Список блоков -->
                 <SessionBlocksList
                     :blocks="session.blocks"
-                    :can-control="session.status === 'active'"
-                    @start-block="startBlock"
-                    @pause-block="pauseBlock"
-                    @complete-block="completeBlock"
                 />
                 </div>
             </div>
@@ -108,9 +97,6 @@
                 @start="startSession"
                 @pause="pauseSession"
                 @complete="completeSession"
-                @start-timer="startTimer"
-                @pause-timer="pauseTimer"
-                @complete-timer="completeCurrentBlock"
                 @update:selectedBlockId="selectedBlockForExtension = $event"
                 @extend="extendTimer"
                 @restart="restartTimerForBlock"

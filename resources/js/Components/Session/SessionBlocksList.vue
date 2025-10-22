@@ -45,40 +45,6 @@
                                 </div>
                             </div>
                         </div>
-
-                        <div class="flex gap-1 ml-3">
-                            <button
-                                v-if="block.status === 'planned' && canControl"
-                                @click="$emit('start-block', block)"
-                                class="px-2 py-1 bg-success-500 text-white text-xs rounded hover:bg-success-600 transition-colors"
-                            >
-                                ▶
-                            </button>
-
-                            <button
-                                v-if="block.status === 'active' && canControl"
-                                @click="$emit('pause-block', block)"
-                                class="px-2 py-1 bg-warning-500 text-white text-xs rounded hover:bg-warning-600 transition-colors"
-                            >
-                                ⏸
-                            </button>
-
-                            <button
-                                v-if="block.status === 'paused' && canControl"
-                                @click="$emit('start-block', block)"
-                                class="px-2 py-1 bg-success-500 text-white text-xs rounded hover:bg-success-600 transition-colors"
-                            >
-                                ▶
-                            </button>
-
-                            <button
-                                v-if="['active', 'paused'].includes(block.status) && canControl"
-                                @click="$emit('complete-block', block)"
-                                class="px-2 py-1 bg-danger-500 text-white text-xs rounded hover:bg-danger-600 transition-colors"
-                            >
-                                ✓
-                            </button>
-                        </div>
                     </div>
                 </div>
             </div>
@@ -110,14 +76,7 @@ interface SessionBlock {
 
 interface Props {
     blocks: SessionBlock[]
-    canControl: boolean
 }
 
 defineProps<Props>();
-
-defineEmits<{
-    'start-block': [block: SessionBlock]
-    'pause-block': [block: SessionBlock]
-    'complete-block': [block: SessionBlock]
-}>();
 </script>
