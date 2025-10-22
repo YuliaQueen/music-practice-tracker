@@ -18,7 +18,7 @@
             </div>
         </template>
 
-        <div class="py-4 sm:py-6">
+        <div class="py-4 sm:py-6 pb-24 sm:pb-28">
             <div class="max-w-7xl mx-auto sm:px-4 lg:px-6">
                 <!-- Уведомление о продлении времени -->
                 <Transition
@@ -51,10 +51,6 @@
                 <!-- Информация о сессии -->
                 <SessionInfo
                     :session="session"
-                    :processing="form.processing"
-                    @start="startSession"
-                    @pause="pauseSession"
-                    @complete="completeSession"
                 />
 
                 <!-- Таймер и текущий блок -->
@@ -101,6 +97,16 @@
             @close="showSoundSettings = false"
             @save="saveSoundSettings"
         />
+
+        <!-- Фиксированная панель управления -->
+        <SessionControlBar
+            :session="session"
+            :current-block="currentBlock"
+            :processing="form.processing"
+            @start="startSession"
+            @pause="pauseSession"
+            @complete="completeSession"
+        />
     </AuthenticatedLayout>
 </template>
 
@@ -112,6 +118,7 @@ import DangerButton from '@/Components/DangerButton.vue'
 import SessionInfo from '@/Components/Session/SessionInfo.vue'
 import SessionTimer from '@/Components/Session/SessionTimer.vue'
 import SessionBlocksList from '@/Components/Session/SessionBlocksList.vue'
+import SessionControlBar from '@/Components/Session/SessionControlBar.vue'
 import SoundSettingsModal from '@/Components/Session/SoundSettingsModal.vue'
 import TimerExtensionControls from '@/Components/Session/TimerExtensionControls.vue'
 import { useTimerSounds } from '@/composables/useTimerSounds'
