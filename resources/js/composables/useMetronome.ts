@@ -129,12 +129,17 @@ export function useMetronome() {
      * Scheduler function - looks ahead and schedules notes
      */
     const scheduler = (): void => {
+        if (!isPlaying.value) return;
+
         const currentTime = audioEngine.getCurrentTime();
-        const nextNoteTime = audioEngine.getNextNoteTime();
         const scheduleAheadTime = audioEngine.getScheduleAheadTime();
 
         // While there are notes that need to be scheduled
-        while (nextNoteTime < currentTime + scheduleAheadTime) {
+        let nextNoteTime = audioEngine.getNextNoteTime();
+        let iterationCount = 0;
+        const maxIterations = 10; // Защита от бесконечного цикла
+
+        while (nextNoteTime < currentTime + scheduleAheadTime && iterationCount < maxIterations) {
             // Calculate which beat we're on
             let beatInMeasure = currentBeat.value % displayBeatsPerMeasure.value;
 
@@ -142,15 +147,19 @@ export function useMetronome() {
             scheduleNote(beatInMeasure, nextNoteTime);
 
             // Advance to next beat
-            const nextBeatTime = nextNoteTime + secondsPerBeat.value;
-            audioEngine.setNextNoteTime(nextBeatTime);
+            nextNoteTime = nextNoteTime + secondsPerBeat.value;
+            audioEngine.setNextNoteTime(nextNoteTime);
 
             // Increment beat counter
             currentBeat.value = (currentBeat.value + 1) % displayBeatsPerMeasure.value;
+
+            iterationCount++;
         }
 
         // Schedule next scheduler call
-        timerID = window.setTimeout(scheduler, audioEngine.getLookahead());
+        if (isPlaying.value) {
+            timerID = window.setTimeout(scheduler, audioEngine.getLookahead());
+        }
     };
 
     /**
