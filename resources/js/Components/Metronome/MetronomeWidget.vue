@@ -183,6 +183,64 @@
                 </label>
             </div>
 
+            <!-- Auto-Increment BPM -->
+            <div class="mb-6 p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg border border-gray-200 dark:border-gray-600">
+                <label class="flex items-center cursor-pointer mb-3">
+                    <input
+                        type="checkbox"
+                        v-model="autoIncrement"
+                        class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:bg-gray-700 dark:border-gray-600"
+                    />
+                    <span class="ml-2 text-sm font-semibold text-gray-700 dark:text-gray-300">
+                        {{ t('metronome.autoIncrement') }}
+                    </span>
+                </label>
+
+                <div v-if="autoIncrement" class="space-y-3">
+                    <div class="grid grid-cols-2 gap-3">
+                        <!-- Interval -->
+                        <div>
+                            <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">
+                                {{ t('metronome.intervalSeconds') }}
+                            </label>
+                            <input
+                                type="number"
+                                v-model.number="autoIncrementInterval"
+                                min="10"
+                                max="600"
+                                step="10"
+                                class="w-full px-2 py-1 text-sm bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400"
+                            />
+                        </div>
+
+                        <!-- Amount -->
+                        <div>
+                            <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">
+                                {{ t('metronome.incrementAmount') }}
+                            </label>
+                            <input
+                                type="number"
+                                v-model.number="autoIncrementAmount"
+                                min="1"
+                                max="20"
+                                step="1"
+                                class="w-full px-2 py-1 text-sm bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400"
+                            />
+                        </div>
+                    </div>
+
+                    <!-- Timer indicator -->
+                    <div v-if="isPlaying && timeUntilIncrement > 0" class="text-center py-2 bg-blue-50 dark:bg-blue-900/20 rounded-md">
+                        <div class="text-xs text-gray-600 dark:text-gray-400 mb-1">
+                            {{ t('metronome.nextIncrementIn') }}
+                        </div>
+                        <div class="text-lg font-bold text-blue-600 dark:text-blue-400">
+                            {{ Math.floor(timeUntilIncrement / 60) }}:{{ String(timeUntilIncrement % 60).padStart(2, '0') }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- Play/Stop Button -->
             <button
                 @click="toggle"
@@ -231,6 +289,10 @@ const {
     volume,
     soundType,
     accentFirstBeat,
+    autoIncrement,
+    autoIncrementInterval,
+    autoIncrementAmount,
+    timeUntilIncrement,
     beatsPerMeasure,
     toggle,
     setBpm,

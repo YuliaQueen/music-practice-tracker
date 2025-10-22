@@ -10,6 +10,9 @@ interface MetronomeSettings {
     volume: number;
     soundType: SoundType;
     accentFirstBeat: boolean;
+    autoIncrement: boolean;
+    autoIncrementInterval: number; // seconds
+    autoIncrementAmount: number; // BPM to add
 }
 
 const SETTINGS_KEY = 'metronome_settings';
@@ -27,8 +30,16 @@ export function useMetronome() {
     const soundType = ref<SoundType>('click');
     const accentFirstBeat = ref(true);
 
+    // Auto-increment state
+    const autoIncrement = ref(false);
+    const autoIncrementInterval = ref(60); // seconds (default 1 minute)
+    const autoIncrementAmount = ref(5); // BPM (default +5)
+    const timeUntilIncrement = ref(0); // seconds remaining
+    const autoIncrementStartTime = ref<number | null>(null);
+
     // Timing
     let timerID: number | null = null;
+    let autoIncrementTimerID: number | null = null;
 
     // Load settings from localStorage
     const loadSettings = (): void => {
@@ -42,6 +53,9 @@ export function useMetronome() {
                 // Remove wood sound - if it was saved, default to click
                 soundType.value = (settings.soundType === 'wood') ? 'click' : (settings.soundType || 'click');
                 accentFirstBeat.value = settings.accentFirstBeat !== undefined ? settings.accentFirstBeat : true;
+                autoIncrement.value = settings.autoIncrement || false;
+                autoIncrementInterval.value = settings.autoIncrementInterval || 60;
+                autoIncrementAmount.value = settings.autoIncrementAmount || 5;
             } catch (e) {
                 console.error('Failed to load metronome settings:', e);
             }
@@ -56,6 +70,9 @@ export function useMetronome() {
             volume: volume.value,
             soundType: soundType.value,
             accentFirstBeat: accentFirstBeat.value,
+            autoIncrement: autoIncrement.value,
+            autoIncrementInterval: autoIncrementInterval.value,
+            autoIncrementAmount: autoIncrementAmount.value,
         };
         localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
     };
@@ -160,6 +177,59 @@ export function useMetronome() {
     };
 
     /**
+     * Start auto-increment timer
+     */
+    const startAutoIncrement = (): void => {
+        if (!autoIncrement.value || !isPlaying.value) return;
+
+        autoIncrementStartTime.value = Date.now();
+        timeUntilIncrement.value = autoIncrementInterval.value;
+
+        // Update timer every 100ms
+        const updateTimer = () => {
+            if (!isPlaying.value || !autoIncrement.value) {
+                stopAutoIncrement();
+                return;
+            }
+
+            const elapsed = Math.floor((Date.now() - (autoIncrementStartTime.value || 0)) / 1000);
+            const remaining = autoIncrementInterval.value - elapsed;
+
+            if (remaining <= 0) {
+                // Time to increment!
+                const newBpm = Math.min(300, bpm.value + autoIncrementAmount.value);
+                bpm.value = newBpm;
+                saveSettings();
+
+                // Reset timer for next increment
+                autoIncrementStartTime.value = Date.now();
+                timeUntilIncrement.value = autoIncrementInterval.value;
+            } else {
+                timeUntilIncrement.value = remaining;
+            }
+
+            // Schedule next update
+            if (isPlaying.value && autoIncrement.value) {
+                autoIncrementTimerID = window.setTimeout(updateTimer, 100);
+            }
+        };
+
+        updateTimer();
+    };
+
+    /**
+     * Stop auto-increment timer
+     */
+    const stopAutoIncrement = (): void => {
+        if (autoIncrementTimerID !== null) {
+            clearTimeout(autoIncrementTimerID);
+            autoIncrementTimerID = null;
+        }
+        autoIncrementStartTime.value = null;
+        timeUntilIncrement.value = 0;
+    };
+
+    /**
      * Start the metronome
      */
     const start = async (): Promise<void> => {
@@ -177,6 +247,11 @@ export function useMetronome() {
         // Start scheduler
         isPlaying.value = true;
         scheduler();
+
+        // Start auto-increment if enabled
+        if (autoIncrement.value) {
+            startAutoIncrement();
+        }
     };
 
     /**
@@ -192,6 +267,9 @@ export function useMetronome() {
             clearTimeout(timerID);
             timerID = null;
         }
+
+        // Stop auto-increment timer
+        stopAutoIncrement();
     };
 
     /**
@@ -321,6 +399,10 @@ export function useMetronome() {
         volume,
         soundType,
         accentFirstBeat,
+        autoIncrement,
+        autoIncrementInterval,
+        autoIncrementAmount,
+        timeUntilIncrement,
 
         // Computed
         beatsPerMeasure: displayBeatsPerMeasure,
