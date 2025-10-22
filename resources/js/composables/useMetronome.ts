@@ -71,19 +71,12 @@ export function useMetronome() {
     });
 
     const secondsPerBeat = computed(() => {
-        // For compound time signatures (6/8, 9/8, 12/8), the beat is usually felt in groups
-        if (noteValue.value === 8 && beatsPerMeasure.value > 4) {
-            // Compound meter: dotted quarter gets the beat
-            return 60.0 / bpm.value * 3;
-        }
+        // Always use the straightforward calculation for metronome
         return 60.0 / bpm.value;
     });
 
     const displayBeatsPerMeasure = computed(() => {
-        // For compound meters, show the actual number of beats felt
-        if (noteValue.value === 8 && beatsPerMeasure.value > 4) {
-            return Math.floor(beatsPerMeasure.value / 3);
-        }
+        // Always show the actual number of beats from time signature
         return beatsPerMeasure.value;
     });
 

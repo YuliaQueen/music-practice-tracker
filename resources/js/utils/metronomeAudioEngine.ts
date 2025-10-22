@@ -91,15 +91,15 @@ export class MetronomeAudioEngine {
         const oscillator = this.audioContext.createOscillator();
         const gainNode = this.audioContext.createGain();
 
-        // Different frequencies for accent and regular beats
-        oscillator.frequency.value = isAccent ? 1000 : 800;
+        // Much more prominent difference for accent beats
+        oscillator.frequency.value = isAccent ? 1200 : 800;
 
         // Connect nodes
         oscillator.connect(gainNode);
         gainNode.connect(this.audioContext.destination);
 
-        // Volume envelope for click sound
-        const clickVolume = isAccent ? volume * 1.5 : volume;
+        // Volume envelope for click sound with stronger accent
+        const clickVolume = isAccent ? volume * 2.0 : volume;
         gainNode.gain.value = clickVolume;
         gainNode.gain.exponentialRampToValueAtTime(0.01, time + 0.03);
 
@@ -170,11 +170,12 @@ export class MetronomeAudioEngine {
 
         const filter = context.createBiquadFilter();
         filter.type = 'bandpass';
-        filter.frequency.value = isAccent ? 600 : 400;
+        filter.frequency.value = isAccent ? 800 : 500;
         filter.Q.value = 10;
 
         const gainNode = context.createGain();
-        const clickVolume = isAccent ? volume * 1.3 : volume;
+        // Much louder base volume and stronger accent for wood block
+        const clickVolume = isAccent ? volume * 3.0 : volume * 1.5;
         gainNode.gain.value = clickVolume;
         gainNode.gain.exponentialRampToValueAtTime(0.01, time + 0.05);
 
@@ -202,13 +203,14 @@ export class MetronomeAudioEngine {
         const oscillator = this.audioContext.createOscillator();
         const gainNode = this.audioContext.createGain();
 
-        oscillator.frequency.value = isAccent ? 1200 : 800;
+        // Higher pitch and stronger accent for beep
+        oscillator.frequency.value = isAccent ? 1400 : 900;
         oscillator.type = 'sine';
 
         oscillator.connect(gainNode);
         gainNode.connect(this.audioContext.destination);
 
-        const clickVolume = isAccent ? volume * 1.4 : volume;
+        const clickVolume = isAccent ? volume * 2.0 : volume;
         gainNode.gain.value = clickVolume;
         gainNode.gain.exponentialRampToValueAtTime(0.01, time + 0.1);
 
