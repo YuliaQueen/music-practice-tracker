@@ -2,7 +2,7 @@
     <div class="relative">
         <button
             @click="showDropdown = !showDropdown"
-            class="inline-flex items-center justify-center rounded-md p-2 text-gray-500 transition duration-150 ease-in-out hover:bg-gray-100 hover:text-gray-700 focus:bg-gray-100 focus:text-gray-700 focus:outline-none dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-200 dark:focus:bg-gray-800 dark:focus:text-gray-200"
+            class="inline-flex items-center justify-center rounded-md p-2 text-neutral-500 transition duration-150 ease-in-out hover:bg-neutral-100 hover:text-neutral-700 focus:bg-neutral-100 focus:text-neutral-700 focus:outline-none dark:text-neutral-400 dark:hover:bg-neutral-800 dark:hover:text-neutral-200 dark:focus:bg-neutral-800 dark:focus:text-neutral-200"
             :title="t('theme.switchToLight')"
         >
             <!-- Иконка языка -->
@@ -25,7 +25,7 @@
         <!-- Выпадающее меню -->
         <div
             v-if="showDropdown"
-            class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none dark:bg-gray-800 dark:ring-gray-600 dark:ring-opacity-50 z-50"
+            class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none dark:bg-neutral-800 dark:ring-neutral-600 dark:ring-opacity-50 z-50"
             @click.stop
         >
             <div class="py-1">
@@ -36,8 +36,8 @@
                     :class="[
                         'w-full text-left px-4 py-2 text-sm transition-colors duration-150',
                         currentLocale === locale.code
-                            ? 'bg-indigo-50 text-indigo-700 dark:bg-indigo-900/50 dark:text-indigo-300'
-                            : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700'
+                            ? 'bg-accent-50 text-accent-700 dark:bg-accent-900/50 dark:text-accent-300'
+                            : 'text-neutral-700 hover:bg-neutral-100 dark:text-neutral-300 dark:hover:bg-neutral-700'
                     ]"
                 >
                     <div class="flex items-center space-x-3">
@@ -45,7 +45,7 @@
                         <span>{{ locale.name }}</span>
                         <svg
                             v-if="currentLocale === locale.code"
-                            class="ml-auto h-4 w-4 text-indigo-600 dark:text-indigo-400"
+                            class="ml-auto h-4 w-4 text-accent-600 dark:text-accent-400"
                             fill="currentColor"
                             viewBox="0 0 20 20"
                         >

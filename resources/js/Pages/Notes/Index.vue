@@ -2,12 +2,12 @@
   <AuthenticatedLayout>
     <template #header>
       <div class="flex justify-between items-center">
-        <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
+        <h2 class="font-semibold text-xl text-neutral-800 dark:text-neutral-200 leading-tight">
           {{ $t('notes.title') }}
         </h2>
         <Link
           :href="route('notes.create')"
-          class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-200"
+          class="bg-accent-500 hover:bg-accent-700 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-200"
         >
           <i class="fas fa-plus mr-2"></i>
           {{ $t('notes.upload_new') }}
@@ -18,30 +18,30 @@
     <div class="py-12">
       <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
         <!-- Фильтры -->
-        <div class="mb-6 bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
+        <div class="mb-6 bg-white dark:bg-neutral-800 overflow-hidden shadow-sm sm:rounded-lg">
           <div class="p-6">
             <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
               <!-- Поиск -->
               <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
                   {{ $t('notes.search') }}
                 </label>
                 <input
                   v-model="searchQuery"
                   type="text"
                   :placeholder="$t('notes.search_placeholder')"
-                  class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+                  class="w-full px-3 py-2 border border-neutral-300 dark:border-neutral-600 rounded-md shadow-sm focus:outline-none focus:ring-accent-500 focus:border-accent-500 dark:bg-neutral-700 dark:text-white"
                 />
               </div>
 
               <!-- Тип файла -->
               <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
                   {{ $t('notes.file_type') }}
                 </label>
                 <select
                   v-model="selectedFileType"
-                  class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+                  class="w-full px-3 py-2 border border-neutral-300 dark:border-neutral-600 rounded-md shadow-sm focus:outline-none focus:ring-accent-500 focus:border-accent-500 dark:bg-neutral-700 dark:text-white"
                 >
                   <option value="">{{ $t('notes.all_types') }}</option>
                   <option value="application/pdf">PDF</option>
@@ -53,12 +53,12 @@
 
               <!-- Упражнение -->
               <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
                   {{ $t('notes.exercise') }}
                 </label>
                 <select
                   v-model="selectedExercise"
-                  class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+                  class="w-full px-3 py-2 border border-neutral-300 dark:border-neutral-600 rounded-md shadow-sm focus:outline-none focus:ring-accent-500 focus:border-accent-500 dark:bg-neutral-700 dark:text-white"
                 >
                   <option value="">{{ $t('notes.all_exercises') }}</option>
                   <option v-for="exercise in exercises" :key="exercise.id" :value="exercise.id">
@@ -69,12 +69,12 @@
 
               <!-- Видимость -->
               <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
                   {{ $t('notes.visibility') }}
                 </label>
                 <select
                   v-model="selectedVisibility"
-                  class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+                  class="w-full px-3 py-2 border border-neutral-300 dark:border-neutral-600 rounded-md shadow-sm focus:outline-none focus:ring-accent-500 focus:border-accent-500 dark:bg-neutral-700 dark:text-white"
                 >
                   <option value="">{{ $t('notes.all_notes') }}</option>
                   <option value="true">{{ $t('notes.public') }}</option>
@@ -86,19 +86,19 @@
         </div>
 
         <!-- Список нот -->
-        <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
+        <div class="bg-white dark:bg-neutral-800 overflow-hidden shadow-sm sm:rounded-lg">
           <div class="p-6">
             <div v-if="filteredNotes.length === 0" class="text-center py-8">
-              <i class="fas fa-music text-6xl text-gray-400 mb-4"></i>
-              <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">
+              <i class="fas fa-music text-6xl text-neutral-400 mb-4"></i>
+              <h3 class="text-lg font-medium text-neutral-900 dark:text-neutral-100 mb-2">
                 {{ $t('notes.no_notes') }}
               </h3>
-              <p class="text-gray-500 dark:text-gray-400 mb-4">
+              <p class="text-neutral-500 dark:text-neutral-400 mb-4">
                 {{ $t('notes.no_notes_description') }}
               </p>
               <Link
                 :href="route('notes.create')"
-                class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-200"
+                class="bg-accent-500 hover:bg-accent-700 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-200"
               >
                 {{ $t('notes.upload_first') }}
               </Link>
@@ -108,28 +108,28 @@
               <div
                 v-for="note in filteredNotes"
                 :key="note.id"
-                class="bg-white dark:bg-gray-700 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200 border border-gray-200 dark:border-gray-600"
+                class="bg-white dark:bg-neutral-700 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200 border border-neutral-200 dark:border-neutral-600"
               >
                 <!-- Заголовок карточки -->
-                <div class="p-4 border-b border-gray-200 dark:border-gray-600">
+                <div class="p-4 border-b border-neutral-200 dark:border-neutral-600">
                   <div class="flex items-start justify-between">
                     <div class="flex-1">
-                      <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-1">
+                      <h3 class="text-lg font-semibold text-neutral-900 dark:text-neutral-100 mb-1">
                         {{ note.title }}
                       </h3>
-                      <p v-if="note.exercise" class="text-sm text-blue-600 dark:text-blue-400">
+                      <p v-if="note.exercise" class="text-sm text-accent-600 dark:text-accent-400">
                         <i class="fas fa-dumbbell mr-1"></i>
                         {{ note.exercise.title }}
                       </p>
                     </div>
                     <div class="flex items-center space-x-2">
                       <!-- Иконка типа файла -->
-                      <div class="flex items-center justify-center w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-600" :title="getFileTypeName(note.mime_type)">
-                        <i :class="getFileTypeIcon(note.mime_type)" class="text-gray-600 dark:text-gray-300"></i>
+                      <div class="flex items-center justify-center w-8 h-8 rounded-full bg-neutral-100 dark:bg-neutral-600" :title="getFileTypeName(note.mime_type)">
+                        <i :class="getFileTypeIcon(note.mime_type)" class="text-neutral-600 dark:text-neutral-300"></i>
                       </div>
                       <!-- Публичность -->
-                      <div v-if="note.is_public" class="flex items-center justify-center w-8 h-8 rounded-full bg-green-100 dark:bg-green-900" :title="$t('notes.public')">
-                        <i class="fas fa-globe text-green-600 dark:text-green-400 text-sm"></i>
+                      <div v-if="note.is_public" class="flex items-center justify-center w-8 h-8 rounded-full bg-success-100 dark:bg-success-900" :title="$t('notes.public')">
+                        <i class="fas fa-globe text-success-600 dark:text-success-400 text-sm"></i>
                       </div>
                     </div>
                   </div>
@@ -137,14 +137,14 @@
 
                 <!-- Описание -->
                 <div v-if="note.description" class="p-4">
-                  <p class="text-sm text-gray-600 dark:text-gray-400 line-clamp-2">
+                  <p class="text-sm text-neutral-600 dark:text-neutral-400 line-clamp-2">
                     {{ note.description }}
                   </p>
                 </div>
 
                 <!-- Метаданные -->
                 <div class="px-4 pb-4">
-                  <div class="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
+                  <div class="flex items-center justify-between text-xs text-neutral-500 dark:text-neutral-400">
                     <span>{{ note.formatted_file_size }}</span>
                     <span>{{ formatDate(note.created_at) }}</span>
                   </div>
@@ -155,14 +155,14 @@
                   <div class="flex space-x-2">
                     <Link
                       :href="route('notes.show', note.id)"
-                      class="flex-1 bg-blue-500 hover:bg-blue-700 text-white text-sm font-medium py-2 px-3 rounded-md transition-colors duration-200 text-center"
+                      class="flex-1 bg-accent-500 hover:bg-accent-700 text-white text-sm font-medium py-2 px-3 rounded-md transition-colors duration-200 text-center"
                     >
                       <i class="fas fa-eye mr-1"></i>
                       {{ $t('notes.view') }}
                     </Link>
                     <button
                       @click="downloadNote(note)"
-                      class="bg-gray-500 hover:bg-gray-700 text-white text-sm font-medium py-2 px-3 rounded-md transition-colors duration-200"
+                      class="bg-neutral-500 hover:bg-neutral-700 text-white text-sm font-medium py-2 px-3 rounded-md transition-colors duration-200"
                       :title="$t('notes.download')"
                     >
                       <i class="fas fa-download mr-1"></i>
@@ -170,7 +170,7 @@
                     </button>
                     <button
                       @click="deleteNote(note)"
-                      class="bg-red-500 hover:bg-red-700 text-white text-sm font-medium py-2 px-3 rounded-md transition-colors duration-200"
+                      class="bg-danger-500 hover:bg-danger-700 text-white text-sm font-medium py-2 px-3 rounded-md transition-colors duration-200"
                       :title="$t('notes.delete')"
                     >
                       <i class="fas fa-trash mr-1"></i>
@@ -188,21 +188,21 @@
                   <Link
                     v-if="notes.prev_page_url"
                     :href="notes.prev_page_url"
-                    class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+                    class="relative inline-flex items-center px-4 py-2 border border-neutral-300 text-sm font-medium rounded-md text-neutral-700 bg-white hover:bg-neutral-50"
                   >
                     {{ $t('pagination.previous') }}
                   </Link>
                   <Link
                     v-if="notes.next_page_url"
                     :href="notes.next_page_url"
-                    class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+                    class="ml-3 relative inline-flex items-center px-4 py-2 border border-neutral-300 text-sm font-medium rounded-md text-neutral-700 bg-white hover:bg-neutral-50"
                   >
                     {{ $t('pagination.next') }}
                   </Link>
                 </div>
                 <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
                   <div>
-                    <p class="text-sm text-gray-700 dark:text-gray-300">
+                    <p class="text-sm text-neutral-700 dark:text-neutral-300">
                       {{ $t('pagination.showing') }}
                       <span class="font-medium">{{ notes.from }}</span>
                       {{ $t('pagination.to') }}
@@ -222,8 +222,8 @@
                         :class="[
                           'relative inline-flex items-center px-4 py-2 border text-sm font-medium',
                           link.active
-                            ? 'z-10 bg-blue-50 border-blue-500 text-blue-600 dark:bg-blue-900 dark:text-blue-200'
-                            : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-600',
+                            ? 'z-10 bg-accent-50 border-accent-500 text-accent-600 dark:bg-accent-900 dark:text-accent-200'
+                            : 'bg-white border-neutral-300 text-neutral-500 hover:bg-neutral-50 dark:bg-neutral-700 dark:border-neutral-600 dark:text-neutral-300 dark:hover:bg-neutral-600',
                           link.url === null ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'
                         ]"
                       />
@@ -333,11 +333,11 @@ const filteredNotes = computed(() => {
 
 // Методы
 const getFileTypeIcon = (mimeType: string): string => {
-  if (mimeType === 'application/pdf') return 'fas fa-file-pdf text-red-500'
-  if (mimeType.startsWith('image/')) return 'fas fa-image text-green-500'
-  if (mimeType.startsWith('audio/')) return 'fas fa-music text-purple-500'
-  if (mimeType.includes('musicxml')) return 'fas fa-file-music text-blue-500'
-  return 'fas fa-file text-gray-500'
+  if (mimeType === 'application/pdf') return 'fas fa-file-pdf text-danger-500'
+  if (mimeType.startsWith('image/')) return 'fas fa-image text-success-500'
+  if (mimeType.startsWith('audio/')) return 'fas fa-music text-secondary-500'
+  if (mimeType.includes('musicxml')) return 'fas fa-file-music text-accent-500'
+  return 'fas fa-file text-neutral-500'
 }
 
 const getFileTypeName = (mimeType: string): string => {

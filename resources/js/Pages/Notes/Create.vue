@@ -2,12 +2,12 @@
   <AuthenticatedLayout>
     <template #header>
       <div class="flex justify-between items-center">
-        <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
+        <h2 class="font-semibold text-xl text-neutral-800 dark:text-neutral-200 leading-tight">
           {{ $t('notes.upload_new') }}
         </h2>
         <Link
           :href="route('notes.index')"
-          class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-200"
+          class="bg-neutral-500 hover:bg-neutral-700 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-200"
         >
           <i class="fas fa-arrow-left mr-2"></i>
           {{ $t('common.back') }}
@@ -17,13 +17,13 @@
 
     <div class="py-12">
       <div class="max-w-3xl mx-auto sm:px-6 lg:px-8">
-        <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
+        <div class="bg-white dark:bg-neutral-800 overflow-hidden shadow-sm sm:rounded-lg">
           <div class="p-6">
             <form @submit.prevent="submitForm" enctype="multipart/form-data">
               <!-- Загрузка файла -->
               <div class="mb-6">
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  {{ $t('notes.select_file') }} <span class="text-red-500">*</span>
+                <label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
+                  {{ $t('notes.select_file') }} <span class="text-danger-500">*</span>
                 </label>
                 
                 <!-- Drag & Drop зона -->
@@ -34,16 +34,16 @@
                   :class="[
                     'border-2 border-dashed rounded-lg p-8 text-center transition-colors duration-200',
                     isDragOver 
-                      ? 'border-blue-500 bg-blue-50 dark:bg-blue-900' 
-                      : 'border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500'
+                      ? 'border-accent-500 bg-accent-50 dark:bg-accent-900' 
+                      : 'border-neutral-300 dark:border-neutral-600 hover:border-neutral-400 dark:hover:border-neutral-500'
                   ]"
                 >
                   <div v-if="!selectedFile">
-                    <i class="fas fa-cloud-upload-alt text-4xl text-gray-400 mb-4"></i>
-                    <p class="text-lg font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    <i class="fas fa-cloud-upload-alt text-4xl text-neutral-400 mb-4"></i>
+                    <p class="text-lg font-medium text-neutral-700 dark:text-neutral-300 mb-2">
                       {{ $t('notes.drag_drop_file') }}
                     </p>
-                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">
+                    <p class="text-sm text-neutral-500 dark:text-neutral-400 mb-4">
                       {{ $t('notes.or_click_to_browse') }}
                     </p>
                     <input
@@ -56,7 +56,7 @@
                     <button
                       type="button"
                       @click="() => fileInput?.click()"
-                      class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-200"
+                      class="bg-accent-500 hover:bg-accent-700 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-200"
                     >
                       {{ $t('notes.browse_files') }}
                     </button>
@@ -64,14 +64,14 @@
                   
                   <div v-else class="space-y-4">
                     <div class="flex items-center justify-center space-x-4">
-                      <div class="flex items-center justify-center w-16 h-16 rounded-full bg-gray-100 dark:bg-gray-600">
+                      <div class="flex items-center justify-center w-16 h-16 rounded-full bg-neutral-100 dark:bg-neutral-600">
                         <i :class="getFileTypeIcon(selectedFile.type)" class="text-2xl"></i>
                       </div>
                       <div class="text-left">
-                        <p class="text-lg font-medium text-gray-900 dark:text-gray-100">
+                        <p class="text-lg font-medium text-neutral-900 dark:text-neutral-100">
                           {{ selectedFile.name }}
                         </p>
-                        <p class="text-sm text-gray-500 dark:text-gray-400">
+                        <p class="text-sm text-neutral-500 dark:text-neutral-400">
                           {{ formatFileSize(selectedFile.size) }}
                         </p>
                       </div>
@@ -79,7 +79,7 @@
                     <button
                       type="button"
                       @click="removeFile"
-                      class="text-red-500 hover:text-red-700 text-sm font-medium"
+                      class="text-danger-500 hover:text-danger-700 text-sm font-medium"
                     >
                       <i class="fas fa-times mr-1"></i>
                       {{ $t('notes.remove_file') }}
@@ -89,41 +89,41 @@
 
                 <!-- Поддерживаемые форматы -->
                 <div class="mt-3">
-                  <p class="text-xs text-gray-500 dark:text-gray-400">
+                  <p class="text-xs text-neutral-500 dark:text-neutral-400">
                     {{ $t('notes.supported_formats') }}: PDF, JPG, PNG, GIF, WebP, MP3, WAV, OGG, MusicXML
                   </p>
-                  <p class="text-xs text-gray-500 dark:text-gray-400">
+                  <p class="text-xs text-neutral-500 dark:text-neutral-400">
                     {{ $t('notes.max_file_size') }}: 50MB
                   </p>
                 </div>
 
                 <!-- Ошибки валидации -->
-                <div v-if="errors.file" class="mt-2 text-sm text-red-600 dark:text-red-400">
+                <div v-if="errors.file" class="mt-2 text-sm text-danger-600 dark:text-danger-400">
                   {{ errors.file }}
                 </div>
               </div>
 
               <!-- Название -->
               <div class="mb-6">
-                <label for="title" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  {{ $t('notes.title') }} <span class="text-red-500">*</span>
+                <label for="title" class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
+                  {{ $t('notes.title') }} <span class="text-danger-500">*</span>
                 </label>
                 <input
                   id="title"
                   v-model="form.title"
                   type="text"
                   :placeholder="$t('notes.title_placeholder')"
-                  class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
-                  :class="{ 'border-red-500': errors.title }"
+                  class="w-full px-3 py-2 border border-neutral-300 dark:border-neutral-600 rounded-md shadow-sm focus:outline-none focus:ring-accent-500 focus:border-accent-500 dark:bg-neutral-700 dark:text-white"
+                  :class="{ 'border-danger-500': errors.title }"
                 />
-                <div v-if="errors.title" class="mt-2 text-sm text-red-600 dark:text-red-400">
+                <div v-if="errors.title" class="mt-2 text-sm text-danger-600 dark:text-danger-400">
                   {{ errors.title }}
                 </div>
               </div>
 
               <!-- Описание -->
               <div class="mb-6">
-                <label for="description" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <label for="description" class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
                   {{ $t('notes.description') }}
                 </label>
                 <textarea
@@ -131,31 +131,31 @@
                   v-model="form.description"
                   rows="3"
                   :placeholder="$t('notes.description_placeholder')"
-                  class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
-                  :class="{ 'border-red-500': errors.description }"
+                  class="w-full px-3 py-2 border border-neutral-300 dark:border-neutral-600 rounded-md shadow-sm focus:outline-none focus:ring-accent-500 focus:border-accent-500 dark:bg-neutral-700 dark:text-white"
+                  :class="{ 'border-danger-500': errors.description }"
                 ></textarea>
-                <div v-if="errors.description" class="mt-2 text-sm text-red-600 dark:text-red-400">
+                <div v-if="errors.description" class="mt-2 text-sm text-danger-600 dark:text-danger-400">
                   {{ errors.description }}
                 </div>
               </div>
 
               <!-- Упражнение -->
               <div class="mb-6">
-                <label for="exercise_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <label for="exercise_id" class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
                   {{ $t('notes.associate_exercise') }}
                 </label>
                 <select
                   id="exercise_id"
                   v-model="form.exercise_id"
-                  class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
-                  :class="{ 'border-red-500': errors.exercise_id }"
+                  class="w-full px-3 py-2 border border-neutral-300 dark:border-neutral-600 rounded-md shadow-sm focus:outline-none focus:ring-accent-500 focus:border-accent-500 dark:bg-neutral-700 dark:text-white"
+                  :class="{ 'border-danger-500': errors.exercise_id }"
                 >
                   <option value="">{{ $t('notes.no_exercise') }}</option>
                   <option v-for="exercise in exercises" :key="exercise.id" :value="exercise.id">
                     {{ exercise.title }}
                   </option>
                 </select>
-                <div v-if="errors.exercise_id" class="mt-2 text-sm text-red-600 dark:text-red-400">
+                <div v-if="errors.exercise_id" class="mt-2 text-sm text-danger-600 dark:text-danger-400">
                   {{ errors.exercise_id }}
                 </div>
               </div>
@@ -167,13 +167,13 @@
                     id="is_public"
                     v-model="form.is_public"
                     type="checkbox"
-                    class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                    class="h-4 w-4 text-accent-600 focus:ring-accent-500 border-neutral-300 rounded"
                   />
-                  <label for="is_public" class="ml-2 block text-sm text-gray-700 dark:text-gray-300">
+                  <label for="is_public" class="ml-2 block text-sm text-neutral-700 dark:text-neutral-300">
                     {{ $t('notes.make_public') }}
                   </label>
                 </div>
-                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                <p class="mt-1 text-xs text-neutral-500 dark:text-neutral-400">
                   {{ $t('notes.public_description') }}
                 </p>
               </div>
@@ -182,14 +182,14 @@
               <div class="flex justify-end space-x-4">
                 <Link
                   :href="route('notes.index')"
-                  class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-200"
+                  class="bg-neutral-500 hover:bg-neutral-700 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-200"
                 >
                   {{ $t('common.cancel') }}
                 </Link>
                 <button
                   type="submit"
                   :disabled="!selectedFile || processing"
-                  class="bg-blue-500 hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white font-bold py-2 px-4 rounded-lg transition-colors duration-200"
+                  class="bg-accent-500 hover:bg-accent-700 disabled:bg-neutral-400 disabled:cursor-not-allowed text-white font-bold py-2 px-4 rounded-lg transition-colors duration-200"
                 >
                   <i v-if="processing" class="fas fa-spinner fa-spin mr-2"></i>
                   <i v-else class="fas fa-upload mr-2"></i>
@@ -305,11 +305,11 @@ const removeFile = () => {
 }
 
 const getFileTypeIcon = (mimeType: string): string => {
-  if (mimeType === 'application/pdf') return 'fas fa-file-pdf text-red-500'
-  if (mimeType.startsWith('image/')) return 'fas fa-image text-green-500'
-  if (mimeType.startsWith('audio/')) return 'fas fa-music text-purple-500'
-  if (mimeType.includes('musicxml')) return 'fas fa-file-music text-blue-500'
-  return 'fas fa-file text-gray-500'
+  if (mimeType === 'application/pdf') return 'fas fa-file-pdf text-danger-500'
+  if (mimeType.startsWith('image/')) return 'fas fa-image text-success-500'
+  if (mimeType.startsWith('audio/')) return 'fas fa-music text-secondary-500'
+  if (mimeType.includes('musicxml')) return 'fas fa-file-music text-accent-500'
+  return 'fas fa-file text-neutral-500'
 }
 
 const formatFileSize = (bytes: number): string => {

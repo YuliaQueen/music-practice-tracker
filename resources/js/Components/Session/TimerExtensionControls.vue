@@ -1,7 +1,7 @@
 <template>
     <div class="mt-4">
         <div class="text-center mb-3">
-            <span class="text-sm text-gray-600 dark:text-gray-400">
+            <span class="text-sm text-neutral-600 dark:text-neutral-400">
                 Добавить время к упражнению:
             </span>
         </div>
@@ -11,7 +11,7 @@
             <select
                 :value="selectedBlockId"
                 @change="$emit('update:selectedBlockId', parseInt(($event.target as HTMLSelectElement).value))"
-                class="w-full max-w-xs mx-auto block border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 dark:focus:border-indigo-400 dark:focus:ring-indigo-400 text-sm"
+                class="w-full max-w-xs mx-auto block border-neutral-300 focus:border-accent-500 focus:ring-accent-500 rounded-md shadow-sm dark:border-neutral-600 dark:bg-neutral-700 dark:text-neutral-100 dark:focus:border-accent-400 dark:focus:ring-accent-400 text-sm"
             >
                 <option value="">Выберите упражнение</option>
                 <option
@@ -28,7 +28,7 @@
             <button
                 @click="$emit('extend', 5)"
                 :disabled="!selectedBlockId"
-                class="px-3 py-2 bg-indigo-500 text-white font-medium rounded-lg shadow hover:bg-indigo-600 transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                class="px-3 py-2 bg-accent-500 text-white font-medium rounded-lg shadow hover:bg-accent-600 transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed"
                 title="Добавить 5 минут"
             >
                 +5 мин
@@ -36,7 +36,7 @@
             <button
                 @click="$emit('extend', 10)"
                 :disabled="!selectedBlockId"
-                class="px-3 py-2 bg-indigo-500 text-white font-medium rounded-lg shadow hover:bg-indigo-600 transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                class="px-3 py-2 bg-accent-500 text-white font-medium rounded-lg shadow hover:bg-accent-600 transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed"
                 title="Добавить 10 минут"
             >
                 +10 мин
@@ -44,7 +44,7 @@
             <button
                 @click="$emit('extend', 15)"
                 :disabled="!selectedBlockId"
-                class="px-3 py-2 bg-indigo-500 text-white font-medium rounded-lg shadow hover:bg-indigo-600 transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                class="px-3 py-2 bg-accent-500 text-white font-medium rounded-lg shadow hover:bg-accent-600 transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed"
                 title="Добавить 15 минут"
             >
                 +15 мин
@@ -55,7 +55,7 @@
         <div v-if="selectedBlockId" class="mt-3 text-center">
             <button
                 @click="$emit('restart')"
-                class="px-4 py-2 bg-green-500 text-white font-medium rounded-lg shadow hover:bg-green-600 transition-colors text-sm"
+                class="px-4 py-2 bg-success-500 text-white font-medium rounded-lg shadow hover:bg-success-600 transition-colors text-sm"
                 title="Перезапустить таймер для выбранного упражнения"
             >
                 🔄 Перезапустить таймер
