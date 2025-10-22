@@ -20,60 +20,60 @@ const STATUS_LABELS: Record<Status, string> = {
  * Маппинг статусов на CSS классы для бейджей
  */
 const STATUS_BADGE_CLASSES: Record<Status, string> = {
-    planned: 'bg-amber-100 text-amber-800 dark:bg-gray-600 dark:text-gray-200',
-    active: 'bg-orange-100 text-orange-800 dark:bg-green-900 dark:text-green-200',
-    paused: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200',
-    completed: 'bg-red-100 text-red-800 dark:bg-blue-900 dark:text-blue-200',
-    cancelled: 'bg-red-200 text-red-800 dark:bg-red-900 dark:text-red-200',
-    skipped: 'bg-gray-100 text-gray-800 dark:bg-gray-600 dark:text-gray-200',
+    planned: 'bg-neutral-100 text-neutral-800 dark:bg-neutral-700 dark:text-neutral-300',
+    active: 'bg-success-100 text-success-800 dark:bg-success-900/40 dark:text-success-300',
+    paused: 'bg-warning-100 text-warning-800 dark:bg-warning-900/40 dark:text-warning-300',
+    completed: 'bg-accent-100 text-accent-800 dark:bg-accent-900/40 dark:text-accent-300',
+    cancelled: 'bg-danger-100 text-danger-800 dark:bg-danger-900/40 dark:text-danger-300',
+    skipped: 'bg-neutral-100 text-neutral-600 dark:bg-neutral-700 dark:text-neutral-400',
 };
 
 /**
  * Маппинг статусов блоков на CSS классы
  */
 const BLOCK_STATUS_CLASSES: Record<Status, string> = {
-    planned: 'border-amber-200 dark:border-gray-600 bg-amber-50/80 dark:bg-gray-800 hover:border-amber-300 dark:hover:border-gray-500',
-    active: 'border-orange-200 dark:border-indigo-600 bg-gradient-to-r from-orange-50/80 to-red-50/80 dark:from-indigo-900 dark:to-purple-900 hover:border-orange-300 dark:hover:border-indigo-500',
-    paused: 'border-yellow-200 dark:border-yellow-600 bg-gradient-to-r from-yellow-50/80 to-orange-50/80 dark:from-yellow-900 dark:to-orange-900 hover:border-yellow-300 dark:hover:border-yellow-500',
-    completed: 'border-red-200 dark:border-green-600 bg-gradient-to-r from-red-50/80 to-orange-50/80 dark:from-green-900 dark:to-emerald-900 hover:border-red-300 dark:hover:border-green-500',
-    cancelled: 'border-red-200 dark:border-red-600 bg-red-50/80 dark:bg-red-900/50 hover:border-red-300 dark:hover:border-red-500',
-    skipped: 'border-amber-200 dark:border-gray-600 bg-amber-100/80 dark:bg-gray-800 hover:border-amber-300 dark:hover:border-gray-500',
+    planned: 'border-neutral-200 dark:border-neutral-600 bg-neutral-50/80 dark:bg-neutral-800 hover:border-neutral-300 dark:hover:border-neutral-500',
+    active: 'border-success-200 dark:border-success-600 bg-gradient-to-r from-success-50/80 to-accent-50/80 dark:from-success-900 dark:to-accent-900 hover:border-success-300 dark:hover:border-success-500',
+    paused: 'border-warning-200 dark:border-warning-600 bg-gradient-to-r from-warning-50/80 to-primary-50/80 dark:from-warning-900 dark:to-primary-900 hover:border-warning-300 dark:hover:border-warning-500',
+    completed: 'border-accent-200 dark:border-accent-600 bg-gradient-to-r from-accent-50/80 to-primary-50/80 dark:from-accent-900 dark:to-success-900 hover:border-accent-300 dark:hover:border-accent-500',
+    cancelled: 'border-danger-200 dark:border-danger-600 bg-danger-50/80 dark:bg-danger-900/50 hover:border-danger-300 dark:hover:border-danger-500',
+    skipped: 'border-neutral-200 dark:border-neutral-600 bg-neutral-100/80 dark:bg-neutral-800 hover:border-neutral-300 dark:hover:border-neutral-500',
 };
 
 /**
  * Маппинг статусов блоков на CSS классы для индикатора прогресса
  */
 const BLOCK_PROGRESS_CLASSES: Record<Status, string> = {
-    planned: 'bg-gray-300',
-    active: 'bg-gradient-to-b from-indigo-400 to-purple-500',
-    paused: 'bg-gradient-to-b from-yellow-400 to-orange-500',
-    completed: 'bg-gradient-to-b from-green-400 to-emerald-500',
-    cancelled: 'bg-red-400',
-    skipped: 'bg-gray-400',
+    planned: 'bg-neutral-300',
+    active: 'bg-gradient-to-b from-success-400 to-accent-500',
+    paused: 'bg-gradient-to-b from-warning-400 to-primary-500',
+    completed: 'bg-gradient-to-b from-accent-400 to-success-500',
+    cancelled: 'bg-danger-400',
+    skipped: 'bg-neutral-400',
 };
 
 /**
  * Маппинг статусов блоков на CSS классы для фона иконки
  */
 const BLOCK_ICON_BG_CLASSES: Record<Status, string> = {
-    planned: 'bg-amber-100 dark:bg-gray-700 shadow-sm',
-    active: 'bg-gradient-to-br from-orange-100 to-red-100 dark:from-indigo-800 dark:to-purple-800 shadow-sm',
-    paused: 'bg-gradient-to-br from-yellow-100 to-orange-100 dark:from-yellow-800 dark:to-orange-800 shadow-sm',
-    completed: 'bg-gradient-to-br from-red-100 to-orange-100 dark:from-green-800 dark:to-emerald-800 shadow-sm',
-    cancelled: 'bg-red-100 dark:bg-red-800 shadow-sm',
-    skipped: 'bg-amber-100 dark:bg-gray-700 shadow-sm',
+    planned: 'bg-neutral-100 dark:bg-neutral-700 shadow-sm',
+    active: 'bg-gradient-to-br from-success-100 to-accent-100 dark:from-success-800 dark:to-accent-800 shadow-sm',
+    paused: 'bg-gradient-to-br from-warning-100 to-primary-100 dark:from-warning-800 dark:to-primary-800 shadow-sm',
+    completed: 'bg-gradient-to-br from-accent-100 to-primary-100 dark:from-accent-800 dark:to-success-800 shadow-sm',
+    cancelled: 'bg-danger-100 dark:bg-danger-800 shadow-sm',
+    skipped: 'bg-neutral-100 dark:bg-neutral-700 shadow-sm',
 };
 
 /**
  * Маппинг статусов блоков на CSS классы для бейджа
  */
 const BLOCK_BADGE_CLASSES: Record<Status, string> = {
-    planned: 'bg-amber-100 dark:bg-gray-700 text-amber-700 dark:text-gray-200',
-    active: 'bg-orange-100 dark:bg-indigo-900 text-orange-700 dark:text-indigo-200',
-    paused: 'bg-yellow-100 dark:bg-yellow-900 text-yellow-700 dark:text-yellow-200',
-    completed: 'bg-red-100 dark:bg-green-900 text-red-700 dark:text-green-200',
-    cancelled: 'bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-200',
-    skipped: 'bg-amber-100 dark:bg-gray-700 text-amber-500 dark:text-gray-400',
+    planned: 'bg-neutral-100 dark:bg-neutral-700 text-neutral-700 dark:text-neutral-200',
+    active: 'bg-success-100 dark:bg-success-900 text-success-700 dark:text-success-200',
+    paused: 'bg-warning-100 dark:bg-warning-900 text-warning-700 dark:text-warning-200',
+    completed: 'bg-accent-100 dark:bg-accent-900 text-accent-700 dark:text-accent-200',
+    cancelled: 'bg-danger-100 dark:bg-danger-900 text-danger-700 dark:text-danger-200',
+    skipped: 'bg-neutral-100 dark:bg-neutral-700 text-neutral-500 dark:text-neutral-400',
 };
 
 /**
