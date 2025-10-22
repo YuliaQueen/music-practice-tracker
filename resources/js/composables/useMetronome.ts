@@ -4,6 +4,8 @@ import MetronomeAudioEngine from '@/utils/metronomeAudioEngine';
 export type TimeSignature = '2/4' | '3/4' | '4/4' | '5/4' | '6/8' | '7/8' | '9/8' | '12/8';
 export type SoundType = 'click' | 'beep' | 'wood';
 export type Subdivision = 'none' | 'eighth' | 'triplet' | 'sixteenth';
+export type CountIn = 0 | 1 | 2 | 4; // number of bars
+export type TempoPreset = 'custom' | 'largo' | 'adagio' | 'andante' | 'moderato' | 'allegro' | 'presto';
 
 interface MetronomeSettings {
     bpm: number;
@@ -12,11 +14,21 @@ interface MetronomeSettings {
     soundType: SoundType;
     accentFirstBeat: boolean;
     subdivision: Subdivision;
+    countIn: CountIn;
+    muteMode: boolean;
+    muteBars: number; // bars to mute after playing
+    playBars: number; // bars to play before muting
     autoIncrement: boolean;
     autoIncrementInterval: number; // seconds
     autoIncrementAmount: number; // BPM to add
     useTargetBpm: boolean;
     targetBpm: number; // target BPM to reach
+    speedTrainer: boolean;
+    speedTrainerStartBpm: number;
+    speedTrainerEndBpm: number;
+    speedTrainerStepSize: number;
+    speedTrainerBarsPerTempo: number;
+    speedTrainerCycle: boolean; // Loop back to start
 }
 
 const SETTINGS_KEY = 'metronome_settings';
@@ -34,6 +46,16 @@ export function useMetronome() {
     const soundType = ref<SoundType>('click');
     const accentFirstBeat = ref(true);
     const subdivision = ref<Subdivision>('none');
+    const countIn = ref<CountIn>(0);
+    const isCountingIn = ref(false);
+    const countInBeatsRemaining = ref(0);
+
+    // Mute mode state
+    const muteMode = ref(false);
+    const muteBars = ref(2);
+    const playBars = ref(4);
+    const barsPlayed = ref(0);
+    const isMuted = ref(false);
 
     // Auto-increment state
     const autoIncrement = ref(false);
@@ -43,6 +65,16 @@ export function useMetronome() {
     const targetBpm = ref(180); // default target
     const timeUntilIncrement = ref(0); // seconds remaining
     const autoIncrementStartTime = ref<number | null>(null);
+
+    // Speed Trainer state
+    const speedTrainer = ref(false);
+    const speedTrainerStartBpm = ref(60);
+    const speedTrainerEndBpm = ref(120);
+    const speedTrainerStepSize = ref(10);
+    const speedTrainerBarsPerTempo = ref(4);
+    const speedTrainerCycle = ref(true);
+    const speedTrainerCurrentBpm = ref(60);
+    const speedTrainerBarsRemaining = ref(4);
 
     // Timing
     let timerID: number | null = null;
@@ -61,11 +93,21 @@ export function useMetronome() {
                 soundType.value = (settings.soundType === 'wood') ? 'click' : (settings.soundType || 'click');
                 accentFirstBeat.value = settings.accentFirstBeat !== undefined ? settings.accentFirstBeat : true;
                 subdivision.value = settings.subdivision || 'none';
+                countIn.value = settings.countIn || 0;
+                muteMode.value = settings.muteMode || false;
+                muteBars.value = settings.muteBars || 2;
+                playBars.value = settings.playBars || 4;
                 autoIncrement.value = settings.autoIncrement || false;
                 autoIncrementInterval.value = settings.autoIncrementInterval || 60;
                 autoIncrementAmount.value = settings.autoIncrementAmount || 5;
                 useTargetBpm.value = settings.useTargetBpm || false;
                 targetBpm.value = settings.targetBpm || 180;
+                speedTrainer.value = settings.speedTrainer || false;
+                speedTrainerStartBpm.value = settings.speedTrainerStartBpm || 60;
+                speedTrainerEndBpm.value = settings.speedTrainerEndBpm || 120;
+                speedTrainerStepSize.value = settings.speedTrainerStepSize || 10;
+                speedTrainerBarsPerTempo.value = settings.speedTrainerBarsPerTempo || 4;
+                speedTrainerCycle.value = settings.speedTrainerCycle !== undefined ? settings.speedTrainerCycle : true;
             } catch (e) {
                 console.error('Failed to load metronome settings:', e);
             }
@@ -81,11 +123,21 @@ export function useMetronome() {
             soundType: soundType.value,
             accentFirstBeat: accentFirstBeat.value,
             subdivision: subdivision.value,
+            countIn: countIn.value,
+            muteMode: muteMode.value,
+            muteBars: muteBars.value,
+            playBars: playBars.value,
             autoIncrement: autoIncrement.value,
             autoIncrementInterval: autoIncrementInterval.value,
             autoIncrementAmount: autoIncrementAmount.value,
             useTargetBpm: useTargetBpm.value,
             targetBpm: targetBpm.value,
+            speedTrainer: speedTrainer.value,
+            speedTrainerStartBpm: speedTrainerStartBpm.value,
+            speedTrainerEndBpm: speedTrainerEndBpm.value,
+            speedTrainerStepSize: speedTrainerStepSize.value,
+            speedTrainerBarsPerTempo: speedTrainerBarsPerTempo.value,
+            speedTrainerCycle: speedTrainerCycle.value,
         };
         localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
     };
@@ -147,17 +199,81 @@ export function useMetronome() {
     };
 
     /**
-     * Schedule note to be played with subdivisions
+     * Schedule note to be played with subdivisions and mute mode
      */
     const scheduleNote = (beatNumber: number, time: number): void => {
+        // Handle count-in
+        if (isCountingIn.value) {
+            // Always play sound during count-in (with accent on first beat)
+            const isAccent = beatNumber === 0;
+            playSound(time, isAccent);
+
+            // Update count-in remaining
+            if (beatNumber === 0) {
+                countInBeatsRemaining.value--;
+                if (countInBeatsRemaining.value <= 0) {
+                    isCountingIn.value = false;
+                }
+            }
+
+            // Update visual indicator
+            const visualDelay = Math.max(0, (time - audioEngine.getCurrentTime()) * 1000 - 50);
+            setTimeout(() => {
+                currentBeat.value = beatNumber;
+            }, visualDelay);
+            return;
+        }
+
+        // Handle speed trainer (on first beat of measure)
+        if (speedTrainer.value && beatNumber === 0) {
+            speedTrainerBarsRemaining.value--;
+
+            if (speedTrainerBarsRemaining.value <= 0) {
+                // Time to change tempo
+                const nextBpm = speedTrainerCurrentBpm.value + speedTrainerStepSize.value;
+
+                if (nextBpm > speedTrainerEndBpm.value) {
+                    // Reached end tempo
+                    if (speedTrainerCycle.value) {
+                        // Cycle back to start
+                        speedTrainerCurrentBpm.value = speedTrainerStartBpm.value;
+                        bpm.value = speedTrainerStartBpm.value;
+                    } else {
+                        // Stay at end tempo
+                        speedTrainerCurrentBpm.value = speedTrainerEndBpm.value;
+                        bpm.value = speedTrainerEndBpm.value;
+                    }
+                } else {
+                    // Increase tempo
+                    speedTrainerCurrentBpm.value = nextBpm;
+                    bpm.value = nextBpm;
+                }
+
+                // Reset bars remaining
+                speedTrainerBarsRemaining.value = speedTrainerBarsPerTempo.value;
+            }
+        }
+
+        // Track bars for mute mode (on first beat of measure)
+        if (muteMode.value && beatNumber === 0) {
+            barsPlayed.value++;
+            const cycleLength = playBars.value + muteBars.value;
+            const positionInCycle = barsPlayed.value % cycleLength;
+
+            // Check if we should be muted
+            isMuted.value = positionInCycle > playBars.value || positionInCycle === 0;
+        }
+
         // Determine if this beat should be accented
         const isAccent = accentFirstBeat.value && beatNumber === 0;
 
-        // Schedule the main beat sound
-        playSound(time, isAccent);
+        // Schedule the main beat sound (unless muted)
+        if (!isMuted.value) {
+            playSound(time, isAccent);
+        }
 
-        // Schedule subdivision sounds if enabled
-        if (subdivision.value !== 'none') {
+        // Schedule subdivision sounds if enabled (and not muted)
+        if (subdivision.value !== 'none' && !isMuted.value) {
             const subdivisionCount = getSubdivisionCount();
             const subdivisionInterval = secondsPerBeat.value / subdivisionCount;
 
@@ -308,6 +424,24 @@ export function useMetronome() {
         // Reset state
         currentBeat.value = 0;
         schedulerBeatCounter = 0;
+        barsPlayed.value = 0;
+        isMuted.value = false;
+
+        // Initialize count-in if enabled
+        if (countIn.value > 0) {
+            isCountingIn.value = true;
+            countInBeatsRemaining.value = countIn.value * displayBeatsPerMeasure.value;
+        } else {
+            isCountingIn.value = false;
+        }
+
+        // Initialize speed trainer if enabled
+        if (speedTrainer.value) {
+            speedTrainerCurrentBpm.value = speedTrainerStartBpm.value;
+            speedTrainerBarsRemaining.value = speedTrainerBarsPerTempo.value;
+            bpm.value = speedTrainerStartBpm.value;
+        }
+
         audioEngine.setNextNoteTime(audioEngine.getCurrentTime());
 
         // Start scheduler
@@ -328,6 +462,13 @@ export function useMetronome() {
 
         isPlaying.value = false;
         currentBeat.value = 0;
+        isCountingIn.value = false;
+        countInBeatsRemaining.value = 0;
+        barsPlayed.value = 0;
+        isMuted.value = false;
+
+        // Reset speed trainer state
+        speedTrainerBarsRemaining.value = speedTrainerBarsPerTempo.value;
 
         if (timerID !== null) {
             clearTimeout(timerID);
@@ -447,6 +588,160 @@ export function useMetronome() {
         setBpm(bpm.value - amount);
     };
 
+    /**
+     * Set subdivision
+     */
+    const setSubdivision = (value: Subdivision): void => {
+        subdivision.value = value;
+        saveSettings();
+    };
+
+    /**
+     * Set count-in
+     */
+    const setCountIn = (value: CountIn): void => {
+        countIn.value = value;
+        saveSettings();
+    };
+
+    /**
+     * Set mute mode
+     */
+    const setMuteMode = (enabled: boolean): void => {
+        muteMode.value = enabled;
+        saveSettings();
+    };
+
+    /**
+     * Set play bars (how many bars to play before muting)
+     */
+    const setPlayBars = (value: number): void => {
+        playBars.value = Math.max(1, Math.min(16, value)); // 1-16 bars
+        saveSettings();
+    };
+
+    /**
+     * Set mute bars (how many bars to mute after playing)
+     */
+    const setMuteBars = (value: number): void => {
+        muteBars.value = Math.max(1, Math.min(16, value)); // 1-16 bars
+        saveSettings();
+    };
+
+    /**
+     * Set auto-increment
+     */
+    const setAutoIncrement = (enabled: boolean): void => {
+        autoIncrement.value = enabled;
+        saveSettings();
+
+        // Start or stop auto-increment based on playing state
+        if (enabled && isPlaying.value) {
+            startAutoIncrement();
+        } else if (!enabled) {
+            stopAutoIncrement();
+        }
+    };
+
+    /**
+     * Set auto-increment interval
+     */
+    const setAutoIncrementInterval = (seconds: number): void => {
+        autoIncrementInterval.value = Math.max(5, Math.min(600, seconds)); // 5 seconds to 10 minutes
+        saveSettings();
+    };
+
+    /**
+     * Set auto-increment amount
+     */
+    const setAutoIncrementAmount = (amount: number): void => {
+        autoIncrementAmount.value = Math.max(1, Math.min(50, amount)); // 1-50 BPM
+        saveSettings();
+    };
+
+    /**
+     * Set use target BPM
+     */
+    const setUseTargetBpm = (enabled: boolean): void => {
+        useTargetBpm.value = enabled;
+        saveSettings();
+    };
+
+    /**
+     * Set target BPM
+     */
+    const setTargetBpm = (value: number): void => {
+        targetBpm.value = Math.max(30, Math.min(300, value));
+        saveSettings();
+    };
+
+    /**
+     * Apply tempo preset
+     */
+    const applyTempoPreset = (preset: TempoPreset): void => {
+        const presetValues: Record<TempoPreset, number> = {
+            custom: bpm.value, // Keep current
+            largo: 50,        // 40-60 BPM
+            adagio: 71,       // 66-76 BPM
+            andante: 92,      // 76-108 BPM
+            moderato: 114,    // 108-120 BPM
+            allegro: 144,     // 120-168 BPM
+            presto: 184,      // 168-200 BPM
+        };
+
+        if (preset !== 'custom') {
+            setBpm(presetValues[preset]);
+        }
+    };
+
+    /**
+     * Set speed trainer
+     */
+    const setSpeedTrainer = (enabled: boolean): void => {
+        speedTrainer.value = enabled;
+        saveSettings();
+    };
+
+    /**
+     * Set speed trainer start BPM
+     */
+    const setSpeedTrainerStartBpm = (value: number): void => {
+        speedTrainerStartBpm.value = Math.max(30, Math.min(300, value));
+        saveSettings();
+    };
+
+    /**
+     * Set speed trainer end BPM
+     */
+    const setSpeedTrainerEndBpm = (value: number): void => {
+        speedTrainerEndBpm.value = Math.max(30, Math.min(300, value));
+        saveSettings();
+    };
+
+    /**
+     * Set speed trainer step size
+     */
+    const setSpeedTrainerStepSize = (value: number): void => {
+        speedTrainerStepSize.value = Math.max(1, Math.min(50, value));
+        saveSettings();
+    };
+
+    /**
+     * Set speed trainer bars per tempo
+     */
+    const setSpeedTrainerBarsPerTempo = (value: number): void => {
+        speedTrainerBarsPerTempo.value = Math.max(1, Math.min(32, value));
+        saveSettings();
+    };
+
+    /**
+     * Set speed trainer cycle
+     */
+    const setSpeedTrainerCycle = (enabled: boolean): void => {
+        speedTrainerCycle.value = enabled;
+        saveSettings();
+    };
+
     // Load settings on initialization
     loadSettings();
 
@@ -466,12 +761,28 @@ export function useMetronome() {
         soundType,
         accentFirstBeat,
         subdivision,
+        countIn,
+        isCountingIn,
+        countInBeatsRemaining,
+        muteMode,
+        muteBars,
+        playBars,
+        barsPlayed,
+        isMuted,
         autoIncrement,
         autoIncrementInterval,
         autoIncrementAmount,
         useTargetBpm,
         targetBpm,
         timeUntilIncrement,
+        speedTrainer,
+        speedTrainerStartBpm,
+        speedTrainerEndBpm,
+        speedTrainerStepSize,
+        speedTrainerBarsPerTempo,
+        speedTrainerCycle,
+        speedTrainerCurrentBpm,
+        speedTrainerBarsRemaining,
 
         // Computed
         beatsPerMeasure: displayBeatsPerMeasure,
@@ -489,6 +800,23 @@ export function useMetronome() {
         tapTempo,
         incrementBpm,
         decrementBpm,
+        setSubdivision,
+        setCountIn,
+        setMuteMode,
+        setPlayBars,
+        setMuteBars,
+        setAutoIncrement,
+        setAutoIncrementInterval,
+        setAutoIncrementAmount,
+        setUseTargetBpm,
+        setTargetBpm,
+        applyTempoPreset,
+        setSpeedTrainer,
+        setSpeedTrainerStartBpm,
+        setSpeedTrainerEndBpm,
+        setSpeedTrainerStepSize,
+        setSpeedTrainerBarsPerTempo,
+        setSpeedTrainerCycle,
     };
 }
 

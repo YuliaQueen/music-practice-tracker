@@ -37,6 +37,63 @@
                 </div>
             </div>
 
+            <!-- Tempo Presets -->
+            <div class="mb-6">
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 text-center">
+                    {{ t('metronome.tempoPresets') }}
+                </label>
+                <div class="grid grid-cols-3 gap-2">
+                    <button
+                        @click="applyTempoPreset('largo')"
+                        class="preset-btn"
+                        title="40-60 BPM"
+                    >
+                        <div class="font-semibold">{{ t('metronome.presets.largo') }}</div>
+                        <div class="text-xs opacity-75">50</div>
+                    </button>
+                    <button
+                        @click="applyTempoPreset('adagio')"
+                        class="preset-btn"
+                        title="66-76 BPM"
+                    >
+                        <div class="font-semibold">{{ t('metronome.presets.adagio') }}</div>
+                        <div class="text-xs opacity-75">71</div>
+                    </button>
+                    <button
+                        @click="applyTempoPreset('andante')"
+                        class="preset-btn"
+                        title="76-108 BPM"
+                    >
+                        <div class="font-semibold">{{ t('metronome.presets.andante') }}</div>
+                        <div class="text-xs opacity-75">92</div>
+                    </button>
+                    <button
+                        @click="applyTempoPreset('moderato')"
+                        class="preset-btn"
+                        title="108-120 BPM"
+                    >
+                        <div class="font-semibold">{{ t('metronome.presets.moderato') }}</div>
+                        <div class="text-xs opacity-75">114</div>
+                    </button>
+                    <button
+                        @click="applyTempoPreset('allegro')"
+                        class="preset-btn"
+                        title="120-168 BPM"
+                    >
+                        <div class="font-semibold">{{ t('metronome.presets.allegro') }}</div>
+                        <div class="text-xs opacity-75">144</div>
+                    </button>
+                    <button
+                        @click="applyTempoPreset('presto')"
+                        class="preset-btn"
+                        title="168-200 BPM"
+                    >
+                        <div class="font-semibold">{{ t('metronome.presets.presto') }}</div>
+                        <div class="text-xs opacity-75">184</div>
+                    </button>
+                </div>
+            </div>
+
             <!-- Visual Beat Indicator -->
             <div class="flex justify-center items-center gap-2 mb-6 h-16">
                 <div
@@ -175,33 +232,125 @@
                 </label>
                 <div class="grid grid-cols-4 gap-2">
                     <button
-                        @click="subdivision = 'none'"
+                        @click="setSubdivision('none')"
                         class="sound-type-btn text-xs"
                         :class="{ 'active': subdivision === 'none' }"
                     >
                         {{ t('metronome.subdivisions.none') }}
                     </button>
                     <button
-                        @click="subdivision = 'eighth'"
+                        @click="setSubdivision('eighth')"
                         class="sound-type-btn text-xs"
                         :class="{ 'active': subdivision === 'eighth' }"
                     >
                         {{ t('metronome.subdivisions.eighth') }}
                     </button>
                     <button
-                        @click="subdivision = 'triplet'"
+                        @click="setSubdivision('triplet')"
                         class="sound-type-btn text-xs"
                         :class="{ 'active': subdivision === 'triplet' }"
                     >
                         {{ t('metronome.subdivisions.triplet') }}
                     </button>
                     <button
-                        @click="subdivision = 'sixteenth'"
+                        @click="setSubdivision('sixteenth')"
                         class="sound-type-btn text-xs"
                         :class="{ 'active': subdivision === 'sixteenth' }"
                     >
                         {{ t('metronome.subdivisions.sixteenth') }}
                     </button>
+                </div>
+            </div>
+
+            <!-- Count-in -->
+            <div class="mb-6">
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    {{ t('metronome.countIn') }}
+                    <span v-if="isCountingIn" class="ml-2 text-xs text-orange-500 dark:text-orange-400 font-semibold">
+                        ({{ t('metronome.countingIn') }})
+                    </span>
+                </label>
+                <div class="grid grid-cols-4 gap-2">
+                    <button
+                        @click="setCountIn(0)"
+                        class="sound-type-btn text-xs"
+                        :class="{ 'active': countIn === 0 }"
+                    >
+                        {{ t('metronome.countInOptions.off') }}
+                    </button>
+                    <button
+                        @click="setCountIn(1)"
+                        class="sound-type-btn text-xs"
+                        :class="{ 'active': countIn === 1 }"
+                    >
+                        {{ t('metronome.countInOptions.onebar') }}
+                    </button>
+                    <button
+                        @click="setCountIn(2)"
+                        class="sound-type-btn text-xs"
+                        :class="{ 'active': countIn === 2 }"
+                    >
+                        {{ t('metronome.countInOptions.twobars') }}
+                    </button>
+                    <button
+                        @click="setCountIn(4)"
+                        class="sound-type-btn text-xs"
+                        :class="{ 'active': countIn === 4 }"
+                    >
+                        {{ t('metronome.countInOptions.fourbars') }}
+                    </button>
+                </div>
+            </div>
+
+            <!-- Mute Mode (Silent Bars Training) -->
+            <div class="mb-6 p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg border border-gray-200 dark:border-gray-600">
+                <label class="flex items-center cursor-pointer mb-3">
+                    <input
+                        type="checkbox"
+                        :checked="muteMode"
+                        @change="setMuteMode(!muteMode)"
+                        class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:bg-gray-700 dark:border-gray-600"
+                    />
+                    <span class="ml-2 text-sm font-semibold text-gray-700 dark:text-gray-300">
+                        {{ t('metronome.muteMode') }}
+                        <span v-if="isMuted && isPlaying" class="ml-2 text-xs text-red-500 dark:text-red-400">
+                            ({{ t('metronome.muted') }})
+                        </span>
+                    </span>
+                </label>
+
+                <div v-if="muteMode" class="grid grid-cols-2 gap-3">
+                    <!-- Play Bars -->
+                    <div>
+                        <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">
+                            {{ t('metronome.playBars') }}
+                        </label>
+                        <input
+                            type="number"
+                            :value="playBars"
+                            @input="setPlayBars(parseInt(($event.target as HTMLInputElement).value))"
+                            min="1"
+                            max="16"
+                            step="1"
+                            class="w-full px-2 py-1 text-sm bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400"
+                        />
+                    </div>
+
+                    <!-- Mute Bars -->
+                    <div>
+                        <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">
+                            {{ t('metronome.muteBars') }}
+                        </label>
+                        <input
+                            type="number"
+                            :value="muteBars"
+                            @input="setMuteBars(parseInt(($event.target as HTMLInputElement).value))"
+                            min="1"
+                            max="16"
+                            step="1"
+                            class="w-full px-2 py-1 text-sm bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400"
+                        />
+                    </div>
                 </div>
             </div>
 
@@ -306,6 +455,115 @@
                 </div>
             </div>
 
+            <!-- Speed Trainer -->
+            <div class="mb-6 p-4 bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 rounded-lg border border-purple-200 dark:border-purple-700">
+                <label class="flex items-center cursor-pointer mb-3">
+                    <input
+                        type="checkbox"
+                        :checked="speedTrainer"
+                        @change="setSpeedTrainer(!speedTrainer)"
+                        class="w-4 h-4 text-purple-600 bg-gray-100 border-gray-300 rounded focus:ring-purple-500 dark:focus:ring-purple-600 dark:bg-gray-700 dark:border-gray-600"
+                    />
+                    <span class="ml-2 text-sm font-semibold text-gray-700 dark:text-gray-300">
+                        {{ t('metronome.speedTrainer') }}
+                    </span>
+                </label>
+
+                <div v-if="speedTrainer" class="space-y-3">
+                    <div class="grid grid-cols-2 gap-3">
+                        <!-- Start BPM -->
+                        <div>
+                            <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">
+                                {{ t('metronome.startBpm') }}
+                            </label>
+                            <input
+                                type="number"
+                                :value="speedTrainerStartBpm"
+                                @input="setSpeedTrainerStartBpm(parseInt(($event.target as HTMLInputElement).value))"
+                                min="30"
+                                max="300"
+                                step="5"
+                                class="w-full px-2 py-1 text-sm bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-purple-500 dark:focus:ring-purple-400"
+                            />
+                        </div>
+
+                        <!-- End BPM -->
+                        <div>
+                            <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">
+                                {{ t('metronome.endBpm') }}
+                            </label>
+                            <input
+                                type="number"
+                                :value="speedTrainerEndBpm"
+                                @input="setSpeedTrainerEndBpm(parseInt(($event.target as HTMLInputElement).value))"
+                                :min="speedTrainerStartBpm + 1"
+                                max="300"
+                                step="5"
+                                class="w-full px-2 py-1 text-sm bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-purple-500 dark:focus:ring-purple-400"
+                            />
+                        </div>
+
+                        <!-- Step Size -->
+                        <div>
+                            <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">
+                                {{ t('metronome.stepSize') }}
+                            </label>
+                            <input
+                                type="number"
+                                :value="speedTrainerStepSize"
+                                @input="setSpeedTrainerStepSize(parseInt(($event.target as HTMLInputElement).value))"
+                                min="1"
+                                max="50"
+                                step="1"
+                                class="w-full px-2 py-1 text-sm bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-purple-500 dark:focus:ring-purple-400"
+                            />
+                        </div>
+
+                        <!-- Bars Per Tempo -->
+                        <div>
+                            <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">
+                                {{ t('metronome.barsPerTempo') }}
+                            </label>
+                            <input
+                                type="number"
+                                :value="speedTrainerBarsPerTempo"
+                                @input="setSpeedTrainerBarsPerTempo(parseInt(($event.target as HTMLInputElement).value))"
+                                min="1"
+                                max="32"
+                                step="1"
+                                class="w-full px-2 py-1 text-sm bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-purple-500 dark:focus:ring-purple-400"
+                            />
+                        </div>
+                    </div>
+
+                    <!-- Cycle Option -->
+                    <label class="flex items-center cursor-pointer">
+                        <input
+                            type="checkbox"
+                            :checked="speedTrainerCycle"
+                            @change="setSpeedTrainerCycle(!speedTrainerCycle)"
+                            class="w-4 h-4 text-purple-600 bg-gray-100 border-gray-300 rounded focus:ring-purple-500 dark:focus:ring-purple-600 dark:bg-gray-700 dark:border-gray-600"
+                        />
+                        <span class="ml-2 text-xs font-medium text-gray-600 dark:text-gray-400">
+                            {{ t('metronome.cycleBack') }}
+                        </span>
+                    </label>
+
+                    <!-- Progress indicator -->
+                    <div v-if="isPlaying && speedTrainerBarsRemaining > 0" class="text-center py-2 bg-purple-100 dark:bg-purple-900/30 rounded-md">
+                        <div class="text-xs text-gray-600 dark:text-gray-400 mb-1">
+                            {{ t('metronome.barsRemaining') }}
+                        </div>
+                        <div class="text-lg font-bold text-purple-600 dark:text-purple-400">
+                            {{ speedTrainerBarsRemaining }} / {{ speedTrainerBarsPerTempo }}
+                        </div>
+                        <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                            {{ t('metronome.currentTempo') }}: {{ speedTrainerCurrentBpm }} BPM
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- Play/Stop Button -->
             <button
                 @click="toggle"
@@ -355,12 +613,26 @@ const {
     soundType,
     accentFirstBeat,
     subdivision,
+    countIn,
+    isCountingIn,
+    muteMode,
+    muteBars,
+    playBars,
+    isMuted,
     autoIncrement,
     autoIncrementInterval,
     autoIncrementAmount,
     useTargetBpm,
     targetBpm,
     timeUntilIncrement,
+    speedTrainer,
+    speedTrainerStartBpm,
+    speedTrainerEndBpm,
+    speedTrainerStepSize,
+    speedTrainerBarsPerTempo,
+    speedTrainerCycle,
+    speedTrainerCurrentBpm,
+    speedTrainerBarsRemaining,
     beatsPerMeasure,
     toggle,
     setBpm,
@@ -371,6 +643,18 @@ const {
     tapTempo,
     incrementBpm,
     decrementBpm,
+    setSubdivision,
+    setCountIn,
+    setMuteMode,
+    setPlayBars,
+    setMuteBars,
+    applyTempoPreset,
+    setSpeedTrainer,
+    setSpeedTrainerStartBpm,
+    setSpeedTrainerEndBpm,
+    setSpeedTrainerStepSize,
+    setSpeedTrainerBarsPerTempo,
+    setSpeedTrainerCycle,
 } = useMetronome();
 
 const isCollapsed = ref(false);
@@ -407,6 +691,10 @@ const toggleCollapse = () => {
 
 .sound-type-btn.active {
     @apply bg-blue-500 dark:bg-blue-600 text-white hover:bg-blue-600 dark:hover:bg-blue-700;
+}
+
+.preset-btn {
+    @apply px-2 py-2 text-sm text-gray-700 dark:text-gray-300 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-700 dark:to-gray-800 rounded-md hover:from-blue-50 hover:to-blue-100 dark:hover:from-blue-900/30 dark:hover:to-blue-800/30 border border-gray-200 dark:border-gray-600 hover:border-blue-300 dark:hover:border-blue-600 transition-all duration-200 shadow-sm hover:shadow-md;
 }
 
 /* Custom slider styling */
