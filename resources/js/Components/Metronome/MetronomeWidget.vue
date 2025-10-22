@@ -229,6 +229,34 @@
                         </div>
                     </div>
 
+                    <!-- Target BPM -->
+                    <div class="space-y-2">
+                        <label class="flex items-center cursor-pointer">
+                            <input
+                                type="checkbox"
+                                v-model="useTargetBpm"
+                                class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:bg-gray-700 dark:border-gray-600"
+                            />
+                            <span class="ml-2 text-xs font-medium text-gray-600 dark:text-gray-400">
+                                {{ t('metronome.useTargetBpm') }}
+                            </span>
+                        </label>
+
+                        <div v-if="useTargetBpm">
+                            <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">
+                                {{ t('metronome.targetBpm') }}
+                            </label>
+                            <input
+                                type="number"
+                                v-model.number="targetBpm"
+                                :min="bpm + 1"
+                                max="300"
+                                step="5"
+                                class="w-full px-2 py-1 text-sm bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400"
+                            />
+                        </div>
+                    </div>
+
                     <!-- Timer indicator -->
                     <div v-if="isPlaying && timeUntilIncrement > 0" class="text-center py-2 bg-blue-50 dark:bg-blue-900/20 rounded-md">
                         <div class="text-xs text-gray-600 dark:text-gray-400 mb-1">
@@ -292,6 +320,8 @@ const {
     autoIncrement,
     autoIncrementInterval,
     autoIncrementAmount,
+    useTargetBpm,
+    targetBpm,
     timeUntilIncrement,
     beatsPerMeasure,
     toggle,

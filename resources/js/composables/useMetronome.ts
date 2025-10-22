@@ -13,6 +13,8 @@ interface MetronomeSettings {
     autoIncrement: boolean;
     autoIncrementInterval: number; // seconds
     autoIncrementAmount: number; // BPM to add
+    useTargetBpm: boolean;
+    targetBpm: number; // target BPM to reach
 }
 
 const SETTINGS_KEY = 'metronome_settings';
@@ -34,6 +36,8 @@ export function useMetronome() {
     const autoIncrement = ref(false);
     const autoIncrementInterval = ref(60); // seconds (default 1 minute)
     const autoIncrementAmount = ref(5); // BPM (default +5)
+    const useTargetBpm = ref(false);
+    const targetBpm = ref(180); // default target
     const timeUntilIncrement = ref(0); // seconds remaining
     const autoIncrementStartTime = ref<number | null>(null);
 
@@ -56,6 +60,8 @@ export function useMetronome() {
                 autoIncrement.value = settings.autoIncrement || false;
                 autoIncrementInterval.value = settings.autoIncrementInterval || 60;
                 autoIncrementAmount.value = settings.autoIncrementAmount || 5;
+                useTargetBpm.value = settings.useTargetBpm || false;
+                targetBpm.value = settings.targetBpm || 180;
             } catch (e) {
                 console.error('Failed to load metronome settings:', e);
             }
@@ -73,6 +79,8 @@ export function useMetronome() {
             autoIncrement: autoIncrement.value,
             autoIncrementInterval: autoIncrementInterval.value,
             autoIncrementAmount: autoIncrementAmount.value,
+            useTargetBpm: useTargetBpm.value,
+            targetBpm: targetBpm.value,
         };
         localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
     };
@@ -197,9 +205,24 @@ export function useMetronome() {
 
             if (remaining <= 0) {
                 // Time to increment!
-                const newBpm = Math.min(300, bpm.value + autoIncrementAmount.value);
+                const maxBpm = useTargetBpm.value ? targetBpm.value : 300;
+                const newBpm = Math.min(maxBpm, bpm.value + autoIncrementAmount.value);
+
+                // Check if we've reached the target
+                if (bpm.value >= maxBpm) {
+                    // Target reached, stop auto-increment
+                    stopAutoIncrement();
+                    return;
+                }
+
                 bpm.value = newBpm;
                 saveSettings();
+
+                // If we've just reached the target, stop
+                if (newBpm >= maxBpm) {
+                    stopAutoIncrement();
+                    return;
+                }
 
                 // Reset timer for next increment
                 autoIncrementStartTime.value = Date.now();
@@ -402,6 +425,8 @@ export function useMetronome() {
         autoIncrement,
         autoIncrementInterval,
         autoIncrementAmount,
+        useTargetBpm,
+        targetBpm,
         timeUntilIncrement,
 
         // Computed
