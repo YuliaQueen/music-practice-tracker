@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
+import MetronomeWidget from '@/Components/Metronome/MetronomeWidget.vue';
 import { Head, router, useForm } from '@inertiajs/vue3';
 import { useSimpleI18n } from '@/composables/useSimpleI18n';
 
@@ -133,6 +134,11 @@ const getStatusBadgeClass = (status: string): string => {
                             </div>
                         </div>
                     </div>
+                </div>
+
+                <!-- Метроном -->
+                <div class="mt-8">
+                    <MetronomeWidget />
                 </div>
 
                 <!-- Упражнения -->
