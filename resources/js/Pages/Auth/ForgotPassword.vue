@@ -23,7 +23,7 @@ const submit = () => {
     <GuestLayout>
         <Head title="Восстановление пароля" />
 
-        <div class="mb-4 text-sm text-gray-600 dark:text-gray-400">
+        <div class="mb-4 text-sm text-neutral-600 dark:text-neutral-400">
             Забыли пароль? Не проблема. Просто укажите ваш email
             адрес и мы отправим вам ссылку для сброса пароля, которая позволит
             вам выбрать новый.
@@ -31,7 +31,7 @@ const submit = () => {
 
         <div
             v-if="status"
-            class="mb-4 text-sm font-medium text-green-600"
+            class="mb-4 text-sm font-medium text-success-600"
         >
             {{ status }}
         </div>

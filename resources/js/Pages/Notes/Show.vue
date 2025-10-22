@@ -5,25 +5,25 @@
         <div class="flex items-center space-x-4">
           <Link
             :href="route('notes.index')"
-            class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+            class="text-neutral-500 hover:text-neutral-700 dark:text-neutral-400 dark:hover:text-neutral-200"
           >
             <i class="fas fa-arrow-left"></i>
           </Link>
-          <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
+          <h2 class="font-semibold text-xl text-neutral-800 dark:text-neutral-200 leading-tight">
             {{ note.title }}
           </h2>
         </div>
         <div class="flex space-x-2">
           <Link
             :href="route('notes.edit', note.id)"
-            class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-200"
+            class="bg-accent-500 hover:bg-accent-700 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-200"
           >
             <i class="fas fa-edit mr-2"></i>
             {{ $t('common.edit') }}
           </Link>
           <button
             @click="downloadNote"
-            class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-200"
+            class="bg-success-500 hover:bg-success-700 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-200"
           >
             <i class="fas fa-download mr-2"></i>
             {{ $t('notes.download') }}
@@ -37,60 +37,60 @@
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <!-- Информация о файле -->
           <div class="lg:col-span-1">
-            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
+            <div class="bg-white dark:bg-neutral-800 overflow-hidden shadow-sm sm:rounded-lg">
               <div class="p-6">
-                <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">
+                <h3 class="text-lg font-medium text-neutral-900 dark:text-neutral-100 mb-4">
                   {{ $t('notes.file_info') }}
                 </h3>
 
                 <!-- Основная информация -->
                 <div class="space-y-4">
                   <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                    <label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300">
                       {{ $t('notes.filename') }}
                     </label>
-                    <p class="mt-1 text-sm text-gray-900 dark:text-gray-100">
+                    <p class="mt-1 text-sm text-neutral-900 dark:text-neutral-100">
                       {{ note.filename }}
                     </p>
                   </div>
 
                   <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                    <label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300">
                       {{ $t('notes.file_type') }}
                     </label>
                     <div class="mt-1 flex items-center space-x-2">
                       <i :class="getFileTypeIcon(note.mime_type)" class="text-lg"></i>
-                      <span class="text-sm text-gray-900 dark:text-gray-100">
+                      <span class="text-sm text-neutral-900 dark:text-neutral-100">
                         {{ getFileTypeName(note.mime_type) }}
                       </span>
                     </div>
                   </div>
 
                   <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                    <label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300">
                       {{ $t('notes.file_size') }}
                     </label>
-                    <p class="mt-1 text-sm text-gray-900 dark:text-gray-100">
+                    <p class="mt-1 text-sm text-neutral-900 dark:text-neutral-100">
                       {{ note.formatted_file_size }}
                     </p>
                   </div>
 
                   <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                    <label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300">
                       {{ $t('notes.uploaded') }}
                     </label>
-                    <p class="mt-1 text-sm text-gray-900 dark:text-gray-100">
+                    <p class="mt-1 text-sm text-neutral-900 dark:text-neutral-100">
                       {{ formatDate(note.created_at) }}
                     </p>
                   </div>
 
                   <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                    <label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300">
                       {{ $t('notes.visibility') }}
                     </label>
                     <div class="mt-1 flex items-center space-x-2">
-                      <i :class="note.is_public ? 'fas fa-globe text-green-500' : 'fas fa-lock text-gray-500'"></i>
-                      <span class="text-sm text-gray-900 dark:text-gray-100">
+                      <i :class="note.is_public ? 'fas fa-globe text-success-500' : 'fas fa-lock text-neutral-500'"></i>
+                      <span class="text-sm text-neutral-900 dark:text-neutral-100">
                         {{ note.is_public ? $t('notes.public') : $t('notes.private') }}
                       </span>
                     </div>
@@ -98,12 +98,12 @@
 
                   <!-- Связанное упражнение -->
                   <div v-if="note.exercise">
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                    <label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300">
                       {{ $t('notes.associated_exercise') }}
                     </label>
                     <Link
                       :href="route('exercises.show', note.exercise.id)"
-                      class="mt-1 inline-flex items-center text-sm text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-200"
+                      class="mt-1 inline-flex items-center text-sm text-accent-600 hover:text-accent-800 dark:text-accent-400 dark:hover:text-accent-200"
                     >
                       <i class="fas fa-dumbbell mr-1"></i>
                       {{ note.exercise.title }}
@@ -113,10 +113,10 @@
 
                 <!-- Описание -->
                 <div v-if="note.description" class="mt-6">
-                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  <label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
                     {{ $t('notes.description') }}
                   </label>
-                  <p class="text-sm text-gray-900 dark:text-gray-100 whitespace-pre-wrap">
+                  <p class="text-sm text-neutral-900 dark:text-neutral-100 whitespace-pre-wrap">
                     {{ note.description }}
                   </p>
                 </div>
@@ -125,7 +125,7 @@
                 <div class="mt-6 space-y-3">
                   <button
                     @click="toggleFullscreen"
-                    class="w-full bg-gray-500 hover:bg-gray-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200"
+                    class="w-full bg-neutral-500 hover:bg-neutral-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200"
                   >
                     <i class="fas fa-expand mr-2"></i>
                     {{ isFullscreen ? $t('notes.exit_fullscreen') : $t('notes.fullscreen') }}
@@ -134,7 +134,7 @@
                   <button
                     v-if="isPdf"
                     @click="toggleZoom"
-                    class="w-full bg-purple-500 hover:bg-purple-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200"
+                    class="w-full bg-secondary-500 hover:bg-secondary-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200"
                   >
                     <i :class="isZoomed ? 'fas fa-search-minus' : 'fas fa-search-plus'" class="mr-2"></i>
                     {{ isZoomed ? $t('notes.zoom_out') : $t('notes.zoom_in') }}
@@ -146,24 +146,24 @@
 
           <!-- Просмотр файла -->
           <div class="lg:col-span-2">
-            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
+            <div class="bg-white dark:bg-neutral-800 overflow-hidden shadow-sm sm:rounded-lg">
               <div class="p-6">
                 <!-- Загрузка -->
                 <div v-if="loading" class="flex items-center justify-center h-96">
                   <div class="text-center">
-                    <i class="fas fa-spinner fa-spin text-4xl text-gray-400 mb-4"></i>
-                    <p class="text-gray-500 dark:text-gray-400">{{ $t('notes.loading') }}</p>
+                    <i class="fas fa-spinner fa-spin text-4xl text-neutral-400 mb-4"></i>
+                    <p class="text-neutral-500 dark:text-neutral-400">{{ $t('notes.loading') }}</p>
                   </div>
                 </div>
 
                 <!-- Ошибка загрузки -->
                 <div v-else-if="error" class="flex items-center justify-center h-96">
                   <div class="text-center">
-                    <i class="fas fa-exclamation-triangle text-4xl text-red-400 mb-4"></i>
-                    <p class="text-red-500 dark:text-red-400 mb-4">{{ error }}</p>
+                    <i class="fas fa-exclamation-triangle text-4xl text-danger-400 mb-4"></i>
+                    <p class="text-danger-500 dark:text-danger-400 mb-4">{{ error }}</p>
                     <button
                       @click="loadFile"
-                      class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-200"
+                      class="bg-accent-500 hover:bg-accent-700 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-200"
                     >
                       {{ $t('notes.retry') }}
                     </button>
@@ -185,17 +185,17 @@
                     <button
                       @click="previousPage"
                       :disabled="currentPage <= 1"
-                      class="bg-gray-500 hover:bg-gray-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200"
+                      class="bg-neutral-500 hover:bg-neutral-700 disabled:bg-neutral-300 disabled:cursor-not-allowed text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200"
                     >
                       <i class="fas fa-chevron-left"></i>
                     </button>
-                    <span class="flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-300">
+                    <span class="flex items-center px-4 py-2 text-sm text-neutral-700 dark:text-neutral-300">
                       {{ currentPage }} / {{ totalPages }}
                     </span>
                     <button
                       @click="nextPage"
                       :disabled="currentPage >= totalPages"
-                      class="bg-gray-500 hover:bg-gray-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200"
+                      class="bg-neutral-500 hover:bg-neutral-700 disabled:bg-neutral-300 disabled:cursor-not-allowed text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200"
                     >
                       <i class="fas fa-chevron-right"></i>
                     </button>
@@ -214,9 +214,9 @@
 
                 <!-- Аудио плеер -->
                 <div v-else-if="isAudio && fileUrl" class="text-center">
-                  <div class="bg-gray-100 dark:bg-gray-700 rounded-lg p-8">
-                    <i class="fas fa-music text-6xl text-gray-400 mb-4"></i>
-                    <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">
+                  <div class="bg-neutral-100 dark:bg-neutral-700 rounded-lg p-8">
+                    <i class="fas fa-music text-6xl text-neutral-400 mb-4"></i>
+                    <h3 class="text-lg font-medium text-neutral-900 dark:text-neutral-100 mb-4">
                       {{ note.title }}
                     </h3>
                     <audio
@@ -231,17 +231,17 @@
 
                 <!-- MusicXML -->
                 <div v-else-if="isMusicXml && fileUrl" class="text-center">
-                  <div class="bg-gray-100 dark:bg-gray-700 rounded-lg p-8">
-                    <i class="fas fa-file-music text-6xl text-blue-400 mb-4"></i>
-                    <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">
+                  <div class="bg-neutral-100 dark:bg-neutral-700 rounded-lg p-8">
+                    <i class="fas fa-file-music text-6xl text-accent-400 mb-4"></i>
+                    <h3 class="text-lg font-medium text-neutral-900 dark:text-neutral-100 mb-4">
                       {{ note.title }}
                     </h3>
-                    <p class="text-gray-600 dark:text-gray-400 mb-4">
+                    <p class="text-neutral-600 dark:text-neutral-400 mb-4">
                       {{ $t('notes.musicxml_description') }}
                     </p>
                     <button
                       @click="downloadNote"
-                      class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-200"
+                      class="bg-accent-500 hover:bg-accent-700 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-200"
                     >
                       <i class="fas fa-download mr-2"></i>
                       {{ $t('notes.download_to_view') }}
@@ -251,17 +251,17 @@
 
                 <!-- Неподдерживаемый формат -->
                 <div v-else class="text-center">
-                  <div class="bg-gray-100 dark:bg-gray-700 rounded-lg p-8">
-                    <i class="fas fa-file text-6xl text-gray-400 mb-4"></i>
-                    <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">
+                  <div class="bg-neutral-100 dark:bg-neutral-700 rounded-lg p-8">
+                    <i class="fas fa-file text-6xl text-neutral-400 mb-4"></i>
+                    <h3 class="text-lg font-medium text-neutral-900 dark:text-neutral-100 mb-4">
                       {{ note.title }}
                     </h3>
-                    <p class="text-gray-600 dark:text-gray-400 mb-4">
+                    <p class="text-neutral-600 dark:text-neutral-400 mb-4">
                       {{ $t('notes.preview_not_available') }}
                     </p>
                     <button
                       @click="downloadNote"
-                      class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-200"
+                      class="bg-accent-500 hover:bg-accent-700 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-200"
                     >
                       <i class="fas fa-download mr-2"></i>
                       {{ $t('notes.download') }}
@@ -369,11 +369,11 @@ const nextPage = () => {
 }
 
 const getFileTypeIcon = (mimeType: string): string => {
-  if (mimeType === 'application/pdf') return 'fas fa-file-pdf text-red-500'
-  if (mimeType.startsWith('image/')) return 'fas fa-image text-green-500'
-  if (mimeType.startsWith('audio/')) return 'fas fa-music text-purple-500'
-  if (mimeType.includes('musicxml')) return 'fas fa-file-music text-blue-500'
-  return 'fas fa-file text-gray-500'
+  if (mimeType === 'application/pdf') return 'fas fa-file-pdf text-danger-500'
+  if (mimeType.startsWith('image/')) return 'fas fa-image text-success-500'
+  if (mimeType.startsWith('audio/')) return 'fas fa-music text-secondary-500'
+  if (mimeType.includes('musicxml')) return 'fas fa-file-music text-accent-500'
+  return 'fas fa-file text-neutral-500'
 }
 
 const getFileTypeName = (mimeType: string): string => {

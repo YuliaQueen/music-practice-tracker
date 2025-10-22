@@ -2,12 +2,12 @@
     <AuthenticatedLayout>
         <template #header>
             <div class="flex justify-between items-center">
-                <h2 class="font-semibold text-xl text-amber-800 dark:text-gray-200 leading-tight">
+                <h2 class="font-semibold text-xl text-primary-800 dark:text-neutral-200 leading-tight">
                     Мои цели
                 </h2>
                 <Link
                     :href="route('goals.create')"
-                    class="bg-orange-500 hover:bg-orange-700 text-white font-bold py-2 px-4 rounded"
+                    class="bg-primary-500 hover:bg-primary-700 text-white font-bold py-2 px-4 rounded"
                 >
                     Создать цель
                 </Link>
@@ -16,23 +16,23 @@
 
         <div class="py-12">
             <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-                <div class="bg-orange-50 dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
-                    <div class="p-6 text-amber-900 dark:text-gray-100">
+                <div class="bg-primary-50 dark:bg-neutral-800 overflow-hidden shadow-sm sm:rounded-lg">
+                    <div class="p-6 text-primary-900 dark:text-neutral-100">
                         <div v-if="goals.length === 0" class="text-center py-8">
-                            <div class="text-amber-500 dark:text-gray-400 mb-4">
+                            <div class="text-primary-500 dark:text-neutral-400 mb-4">
                                 <svg class="mx-auto h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                                 </svg>
                             </div>
-                            <h3 class="text-lg font-medium text-amber-900 dark:text-gray-100 mb-2">
+                            <h3 class="text-lg font-medium text-primary-900 dark:text-neutral-100 mb-2">
                                 У вас пока нет целей
                             </h3>
-                            <p class="text-amber-600 dark:text-gray-400 mb-4">
+                            <p class="text-primary-600 dark:text-neutral-400 mb-4">
                                 Создайте свою первую цель для отслеживания прогресса в музыке
                             </p>
                             <Link
                                 :href="route('goals.create')"
-                                class="bg-orange-500 hover:bg-orange-700 text-white font-bold py-2 px-4 rounded"
+                                class="bg-primary-500 hover:bg-primary-700 text-white font-bold py-2 px-4 rounded"
                             >
                                 Создать цель
                             </Link>
@@ -42,16 +42,16 @@
                             <div
                                 v-for="goal in goals"
                                 :key="goal.id"
-                                class="bg-orange-50 dark:bg-gray-700 rounded-lg shadow-md p-6 border border-amber-200 dark:border-gray-600"
+                                class="bg-primary-50 dark:bg-neutral-700 rounded-lg shadow-md p-6 border border-primary-200 dark:border-neutral-600"
                             >
                                 <div class="flex items-start justify-between mb-4">
                                     <div class="flex items-center">
                                         <span class="text-2xl mr-3">{{ goal.type_icon }}</span>
                                         <div>
-                                            <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">
+                                            <h3 class="text-lg font-semibold text-neutral-900 dark:text-neutral-100">
                                                 {{ goal.title }}
                                             </h3>
-                                            <p class="text-sm text-gray-500 dark:text-gray-400">
+                                            <p class="text-sm text-neutral-500 dark:text-neutral-400">
                                                 {{ goal.type_label }}
                                             </p>
                                         </div>
@@ -59,7 +59,7 @@
                                     <div class="flex space-x-2">
                                         <button
                                             @click="toggleGoal(goal)"
-                                            class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                                            class="text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300"
                                             :title="goal.is_active ? 'Деактивировать' : 'Активировать'"
                                         >
                                             <svg v-if="goal.is_active" class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
@@ -71,7 +71,7 @@
                                         </button>
                                         <Link
                                             :href="route('goals.show', goal.id)"
-                                            class="text-blue-500 hover:text-blue-700 mr-2"
+                                            class="text-accent-500 hover:text-accent-700 mr-2"
                                             title="Просмотреть"
                                         >
                                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -81,7 +81,7 @@
                                         </Link>
                                         <Link
                                             :href="route('goals.edit', goal.id)"
-                                            class="text-green-500 hover:text-green-700 mr-2"
+                                            class="text-success-500 hover:text-success-700 mr-2"
                                             title="Редактировать"
                                         >
                                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -90,7 +90,7 @@
                                         </Link>
                                         <button
                                             @click="deleteGoal(goal)"
-                                            class="text-red-500 hover:text-red-700"
+                                            class="text-danger-500 hover:text-danger-700"
                                             title="Удалить"
                                         >
                                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -101,35 +101,35 @@
                                 </div>
 
                                 <div v-if="goal.description" class="mb-4">
-                                    <p class="text-sm text-gray-600 dark:text-gray-300">
+                                    <p class="text-sm text-neutral-600 dark:text-neutral-300">
                                         {{ goal.description }}
                                     </p>
                                 </div>
 
                                 <div class="mb-4">
-                                    <div class="flex justify-between text-sm text-gray-600 dark:text-gray-300 mb-1">
+                                    <div class="flex justify-between text-sm text-neutral-600 dark:text-neutral-300 mb-1">
                                         <span>Прогресс</span>
                                         <span>{{ goal.progress_percentage }}%</span>
                                     </div>
-                                    <div class="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-2">
+                                    <div class="w-full bg-neutral-200 dark:bg-neutral-600 rounded-full h-2">
                                         <div
-                                            class="bg-blue-500 h-2 rounded-full transition-all duration-300"
+                                            class="bg-accent-500 h-2 rounded-full transition-all duration-300"
                                             :style="{ width: goal.progress_percentage + '%' }"
                                         ></div>
                                     </div>
-                                    <div class="flex justify-between text-xs text-gray-500 dark:text-gray-400 mt-1">
+                                    <div class="flex justify-between text-xs text-neutral-500 dark:text-neutral-400 mt-1">
                                         <span>{{ goal.progress?.current || 0 }} / {{ goal.target.value }}</span>
                                         <span v-if="goal.remaining > 0">Осталось: {{ goal.remaining }}</span>
                                     </div>
                                 </div>
 
-                                <div class="flex justify-between items-center text-sm text-gray-500 dark:text-gray-400">
+                                <div class="flex justify-between items-center text-sm text-neutral-500 dark:text-neutral-400">
                                     <span>{{ formatDate(goal.start_date) }}</span>
                                     <span v-if="goal.end_date">до {{ formatDate(goal.end_date) }}</span>
-                                    <span v-else class="text-green-500">Бессрочная</span>
+                                    <span v-else class="text-success-500">Бессрочная</span>
                                 </div>
 
-                                <div v-if="goal.is_completed" class="mt-3 p-2 bg-green-100 dark:bg-green-900 rounded text-green-800 dark:text-green-200 text-sm">
+                                <div v-if="goal.is_completed" class="mt-3 p-2 bg-success-100 dark:bg-success-900 rounded text-success-800 dark:text-success-200 text-sm">
                                     ✅ Цель выполнена {{ formatDate(goal.completed_at) }}
                                 </div>
                             </div>
@@ -140,19 +140,19 @@
         </div>
 
         <!-- Модальное окно подтверждения удаления -->
-        <div v-if="showDeleteModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-            <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white dark:bg-gray-800">
+        <div v-if="showDeleteModal" class="fixed inset-0 bg-neutral-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+            <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white dark:bg-neutral-800">
                 <div class="mt-3 text-center">
-                    <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100 dark:bg-red-900">
-                        <svg class="h-6 w-6 text-red-600 dark:text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-danger-100 dark:bg-danger-900">
+                        <svg class="h-6 w-6 text-danger-600 dark:text-danger-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
                         </svg>
                     </div>
-                    <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mt-4">
+                    <h3 class="text-lg font-medium text-neutral-900 dark:text-neutral-100 mt-4">
                         Удалить цель?
                     </h3>
                     <div class="mt-2 px-7 py-3">
-                        <p class="text-sm text-gray-500 dark:text-gray-400">
+                        <p class="text-sm text-neutral-500 dark:text-neutral-400">
                             Вы уверены, что хотите удалить цель "{{ goalToDelete?.title }}"? 
                             Это действие нельзя отменить.
                         </p>
@@ -160,13 +160,13 @@
                     <div class="flex justify-center space-x-4 mt-4">
                         <button
                             @click="cancelDelete"
-                            class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded"
+                            class="bg-neutral-300 hover:bg-neutral-400 text-neutral-800 font-bold py-2 px-4 rounded"
                         >
                             Отмена
                         </button>
                         <button
                             @click="confirmDelete"
-                            class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
+                            class="bg-danger-500 hover:bg-danger-700 text-white font-bold py-2 px-4 rounded"
                         >
                             Удалить
                         </button>
