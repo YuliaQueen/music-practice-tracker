@@ -70,7 +70,7 @@ class AudioRecording extends Model
     }
 
     /**
-     * Получить временный URL для прослушивания аудиофайла (действует 1 час)
+     * Получить URL для прослушивания аудиофайла через Laravel маршрут
      */
     public function getAudioUrlAttribute(): ?string
     {
@@ -78,16 +78,8 @@ class AudioRecording extends Model
             return null;
         }
 
-        try {
-            // Генерируем временный URL, действительный в течение 1 часа
-            return Storage::disk('minio')->temporaryUrl(
-                $this->file_path,
-                now()->addHour()
-            );
-        } catch (\Exception $e) {
-            \Log::error('Ошибка при генерации URL для аудио записи: ' . $e->getMessage());
-            return null;
-        }
+        // Используем маршрут Laravel для стриминга файла
+        return route('audio-recordings.stream', $this->id);
     }
 
     /**

@@ -98,17 +98,6 @@
                         </button>
 
                         <button
-                            v-if="canEdit"
-                            @click="editRecording(recording)"
-                            class="inline-flex items-center px-2 py-1 text-xs font-medium text-primary-700 dark:text-primary-400 bg-primary-50 dark:bg-primary-900/20 hover:bg-primary-100 dark:hover:bg-primary-900/30 rounded"
-                        >
-                            <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                            </svg>
-                            Редактировать
-                        </button>
-
-                        <button
                             v-if="canDelete"
                             @click="deleteRecording(recording)"
                             class="inline-flex items-center px-2 py-1 text-xs font-medium text-danger-700 dark:text-danger-400 bg-danger-50 dark:bg-danger-900/20 hover:bg-danger-100 dark:hover:bg-danger-900/30 rounded"
@@ -142,12 +131,10 @@ interface AudioRecording {
 
 interface Props {
     recordings: AudioRecording[]
-    canEdit?: boolean
     canDelete?: boolean
 }
 
 const props = withDefaults(defineProps<Props>(), {
-    canEdit: true,
     canDelete: true,
 })
 
@@ -180,10 +167,6 @@ const formatDate = (dateString: string) => {
 
 const downloadRecording = (recording: AudioRecording) => {
     window.location.href = route('audio-recordings.download', recording.id)
-}
-
-const editRecording = (recording: AudioRecording) => {
-    router.visit(route('audio-recordings.edit', recording.id))
 }
 
 const deleteRecording = (recording: AudioRecording) => {

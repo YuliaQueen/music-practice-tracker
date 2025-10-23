@@ -62,6 +62,7 @@ Route::middleware('auth')->group(function () {
 
     // Аудио записи
     Route::resource('audio-recordings', AudioRecordingController::class);
+    Route::get('/audio-recordings/{audioRecording}/stream', [AudioRecordingController::class, 'stream'])->name('audio-recordings.stream');
     Route::get('/audio-recordings/{audioRecording}/download', [AudioRecordingController::class, 'download'])->name('audio-recordings.download');
     Route::get('/exercises/{exercise}/audio-recordings', [AudioRecordingController::class, 'forExercise'])->name('exercises.audio-recordings');
     Route::get('/session-blocks/{sessionBlock}/audio-recordings', [AudioRecordingController::class, 'forSessionBlock'])->name('session-blocks.audio-recordings');

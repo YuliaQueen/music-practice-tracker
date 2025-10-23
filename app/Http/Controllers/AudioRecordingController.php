@@ -164,6 +164,31 @@ class AudioRecordingController extends Controller
     }
 
     /**
+     * Stream the audio file for playback.
+     */
+    public function stream(AudioRecording $audioRecording)
+    {
+        Gate::authorize('view', $audioRecording);
+
+        if (!Storage::disk('minio')->exists($audioRecording->file_path)) {
+            abort(404, 'Файл не найден');
+        }
+
+        return response()->stream(function () use ($audioRecording) {
+            $stream = Storage::disk('minio')->readStream($audioRecording->file_path);
+            fpassthru($stream);
+            if (is_resource($stream)) {
+                fclose($stream);
+            }
+        }, 200, [
+            'Content-Type' => $audioRecording->mime_type,
+            'Content-Length' => $audioRecording->file_size,
+            'Accept-Ranges' => 'bytes',
+            'Cache-Control' => 'public, max-age=3600',
+        ]);
+    }
+
+    /**
      * Download the audio file.
      */
     public function download(AudioRecording $audioRecording)

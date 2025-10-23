@@ -97,13 +97,6 @@
                         @refresh="refreshRecordings"
                     />
                 </div>
-
-                <!-- Сравнение записей и прогресс -->
-                <div v-if="audioRecordings.length >= 2" class="mt-6">
-                    <AudioRecordingsComparison
-                        :recordings="audioRecordings"
-                    />
-                </div>
             </div>
         </div>
 
@@ -143,7 +136,6 @@ import TimerExtensionControls from '@/Components/Session/TimerExtensionControls.
 import MetronomeWidget from '@/Components/Metronome/MetronomeWidget.vue'
 import AudioRecorder from '@/Components/Audio/AudioRecorder.vue'
 import AudioRecordingsList from '@/Components/Audio/AudioRecordingsList.vue'
-import AudioRecordingsComparison from '@/Components/Audio/AudioRecordingsComparison.vue'
 import { useTimerSounds } from '@/composables/useTimerSounds'
 import { getStatusLabel, getStatusBadgeClass } from '@/utils/statusHelpers'
 
