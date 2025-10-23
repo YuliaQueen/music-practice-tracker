@@ -226,16 +226,42 @@
                                     Добавьте упражнения для вашего занятия
                                 </div>
 
-                                <div v-else class="space-y-4">
-                                    <div
-                                        v-for="(block, index) in form.blocks"
-                                        :key="index"
-                                        class="border border-neutral-200 rounded-lg p-4 dark:border-neutral-600 dark:bg-neutral-700"
-                                    >
+                                <div v-else class="mb-4 p-3 bg-accent-50 dark:bg-accent-900/20 border border-accent-200 dark:border-accent-800 rounded-lg">
+                                    <div class="flex items-center text-xs sm:text-sm text-accent-700 dark:text-accent-300">
+                                        <svg class="w-4 h-4 sm:w-5 sm:h-5 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        </svg>
+                                        <span>
+                                            <strong>Совет:</strong> Перетащите упражнения чтобы изменить порядок
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <draggable
+                                    v-if="form.blocks.length > 0"
+                                    v-model="form.blocks"
+                                    item-key="title"
+                                    tag="div"
+                                    class="space-y-4"
+                                    ghost-class="dragging-ghost"
+                                    chosen-class="dragging-chosen"
+                                    :animation="200"
+                                >
+                                    <template #item="{ element: block, index }">
+                                        <div
+                                            class="border border-neutral-200 rounded-lg p-4 dark:border-neutral-600 dark:bg-neutral-700 cursor-move hover:shadow-lg hover:border-accent-300 dark:hover:border-accent-600 transition-all"
+                                        >
                                         <div class="flex justify-between items-start mb-3">
-                                            <h4 class="font-medium text-neutral-900 dark:text-neutral-100">
-                                                Упражнение {{ index + 1 }}
-                                            </h4>
+                                            <div class="flex items-center space-x-3">
+                                                <div class="flex-shrink-0 text-primary-400 dark:text-neutral-500 hover:text-accent-500 dark:hover:text-accent-400 transition-colors" title="Перетащите для изменения порядка">
+                                                    <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 8h16M4 16h16" />
+                                                    </svg>
+                                                </div>
+                                                <h4 class="font-medium text-neutral-900 dark:text-neutral-100">
+                                                    Упражнение {{ index + 1 }}
+                                                </h4>
+                                            </div>
                                             <DangerButton
                                                 type="button"
                                                 @click="removeBlock(index)"
@@ -294,12 +320,13 @@
                                             <textarea
                                                 :id="`block_${index}_description`"
                                                 v-model="block.description"
-                                                class="mt-1 block w-full border-neutral-300 focus:border-accent-500 focus:ring-accent-500 rounded-md shadow-sm"
+                                                class="mt-1 block w-full border-neutral-300 focus:border-accent-500 focus:ring-accent-500 rounded-md shadow-sm dark:border-neutral-600 dark:bg-neutral-700 dark:text-neutral-100"
                                                 rows="2"
                                             ></textarea>
                                         </div>
-                                    </div>
-                                </div>
+                                        </div>
+                                    </template>
+                                </draggable>
 
                                 <InputError class="mt-2" :message="form.errors.blocks" />
                             </div>
@@ -365,6 +392,7 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
 import { useForm } from '@inertiajs/vue3'
+import draggable from 'vuedraggable'
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
 import InputError from '@/Components/InputError.vue'
 import InputLabel from '@/Components/InputLabel.vue'
@@ -660,3 +688,24 @@ if (props.exerciseData) {
     }
 }
 </script>
+
+<style scoped>
+/* Стили для drag & drop */
+.dragging-ghost {
+    opacity: 0.6 !important;
+    transform: scale(1.05) !important;
+    cursor: grabbing !important;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.2) !important;
+}
+
+.dragging-chosen {
+    opacity: 0.5 !important;
+    border: 2px dashed #cbd5e1 !important;
+    background: #f8fafc !important;
+}
+
+:global(.dark) .dragging-chosen {
+    background: #0f172a !important;
+    border-color: #334155 !important;
+}
+</style>
