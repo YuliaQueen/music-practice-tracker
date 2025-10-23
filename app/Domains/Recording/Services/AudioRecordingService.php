@@ -76,7 +76,14 @@ readonly class AudioRecordingService
             ];
         } catch (\Throwable $e) {
             if (DB::transactionLevel() > 0) {
-                DB::rollBack();
+                try {
+                    DB::rollBack();
+                } catch (\Throwable $rollbackException) {
+                    Log::error('Ошибка при откате транзакции', [
+                        'user_id' => $userId,
+                        'error'   => $rollbackException->getMessage(),
+                    ]);
+                }
             }
 
             // Удаляем файл если он был загружен

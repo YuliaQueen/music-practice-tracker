@@ -67,7 +67,14 @@ class SessionService
             ];
         } catch (\Throwable $e) {
             if (DB::transactionLevel() > 0) {
-                DB::rollBack();
+                try {
+                    DB::rollBack();
+                } catch (\Throwable $rollbackException) {
+                    Log::error('Ошибка при откате транзакции', [
+                        'user_id' => $user->id,
+                        'error'   => $rollbackException->getMessage(),
+                    ]);
+                }
             }
 
             Log::error('Ошибка при создании сессии', [
@@ -222,7 +229,14 @@ class SessionService
             ];
         } catch (\Throwable $e) {
             if (DB::transactionLevel() > 0) {
-                DB::rollBack();
+                try {
+                    DB::rollBack();
+                } catch (\Throwable $rollbackException) {
+                    Log::error('Ошибка при откате транзакции', [
+                        'session_id' => $session->id,
+                        'error'      => $rollbackException->getMessage(),
+                    ]);
+                }
             }
 
             Log::error('Ошибка при завершении сессии', [
@@ -273,7 +287,15 @@ class SessionService
             ];
         } catch (\Throwable $e) {
             if (DB::transactionLevel() > 0) {
-                DB::rollBack();
+                try {
+                    DB::rollBack();
+                } catch (\Throwable $rollbackException) {
+                    Log::error('Ошибка при откате транзакции', [
+                        'session_id' => $session->id,
+                        'block_id'   => $block->id,
+                        'error'      => $rollbackException->getMessage(),
+                    ]);
+                }
             }
 
             Log::error('Ошибка при обновлении блока сессии', [
@@ -315,7 +337,14 @@ class SessionService
             ];
         } catch (\Throwable $e) {
             if (DB::transactionLevel() > 0) {
-                DB::rollBack();
+                try {
+                    DB::rollBack();
+                } catch (\Throwable $rollbackException) {
+                    Log::error('Ошибка при откате транзакции', [
+                        'session_id' => $session->id,
+                        'error'      => $rollbackException->getMessage(),
+                    ]);
+                }
             }
 
             Log::error('Ошибка при удалении сессии', [
