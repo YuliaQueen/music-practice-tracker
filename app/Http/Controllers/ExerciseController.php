@@ -6,6 +6,7 @@ namespace App\Http\Controllers;
 
 use Inertia\Inertia;
 use Inertia\Response;
+use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
 use App\Domains\Planning\Models\Exercise;
 use App\DTOs\Exercises\CreateExerciseDTO;
@@ -16,16 +17,38 @@ use App\Http\Requests\Exercise\UpdateExerciseRequest;
 class ExerciseController extends Controller
 {
     /**
+     * Количество упражнений на странице
+     */
+    private const EXERCISES_PER_PAGE = 10;
+
+    /**
      * Показать список упражнений пользователя
      */
-    public function index(): Response
+    public function index(Request $request): Response
     {
-        $exercises = Exercise::forUser(auth()->id())
-            ->orderBy('created_at', 'desc')
-            ->paginate(10);
+        $filters = [
+            'search' => $request->input('search'),
+            'type'   => $request->input('type'),
+        ];
+
+        $query = Exercise::forUser(auth()->id());
+
+        // Фильтр по названию
+        if (!empty($filters['search'])) {
+            $query->where('title', 'like', '%' . $filters['search'] . '%');
+        }
+
+        // Фильтр по типу
+        if (!empty($filters['type'])) {
+            $query->where('type', $filters['type']);
+        }
+
+        $exercises = $query->orderBy('created_at', 'desc')
+            ->paginate(self::EXERCISES_PER_PAGE);
 
         return Inertia::render('Exercises/Index', [
             'exercises' => $exercises,
+            'filters'   => $filters,
         ]);
     }
 
