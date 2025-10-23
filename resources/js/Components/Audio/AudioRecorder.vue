@@ -177,7 +177,7 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import { useForm } from '@inertiajs/vue3'
+import { router } from '@inertiajs/vue3'
 import { useAudioRecorder } from '@/composables/useAudioRecorder'
 
 interface Props {
@@ -262,9 +262,8 @@ const handleSaveRecording = async () => {
             formData.append('quality_rating', qualityRating.value.toString())
         }
 
-        const form = useForm(formData)
-
-        form.post(route('audio-recordings.store'), {
+        // Используем router.post напрямую для отправки FormData
+        router.post(route('audio-recordings.store'), formData, {
             preserveScroll: true,
             onSuccess: (page) => {
                 // Очищаем форму после успешного сохранения
