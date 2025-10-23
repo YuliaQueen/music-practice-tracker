@@ -106,32 +106,37 @@
                 ></div>
             </div>
 
-            <!-- Tempo Presets (compact) -->
-            <div class="flex gap-1 overflow-x-auto">
-                <button
-                    v-for="preset in tempoPresets"
-                    :key="preset.name"
-                    @click="applyTempoPreset(preset.value as any)"
-                    class="px-2 py-1 text-xs font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors whitespace-nowrap"
-                    :title="`${preset.bpm} BPM`"
-                >
-                    {{ preset.name }}
-                </button>
-            </div>
+            <!-- Subdivision & Volume Row -->
+            <div class="flex items-center gap-3">
+                <!-- Subdivision (дробление) -->
+                <div class="flex items-center gap-2">
+                    <label class="text-xs text-gray-600 dark:text-gray-400 whitespace-nowrap">Дробление:</label>
+                    <select
+                        :value="subdivision"
+                        @change="setSubdivision(($event.target as HTMLSelectElement).value as any)"
+                        class="px-2 py-1 text-xs bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded text-gray-900 dark:text-gray-100"
+                    >
+                        <option value="quarter">Четверти</option>
+                        <option value="eighth">Восьмые</option>
+                        <option value="triplet">Триоли</option>
+                        <option value="sixteenth">Шестнадцатые</option>
+                    </select>
+                </div>
 
-            <!-- Volume Control (compact) -->
-            <div class="flex items-center gap-2">
-                <span class="text-xs text-gray-600 dark:text-gray-400">🔊</span>
-                <input
-                    type="range"
-                    :value="volume"
-                    @input="setVolume(parseInt(($event.target as HTMLInputElement).value))"
-                    min="0"
-                    max="100"
-                    step="5"
-                    class="flex-1 h-1 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer"
-                />
-                <span class="text-xs text-gray-500 dark:text-gray-400 w-8">{{ volume }}%</span>
+                    <!-- Volume -->
+                <div class="flex items-center gap-2 flex-1">
+                    <span class="text-xs text-gray-600 dark:text-gray-400">🔊</span>
+                    <input
+                        type="range"
+                        :value="volume"
+                        @input="setVolume(parseInt(($event.target as HTMLInputElement).value))"
+                        min="0"
+                        max="100"
+                        step="5"
+                        class="flex-1 h-1 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer"
+                    />
+                    <span class="text-xs text-gray-500 dark:text-gray-400 w-8">{{ volume }}%</span>
+                </div>
             </div>
         </div>
     </div>
@@ -155,26 +160,18 @@ const {
     bpm,
     timeSignature,
     volume,
+    subdivision,
     accentFirstBeat,
     beatsPerMeasure,
     toggle,
     setBpm,
     setTimeSignature,
     setVolume,
+    setSubdivision,
     tapTempo,
     incrementBpm,
     decrementBpm,
-    applyTempoPreset,
 } = useMetronome();
 
 const isCollapsed = ref(props.initiallyCollapsed);
-
-const tempoPresets = [
-    { name: 'Largo', value: 'largo', bpm: 50 },
-    { name: 'Adagio', value: 'adagio', bpm: 71 },
-    { name: 'Andante', value: 'andante', bpm: 92 },
-    { name: 'Moderato', value: 'moderato', bpm: 114 },
-    { name: 'Allegro', value: 'allegro', bpm: 144 },
-    { name: 'Presto', value: 'presto', bpm: 184 },
-];
 </script>

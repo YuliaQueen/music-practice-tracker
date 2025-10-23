@@ -50,27 +50,31 @@
                 </Transition>
 
                 <!-- Информация о сессии -->
-                <SessionInfo
-                    :session="session"
-                />
+                <div class="mb-6">
+                    <SessionInfo
+                        :session="session"
+                    />
+                </div>
 
                 <!-- Таймер и текущий блок -->
-                <SessionTimer
-                    v-if="currentBlock"
-                    :current-block="currentBlock"
-                    :time-remaining="currentBlockTime"
-                    :progress="currentBlockProgress"
-                    :is-running="timerRunning"
-                />
+                <div v-if="currentBlock" class="mb-6">
+                    <SessionTimer
+                        :current-block="currentBlock"
+                        :time-remaining="currentBlockTime"
+                        :progress="currentBlockProgress"
+                        :is-running="timerRunning"
+                    />
+                </div>
 
                 <!-- Управление продлением времени -->
-                <TimerExtensionControls
-                    v-if="session.status === 'active' && session.blocks.length > 0"
-                    :blocks="session.blocks"
-                    v-model:selectedBlockId="selectedBlockForExtension"
-                    @extend="extendTimer"
-                    @restart="restartTimerForBlock"
-                />
+                <div v-if="session.status === 'active' && session.blocks.length > 0" class="mb-6">
+                    <TimerExtensionControls
+                        :blocks="session.blocks"
+                        v-model:selectedBlockId="selectedBlockForExtension"
+                        @extend="extendTimer"
+                        @restart="restartTimerForBlock"
+                    />
+                </div>
 
                 <!-- Аудио рекордер -->
                 <div v-if="currentBlock" class="mb-6">
