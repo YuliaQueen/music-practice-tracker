@@ -146,6 +146,51 @@
                             </button>
                         </div>
 
+                        <!-- Управление временем (для активных/приостановленных блоков) -->
+                        <div v-if="['active', 'paused'].includes(block.status)" class="mt-3 pt-3 border-t border-primary-200 dark:border-neutral-700">
+                            <div class="flex items-center justify-between flex-wrap gap-2">
+                                <span class="text-xs font-medium text-neutral-600 dark:text-neutral-400">
+                                    ⏱️ Управление временем:
+                                </span>
+                                <div class="flex items-center gap-1.5">
+                                    <!-- Кнопки добавления времени -->
+                                    <button
+                                        @click="extendBlockTime(block.id, 5)"
+                                        class="px-2 py-1 text-xs font-medium bg-accent-100 hover:bg-accent-200 dark:bg-accent-900/30 dark:hover:bg-accent-800/50 text-accent-700 dark:text-accent-300 rounded transition-colors"
+                                        title="Добавить 5 минут"
+                                    >
+                                        +5
+                                    </button>
+                                    <button
+                                        @click="extendBlockTime(block.id, 10)"
+                                        class="px-2 py-1 text-xs font-medium bg-accent-100 hover:bg-accent-200 dark:bg-accent-900/30 dark:hover:bg-accent-800/50 text-accent-700 dark:text-accent-300 rounded transition-colors"
+                                        title="Добавить 10 минут"
+                                    >
+                                        +10
+                                    </button>
+                                    <button
+                                        @click="extendBlockTime(block.id, 15)"
+                                        class="px-2 py-1 text-xs font-medium bg-accent-100 hover:bg-accent-200 dark:bg-accent-900/30 dark:hover:bg-accent-800/50 text-accent-700 dark:text-accent-300 rounded transition-colors"
+                                        title="Добавить 15 минут"
+                                    >
+                                        +15
+                                    </button>
+                                    <div class="w-px h-4 bg-neutral-300 dark:bg-neutral-600"></div>
+                                    <!-- Кнопка перезапуска -->
+                                    <button
+                                        @click="restartBlock(block.id)"
+                                        class="px-2 py-1 text-xs font-medium bg-primary-100 hover:bg-primary-200 dark:bg-primary-900/30 dark:hover:bg-primary-800/50 text-primary-700 dark:text-primary-300 rounded transition-colors flex items-center gap-1"
+                                        title="Перезапустить таймер"
+                                    >
+                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                        </svg>
+                                        <span class="hidden sm:inline">Сброс</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
                         <!-- Список аудио записей (сворачиваемый) -->
                         <div v-if="block.audioRecordings && block.audioRecordings.length > 0" class="mt-3 pt-3 border-t border-primary-200 dark:border-neutral-700">
                             <button
@@ -304,6 +349,44 @@ const startBlock = (blockId: number) => {
 
 const toggleRecordings = (blockId: number) => {
     expandedRecordings.value[blockId] = !expandedRecordings.value[blockId];
+};
+
+const extendBlockTime = (blockId: number, minutes: number) => {
+    const block = props.blocks.find(b => b.id === blockId);
+    if (!block) return;
+    
+    const newPlannedDuration = block.planned_duration + minutes;
+    
+    router.patch(
+        route('sessions.blocks.update', { session: props.sessionId, block: blockId }),
+        { planned_duration: newPlannedDuration },
+        {
+            preserveScroll: true,
+            onSuccess: () => {
+                // Обновляем локальный блок после успешного обновления
+                const localBlock = localBlocks.value.find(b => b.id === blockId);
+                if (localBlock) {
+                    localBlock.planned_duration = newPlannedDuration;
+                }
+            }
+        }
+    );
+};
+
+const restartBlock = (blockId: number) => {
+    if (confirm('Вы уверены, что хотите перезапустить таймер этого упражнения?')) {
+        router.patch(
+            route('sessions.blocks.update', { session: props.sessionId, block: blockId }),
+            { 
+                status: 'active',
+                actual_duration: null,
+                completed_at: null,
+            },
+            {
+                preserveScroll: true,
+            }
+        );
+    }
 };
 
 const onDragEnd = () => {

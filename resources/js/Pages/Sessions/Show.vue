@@ -66,16 +66,6 @@
                     />
                 </div>
 
-                <!-- Управление продлением времени -->
-                <div v-if="session.status === 'active' && session.blocks.length > 0" class="mb-6">
-                    <TimerExtensionControls
-                        :blocks="session.blocks"
-                        v-model:selectedBlockId="selectedBlockForExtension"
-                        @extend="extendTimer"
-                        @restart="restartTimerForBlock"
-                    />
-                </div>
-
                 <!-- Аудио рекордер -->
                 <div v-if="currentBlock" class="mb-6">
                     <AudioRecorder
@@ -131,7 +121,6 @@ import SessionTimer from '@/Components/Session/SessionTimer.vue'
 import SessionBlocksList from '@/Components/Session/SessionBlocksList.vue'
 import SessionControlBar from '@/Components/Session/SessionControlBar.vue'
 import SoundSettingsModal from '@/Components/Session/SoundSettingsModal.vue'
-import TimerExtensionControls from '@/Components/Session/TimerExtensionControls.vue'
 import CompactMetronome from '@/Components/Metronome/CompactMetronome.vue'
 import AudioRecorder from '@/Components/Audio/AudioRecorder.vue'
 import { useTimerSounds } from '@/composables/useTimerSounds'
@@ -207,7 +196,6 @@ const extensionNotification = ref<{ show: boolean; message: string; minutes: num
     message: '',
     minutes: 0
 })
-const selectedBlockForExtension = ref<number | null>(null)
 
 // Ключи для localStorage
 const TIMER_STATE_KEY = 'timer-state'
@@ -429,69 +417,7 @@ const completeCurrentBlock = () => {
 }
 
 // Продление времени
-const extendTimer = (minutes: number) => {
-    if (!selectedBlockForExtension.value) return
-
-    const selectedBlock = props.session.blocks.find(block => block.id === selectedBlockForExtension.value)
-    if (!selectedBlock) return
-
-    const newPlannedDuration = selectedBlock.planned_duration + minutes
-
-    const blockForm = useForm({
-        planned_duration: newPlannedDuration,
-    })
-
-    blockForm.patch(route('sessions.blocks.update', {
-        session: props.session.id,
-        block: selectedBlock.id
-    }), {
-        preserveScroll: true,
-        onSuccess: () => {
-            selectedBlock.planned_duration = newPlannedDuration
-
-            if (selectedBlock.id === currentBlock.value?.id && timerRunning.value) {
-                if (startTime.value) {
-                    const now = Date.now()
-                    const elapsed = Math.floor((now - startTime.value) / 1000)
-                    const newPlannedSeconds = newPlannedDuration * 60
-                    const newRemaining = Math.max(0, newPlannedSeconds - elapsed)
-                    currentBlockTime.value = newRemaining
-                }
-            }
-
-            saveTimerState()
-            showExtensionNotification(minutes, selectedBlock.title)
-        }
-    })
-}
-
-const restartTimerForBlock = () => {
-    if (!selectedBlockForExtension.value) return
-
-    const selectedBlock = props.session.blocks.find(block => block.id === selectedBlockForExtension.value)
-    if (!selectedBlock) return
-
-    const blockForm = useForm({
-        status: 'active',
-        actual_duration: null,
-        completed_at: null,
-    })
-
-    blockForm.patch(route('sessions.blocks.update', {
-        session: props.session.id,
-        block: selectedBlock.id
-    }), {
-        preserveScroll: true,
-        onSuccess: () => {
-            selectedBlock.status = 'active'
-            selectedBlock.actual_duration = null
-            selectedBlock.completed_at = null
-
-            resetTimer()
-            showExtensionNotification(0, selectedBlock.title, 'Перезапущен')
-        }
-    })
-}
+// Методы extendTimer и restartTimerForBlock удалены - теперь в SessionBlocksList.vue
 
 const showExtensionNotification = (minutes: number, blockTitle?: string, action?: string) => {
     const title = blockTitle ? ` для "${blockTitle}"` : ''
@@ -588,10 +514,6 @@ const saveSoundSettings = () => {
 onMounted(() => {
     loadSoundSettings()
 
-    if (currentBlock.value) {
-        selectedBlockForExtension.value = currentBlock.value.id
-    }
-
     const timerRestored = restoreTimerState()
 
     if (!timerRestored && currentBlock.value && props.session.status === 'active') {
@@ -608,10 +530,6 @@ onUnmounted(() => {
 watch(currentBlock, (newBlock, oldBlock) => {
     if (oldBlock && newBlock && oldBlock.id !== newBlock.id) {
         resetTimer()
-    }
-
-    if (newBlock) {
-        selectedBlockForExtension.value = newBlock.id
     }
 
     if (newBlock && props.session.status === 'active' && !timerRunning.value) {
