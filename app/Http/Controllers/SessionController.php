@@ -93,22 +93,13 @@ class SessionController extends Controller
     {
         $this->authorize('view', $session);
 
-        $session->load(['blocks', 'template']);
-
-        // Получаем аудио записи для блоков этой сессии
-        $blockIds = $session->blocks->pluck('id')->toArray();
-        $audioRecordings = collect();
-
-        if (!empty($blockIds)) {
-            foreach ($blockIds as $blockId) {
-                $recordings = $this->audioRecordingRepository->getForSessionBlock($blockId);
-                $audioRecordings = $audioRecordings->concat($recordings);
-            }
-        }
+        // Загружаем blocks с их аудио записями (eager loading)
+        $session->load(['blocks.audioRecordings' => function ($query) {
+            $query->orderBy('recorded_at', 'desc');
+        }, 'template']);
 
         return Inertia::render('Sessions/Show', [
-            'session'         => $session,
-            'audioRecordings' => $audioRecordings->sortByDesc('recorded_at')->values(),
+            'session' => $session,
         ]);
     }
 

@@ -95,13 +95,7 @@
                     <CompactMetronome :initially-collapsed="true" />
                 </div>
 
-                <!-- История аудио записей -->
-                <div v-if="audioRecordings.length > 0" class="mt-6">
-                    <AudioRecordingsList
-                        :recordings="audioRecordings"
-                        @refresh="refreshRecordings"
-                    />
-                </div>
+                <!-- Записи теперь показываются внутри каждого упражнения в SessionBlocksList -->
             </div>
         </div>
 
@@ -140,9 +134,20 @@ import SoundSettingsModal from '@/Components/Session/SoundSettingsModal.vue'
 import TimerExtensionControls from '@/Components/Session/TimerExtensionControls.vue'
 import CompactMetronome from '@/Components/Metronome/CompactMetronome.vue'
 import AudioRecorder from '@/Components/Audio/AudioRecorder.vue'
-import AudioRecordingsList from '@/Components/Audio/AudioRecordingsList.vue'
 import { useTimerSounds } from '@/composables/useTimerSounds'
 import { getStatusLabel, getStatusBadgeClass } from '@/utils/statusHelpers'
+
+interface AudioRecording {
+    id: number
+    title: string | null
+    notes: string | null
+    file_name: string
+    audio_url: string
+    formatted_duration: string | null
+    formatted_file_size: string
+    quality_rating: number | null
+    recorded_at: string
+}
 
 interface SessionBlock {
     id: number
@@ -155,6 +160,7 @@ interface SessionBlock {
     sort_order: number
     started_at: string | null
     completed_at: string | null
+    audio_recordings?: AudioRecording[]
 }
 
 interface Session {
@@ -169,20 +175,8 @@ interface Session {
     blocks: SessionBlock[]
 }
 
-interface AudioRecording {
-    id: number
-    title: string | null
-    notes: string | null
-    file_path: string
-    audio_url: string | null
-    quality_rating: number | null
-    recorded_at: string
-    duration: number | null
-}
-
 interface Props {
     session: Session
-    audioRecordings: AudioRecording[]
 }
 
 const props = defineProps<Props>()
@@ -575,12 +569,8 @@ const deleteSession = () => {
 
 const handleRecordingSaved = (recordingId: number) => {
     console.log('Recording saved:', recordingId)
-    // Обновляем страницу, чтобы показать новую запись
-    router.reload({ only: ['audioRecordings'] })
-}
-
-const refreshRecordings = () => {
-    router.reload({ only: ['audioRecordings'] })
+    // Перезагружаем сессию, чтобы обновить записи в blocks
+    router.reload({ only: ['session'] })
 }
 
 // Управление звуками
