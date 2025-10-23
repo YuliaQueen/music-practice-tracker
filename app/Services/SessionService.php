@@ -22,7 +22,7 @@ use App\Domains\Planning\Contracts\SessionRepositoryInterface;
 use App\Domains\Planning\Contracts\SessionBlockRepositoryInterface;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Collection;
 
 /**
  * Сервис для работы с сессиями практики
@@ -91,22 +91,16 @@ class SessionService
     }
 
     /**
-     * Получить предыдущие упражнения пользователя для автозаполнения
-     *
-     * Возвращает упражнения из предыдущих сессий + упражнения из библиотеки,
-     * объединенные по названию и типу
+     * Получить упражнения пользователя для автозаполнения
      *
      * @param int $userId
      * @return Collection
      */
     public function getPreviousExercises(int $userId): Collection
     {
-        // Получаем упражнения из предыдущих сессий
-        $previousExercises = $this->blockRepository->getPreviousExercisesForUser($userId);
-
-        // Получаем упражнения из библиотеки
-        $exerciseLibrary = Exercise::where('user_id', $userId)
+        return Exercise::where('user_id', $userId)
             ->select('title', 'description', 'type', 'planned_duration')
+            ->orderBy('title')
             ->get()
             ->map(function ($exercise) {
                 return [
@@ -114,28 +108,8 @@ class SessionService
                     'description' => $exercise->description,
                     'type'        => $exercise->type,
                     'duration'    => $exercise->planned_duration,
-                    'usage_count' => 0, // Упражнения из библиотеки еще не использовались в сессиях
                 ];
             });
-
-        // Объединяем коллекции
-        $allExercises = $previousExercises->concat($exerciseLibrary);
-
-        // Группируем по комбинации title + type и берем первое (с наибольшим usage_count)
-        $uniqueExercises = $allExercises
-            ->groupBy(function ($exercise) {
-                return $exercise['title'] . '|' . $exercise['type'];
-            })
-            ->map(function ($group) {
-                // Если есть упражнение из сессий (usage_count > 0), берем его
-                // Иначе берем из библиотеки
-                return $group->sortByDesc('usage_count')->first();
-            })
-            ->values()
-            ->sortByDesc('usage_count') // Сортируем по частоте использования
-            ->values();
-
-        return $uniqueExercises;
     }
 
     /**

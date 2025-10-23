@@ -53,32 +53,6 @@ class SessionBlockRepository implements SessionBlockRepositoryInterface
     }
 
     /**
-     * Получить уникальные упражнения пользователя из всех сессий
-     */
-    public function getPreviousExercisesForUser(int $userId): Collection
-    {
-        return SessionBlock::whereHas('session', function ($query) use ($userId) {
-            $query->where('user_id', $userId);
-        })
-            ->select('title', 'description', 'type', 'planned_duration')
-            ->distinct()
-            ->orderBy('title')
-            ->get()
-            ->groupBy('title')
-            ->map(function ($group) {
-                $first = $group->first();
-                return [
-                    'title'       => $first->title,
-                    'description' => $first->description,
-                    'type'        => $first->type,
-                    'duration'    => $first->planned_duration,
-                    'usage_count' => $group->count(),
-                ];
-            })
-            ->values();
-    }
-
-    /**
      * Создать блок
      */
     public function create(array $data): SessionBlock

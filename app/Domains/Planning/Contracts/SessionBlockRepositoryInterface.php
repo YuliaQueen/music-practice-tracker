@@ -45,14 +45,6 @@ interface SessionBlockRepositoryInterface
     public function getNextPlannedForSession(int $sessionId): ?SessionBlock;
 
     /**
-     * Получить уникальные упражнения пользователя из всех сессий
-     *
-     * @param int $userId
-     * @return Collection
-     */
-    public function getPreviousExercisesForUser(int $userId): Collection;
-
-    /**
      * Создать блок
      *
      * @param array $data
