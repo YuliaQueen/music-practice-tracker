@@ -89,6 +89,21 @@
                 <SessionBlocksList
                     :blocks="session.blocks"
                 />
+
+                <!-- История аудио записей -->
+                <div v-if="audioRecordings.length > 0" class="mt-6">
+                    <AudioRecordingsList
+                        :recordings="audioRecordings"
+                        @refresh="refreshRecordings"
+                    />
+                </div>
+
+                <!-- Сравнение записей и прогресс -->
+                <div v-if="audioRecordings.length >= 2" class="mt-6">
+                    <AudioRecordingsComparison
+                        :recordings="audioRecordings"
+                    />
+                </div>
             </div>
         </div>
 
@@ -127,6 +142,8 @@ import SoundSettingsModal from '@/Components/Session/SoundSettingsModal.vue'
 import TimerExtensionControls from '@/Components/Session/TimerExtensionControls.vue'
 import MetronomeWidget from '@/Components/Metronome/MetronomeWidget.vue'
 import AudioRecorder from '@/Components/Audio/AudioRecorder.vue'
+import AudioRecordingsList from '@/Components/Audio/AudioRecordingsList.vue'
+import AudioRecordingsComparison from '@/Components/Audio/AudioRecordingsComparison.vue'
 import { useTimerSounds } from '@/composables/useTimerSounds'
 import { getStatusLabel, getStatusBadgeClass } from '@/utils/statusHelpers'
 
@@ -154,8 +171,20 @@ interface Session {
     blocks: SessionBlock[]
 }
 
+interface AudioRecording {
+    id: number
+    title: string | null
+    notes: string | null
+    file_path: string
+    audio_url: string | null
+    quality_rating: number | null
+    recorded_at: string
+    duration: number | null
+}
+
 interface Props {
     session: Session
+    audioRecordings: AudioRecording[]
 }
 
 const props = defineProps<Props>()
@@ -548,7 +577,12 @@ const deleteSession = () => {
 
 const handleRecordingSaved = (recordingId: number) => {
     console.log('Recording saved:', recordingId)
-    // Можно добавить уведомление или обновить список записей
+    // Обновляем страницу, чтобы показать новую запись
+    router.reload({ only: ['audioRecordings'] })
+}
+
+const refreshRecordings = () => {
+    router.reload({ only: ['audioRecordings'] })
 }
 
 // Управление звуками
