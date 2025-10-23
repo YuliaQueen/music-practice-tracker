@@ -281,32 +281,7 @@ import {
     getBlockIconBgClass,
     getBlockBadgeClass
 } from '@/utils/statusHelpers';
-
-interface AudioRecording {
-    id: number
-    title: string | null
-    notes: string | null
-    file_name: string
-    audio_url: string
-    formatted_duration: string | null
-    formatted_file_size: string
-    quality_rating: number | null
-    recorded_at: string
-}
-
-interface SessionBlock {
-    id: number
-    title: string
-    description: string
-    type: string
-    planned_duration: number
-    actual_duration: number | null
-    status: string
-    sort_order: number
-    started_at: string | null
-    completed_at: string | null
-    audioRecordings?: AudioRecording[]
-}
+import type { SessionBlock } from '@/types/models';
 
 interface Props {
     blocks: SessionBlock[]

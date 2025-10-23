@@ -16,7 +16,6 @@ use App\Domains\Planning\Models\SessionBlock;
 use App\Http\Requests\Session\StoreSessionRequest;
 use App\Http\Requests\Session\UpdateSessionBlockRequest;
 use App\Domains\Planning\Contracts\SessionRepositoryInterface;
-use App\Domains\Recording\Contracts\AudioRecordingRepositoryInterface;
 
 /**
  * Контроллер для управления сессиями практики
@@ -24,9 +23,8 @@ use App\Domains\Recording\Contracts\AudioRecordingRepositoryInterface;
 class SessionController extends Controller
 {
     public function __construct(
-        private SessionService $sessionService,
-        private SessionRepositoryInterface $sessionRepository,
-        private AudioRecordingRepositoryInterface $audioRecordingRepository
+        private readonly SessionService             $sessionService,
+        private readonly SessionRepositoryInterface $sessionRepository
     ) {
     }
 
@@ -94,32 +92,15 @@ class SessionController extends Controller
         $this->authorize('view', $session);
 
         // Загружаем blocks с их аудио записями (eager loading)
-        $session->load(['blocks.audioRecordings' => function ($query) {
-            $query->orderBy('recorded_at', 'desc');
+        // audioRecordings уже загружаются автоматически через $with в SessionBlock
+        $session->load(['blocks' => function ($query) {
+            $query->with(['audioRecordings' => function ($q) {
+                $q->orderBy('recorded_at', 'desc');
+            }]);
         }, 'template']);
 
-        // Явно формируем blocks с recordings для Inertia
-        $blocksWithRecordings = $session->blocks->map(function ($block) {
-            return [
-                'id' => $block->id,
-                'practice_session_id' => $block->practice_session_id,
-                'title' => $block->title,
-                'description' => $block->description,
-                'type' => $block->type,
-                'planned_duration' => $block->planned_duration,
-                'actual_duration' => $block->actual_duration,
-                'status' => $block->status,
-                'sort_order' => $block->sort_order,
-                'started_at' => $block->started_at,
-                'completed_at' => $block->completed_at,
-                'audioRecordings' => $block->audioRecordings, // Явно добавляем recordings
-            ];
-        });
-
         return Inertia::render('Sessions/Show', [
-            'session' => array_merge($session->toArray(), [
-                'blocks' => $blocksWithRecordings,
-            ]),
+            'session' => $session,
         ]);
     }
 

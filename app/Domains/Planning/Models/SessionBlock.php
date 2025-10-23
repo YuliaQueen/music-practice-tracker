@@ -104,6 +104,11 @@ class SessionBlock extends BaseModel
     ];
 
     /**
+     * Relationships to eager load by default
+     */
+    protected $with = ['audioRecordings'];
+
+    /**
      * Create a new factory instance for the model.
      */
     protected static function newFactory()

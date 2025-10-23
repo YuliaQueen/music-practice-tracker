@@ -52,7 +52,7 @@
                 <!-- Информация о сессии -->
                 <div class="mb-6">
                     <SessionInfo
-                        :session="session"
+                        :session="session as any"
                     />
                 </div>
 
@@ -100,8 +100,8 @@
 
         <!-- Фиксированная панель управления -->
         <SessionControlBar
-            :session="session"
-            :current-block="currentBlock"
+            :session="session as any"
+            :current-block="currentBlock as any"
             :processing="form.processing"
             @start="startSession"
             @pause="pauseSession"
@@ -125,44 +125,7 @@ import CompactMetronome from '@/Components/Metronome/CompactMetronome.vue'
 import AudioRecorder from '@/Components/Audio/AudioRecorder.vue'
 import { useTimerSounds } from '@/composables/useTimerSounds'
 import { getStatusLabel, getStatusBadgeClass } from '@/utils/statusHelpers'
-
-interface AudioRecording {
-    id: number
-    title: string | null
-    notes: string | null
-    file_name: string
-    audio_url: string
-    formatted_duration: string | null
-    formatted_file_size: string
-    quality_rating: number | null
-    recorded_at: string
-}
-
-interface SessionBlock {
-    id: number
-    title: string
-    description: string
-    type: string
-    planned_duration: number
-    actual_duration: number | null
-    status: string
-    sort_order: number
-    started_at: string | null
-    completed_at: string | null
-    audioRecordings?: AudioRecording[]
-}
-
-interface Session {
-    id: number
-    title: string
-    description: string
-    planned_duration: number
-    actual_duration: number | null
-    status: string
-    started_at: string | null
-    completed_at: string | null
-    blocks: SessionBlock[]
-}
+import type { Session, SessionBlock } from '@/types/models'
 
 interface Props {
     session: Session
