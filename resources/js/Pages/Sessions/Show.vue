@@ -77,10 +77,26 @@
                     <MetronomeWidget />
                 </div>
 
+                <!-- Аудио рекордер -->
+                <div v-if="currentBlock" class="mb-6">
+                    <AudioRecorder
+                        :session-block-id="currentBlock.id"
+                        @saved="handleRecordingSaved"
+                    />
+                </div>
+
                 <!-- Список блоков -->
                 <SessionBlocksList
                     :blocks="session.blocks"
                 />
+
+                <!-- История аудио записей -->
+                <div v-if="audioRecordings.length > 0" class="mt-6">
+                    <AudioRecordingsList
+                        :recordings="audioRecordings"
+                        @refresh="refreshRecordings"
+                    />
+                </div>
             </div>
         </div>
 
@@ -118,6 +134,8 @@ import SessionControlBar from '@/Components/Session/SessionControlBar.vue'
 import SoundSettingsModal from '@/Components/Session/SoundSettingsModal.vue'
 import TimerExtensionControls from '@/Components/Session/TimerExtensionControls.vue'
 import MetronomeWidget from '@/Components/Metronome/MetronomeWidget.vue'
+import AudioRecorder from '@/Components/Audio/AudioRecorder.vue'
+import AudioRecordingsList from '@/Components/Audio/AudioRecordingsList.vue'
 import { useTimerSounds } from '@/composables/useTimerSounds'
 import { getStatusLabel, getStatusBadgeClass } from '@/utils/statusHelpers'
 
@@ -145,8 +163,20 @@ interface Session {
     blocks: SessionBlock[]
 }
 
+interface AudioRecording {
+    id: number
+    title: string | null
+    notes: string | null
+    file_path: string
+    audio_url: string | null
+    quality_rating: number | null
+    recorded_at: string
+    duration: number | null
+}
+
 interface Props {
     session: Session
+    audioRecordings: AudioRecording[]
 }
 
 const props = defineProps<Props>()
@@ -535,6 +565,16 @@ const deleteSession = () => {
             }
         })
     }
+}
+
+const handleRecordingSaved = (recordingId: number) => {
+    console.log('Recording saved:', recordingId)
+    // Обновляем страницу, чтобы показать новую запись
+    router.reload({ only: ['audioRecordings'] })
+}
+
+const refreshRecordings = () => {
+    router.reload({ only: ['audioRecordings'] })
 }
 
 // Управление звуками

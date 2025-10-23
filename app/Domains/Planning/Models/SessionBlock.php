@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Database\Factories\SessionBlockFactory;
 use Spatie\Activitylog\Traits\LogsActivity;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
@@ -124,6 +125,14 @@ class SessionBlock extends BaseModel
     public function templateBlock(): BelongsTo
     {
         return $this->belongsTo(TemplateBlock::class, 'practice_template_block_id');
+    }
+
+    /**
+     * Связь с аудио записями блока
+     */
+    public function audioRecordings(): HasMany
+    {
+        return $this->hasMany(\App\Models\AudioRecording::class, 'practice_session_block_id');
     }
 
     /**

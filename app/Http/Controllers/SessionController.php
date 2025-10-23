@@ -6,6 +6,7 @@ namespace App\Http\Controllers;
 
 use Inertia\Inertia;
 use Inertia\Response;
+use App\Models\AudioRecording;
 use Illuminate\Http\Request;
 use App\Services\SessionService;
 use Illuminate\Http\RedirectResponse;
@@ -130,8 +131,16 @@ class SessionController extends Controller
 
         $session->load(['blocks', 'template']);
 
+        // Получаем все аудио записи для блоков этой сессии
+        $blockIds = $session->blocks->pluck('id');
+        $audioRecordings = AudioRecording::whereIn('practice_session_block_id', $blockIds)
+            ->where('user_id', auth()->id())
+            ->orderBy('recorded_at', 'desc')
+            ->get();
+
         return Inertia::render('Sessions/Show', [
             'session' => $session,
+            'audioRecordings' => $audioRecordings,
         ]);
     }
 
