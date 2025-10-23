@@ -170,14 +170,6 @@ const canReorder = computed(() => {
         block.status === 'planned' || block.status === 'paused' || block.status === 'active'
     );
     
-    // Отладка
-    console.log('SessionBlocksList - canReorder check:', {
-        totalBlocks: localBlocks.value.length,
-        unfinishedBlocks: unfinishedBlocks.length,
-        canReorder: unfinishedBlocks.length >= 2,
-        blockStatuses: localBlocks.value.map(b => ({ id: b.id, title: b.title, status: b.status }))
-    });
-    
     return unfinishedBlocks.length >= 2;
 });
 
@@ -228,18 +220,30 @@ const onDragEnd = () => {
 
 <style scoped>
 /* Стили для drag & drop */
+
+/* Ghost - элемент под курсором при перетаскивании */
 .dragging-ghost {
-    opacity: 0.5;
-    transform: scale(1.05);
+    opacity: 0.6 !important;
+    transform: scale(1.05) rotate(3deg) !important;
+    cursor: grabbing !important;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.2) !important;
 }
 
+/* Chosen - оригинальный элемент на своем месте (когда начинаем тянуть) */
 .dragging-chosen {
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-    outline: 2px solid rgb(var(--color-accent-400));
-    outline-offset: 2px;
+    opacity: 0.3 !important;
+    border: 2px dashed #94a3b8 !important;
+    background: #f1f5f9 !important;
 }
 
+/* Темная тема для chosen */
+:global(.dark) .dragging-chosen {
+    background: #1e293b !important;
+    border-color: #475569 !important;
+}
+
+/* Drag - дополнительные эффекты во время перетаскивания */
 .dragging-active {
-    transform: rotate(2deg);
+    cursor: grabbing !important;
 }
 </style>
