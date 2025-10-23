@@ -244,6 +244,73 @@ class SessionService
     }
 
     /**
+     * Изменить порядок блоков в сессии
+     *
+     * @param Session $session
+     * @param array   $blockIds Массив ID блоков в новом порядке
+     * @return array{success: bool, message: string}
+     */
+    public function reorderSessionBlocks(Session $session, array $blockIds): array
+    {
+        try {
+            DB::beginTransaction();
+
+            // Проверяем что все блоки принадлежат этой сессии
+            $sessionBlocks = $this->blockRepository->getForSession($session->id);
+            $sessionBlockIds = $sessionBlocks->pluck('id')->toArray();
+
+            foreach ($blockIds as $blockId) {
+                if (!in_array($blockId, $sessionBlockIds)) {
+                    DB::rollBack();
+                    return [
+                        'success' => false,
+                        'message' => 'Некоторые блоки не принадлежат этой сессии',
+                    ];
+                }
+            }
+
+            // Обновляем sort_order для каждого блока
+            foreach ($blockIds as $index => $blockId) {
+                $block = $sessionBlocks->firstWhere('id', $blockId);
+                if ($block) {
+                    $this->blockRepository->update($block, [
+                        'sort_order' => $index + 1,
+                    ]);
+                }
+            }
+
+            DB::commit();
+
+            return [
+                'success' => true,
+                'message' => 'Порядок упражнений обновлен',
+            ];
+        } catch (\Throwable $e) {
+            if (DB::transactionLevel() > 0) {
+                try {
+                    DB::rollBack();
+                } catch (\Throwable $rollbackException) {
+                    Log::error('Ошибка при откате транзакции', [
+                        'session_id' => $session->id,
+                        'error'      => $rollbackException->getMessage(),
+                    ]);
+                }
+            }
+
+            Log::error('Ошибка при изменении порядка блоков', [
+                'session_id' => $session->id,
+                'error'      => $e->getMessage(),
+                'trace'      => $e->getTraceAsString(),
+            ]);
+
+            return [
+                'success' => false,
+                'message' => 'Ошибка при изменении порядка упражнений',
+            ];
+        }
+    }
+
+    /**
      * Начать выполнение конкретного блока сессии
      *
      * @param Session      $session

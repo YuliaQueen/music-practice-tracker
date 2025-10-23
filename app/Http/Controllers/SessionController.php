@@ -161,6 +161,27 @@ class SessionController extends Controller
     }
 
     /**
+     * Изменить порядок блоков в сессии
+     */
+    public function reorderBlocks(Request $request, Session $session)
+    {
+        $this->authorize('update', $session);
+
+        $request->validate([
+            'block_ids'   => 'required|array',
+            'block_ids.*' => 'required|integer|exists:practice_session_blocks,id',
+        ]);
+
+        $result = $this->sessionService->reorderSessionBlocks($session, $request->input('block_ids'));
+
+        if (!$result['success']) {
+            return response()->json($result, 400);
+        }
+
+        return response()->json($result);
+    }
+
+    /**
      * Начать выполнение блока сессии
      */
     public function startBlock(Session $session, SessionBlock $block): RedirectResponse
