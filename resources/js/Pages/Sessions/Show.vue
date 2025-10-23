@@ -160,7 +160,7 @@ interface SessionBlock {
     sort_order: number
     started_at: string | null
     completed_at: string | null
-    audio_recordings?: AudioRecording[]
+    audioRecordings?: AudioRecording[]
 }
 
 interface Session {

@@ -121,11 +121,11 @@
                                         </span>
                                         <!-- Счетчик записей -->
                                         <span 
-                                            v-if="block.audio_recordings && block.audio_recordings.length > 0" 
+                                            v-if="block.audioRecordings && block.audioRecordings.length > 0" 
                                             class="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 rounded-full"
-                                            :title="`Записей: ${block.audio_recordings.length}`"
+                                            :title="`Записей: ${block.audioRecordings.length}`"
                                         >
-                                            🎙️ {{ block.audio_recordings.length }}
+                                            🎙️ {{ block.audioRecordings.length }}
                                         </span>
                                     </div>
                                 </div>
@@ -147,13 +147,13 @@
                         </div>
 
                         <!-- Список аудио записей (сворачиваемый) -->
-                        <div v-if="block.audio_recordings && block.audio_recordings.length > 0" class="mt-3 pt-3 border-t border-primary-200 dark:border-neutral-700">
+                        <div v-if="block.audioRecordings && block.audioRecordings.length > 0" class="mt-3 pt-3 border-t border-primary-200 dark:border-neutral-700">
                             <button
                                 @click="toggleRecordings(block.id)"
                                 class="w-full flex items-center justify-between text-sm text-primary-700 dark:text-neutral-300 hover:text-primary-900 dark:hover:text-neutral-100 transition-colors"
                             >
                                 <span class="font-medium flex items-center gap-2">
-                                    🎙️ Записи упражнения ({{ block.audio_recordings.length }})
+                                    🎙️ Записи упражнения ({{ block.audioRecordings.length }})
                                 </span>
                                 <svg
                                     class="w-4 h-4 transition-transform duration-200"
@@ -169,7 +169,7 @@
                             <!-- Список записей -->
                             <div v-show="expandedRecordings[block.id]" class="mt-2 space-y-2">
                                 <div
-                                    v-for="recording in block.audio_recordings"
+                                    v-for="recording in block.audioRecordings"
                                     :key="recording.id"
                                     class="p-3 bg-neutral-50 dark:bg-neutral-900/50 rounded-lg border border-neutral-200 dark:border-neutral-700"
                                 >
@@ -260,7 +260,7 @@ interface SessionBlock {
     sort_order: number
     started_at: string | null
     completed_at: string | null
-    audio_recordings?: AudioRecording[]
+    audioRecordings?: AudioRecording[]
 }
 
 interface Props {

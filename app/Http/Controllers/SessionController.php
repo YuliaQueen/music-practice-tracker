@@ -98,8 +98,28 @@ class SessionController extends Controller
             $query->orderBy('recorded_at', 'desc');
         }, 'template']);
 
+        // Явно формируем blocks с recordings для Inertia
+        $blocksWithRecordings = $session->blocks->map(function ($block) {
+            return [
+                'id' => $block->id,
+                'practice_session_id' => $block->practice_session_id,
+                'title' => $block->title,
+                'description' => $block->description,
+                'type' => $block->type,
+                'planned_duration' => $block->planned_duration,
+                'actual_duration' => $block->actual_duration,
+                'status' => $block->status,
+                'sort_order' => $block->sort_order,
+                'started_at' => $block->started_at,
+                'completed_at' => $block->completed_at,
+                'audioRecordings' => $block->audioRecordings, // Явно добавляем recordings
+            ];
+        });
+
         return Inertia::render('Sessions/Show', [
-            'session' => $session,
+            'session' => array_merge($session->toArray(), [
+                'blocks' => $blocksWithRecordings,
+            ]),
         ]);
     }
 
