@@ -26,7 +26,7 @@
         </button>
 
         <!-- Compact Content -->
-        <div v-show="!isCollapsed" class="px-4 pb-4 space-y-4">
+        <div v-show="!isCollapsed" class="px-4 pt-4 pb-4 space-y-4">
             <!-- Main Controls Row -->
             <div class="flex items-center gap-3">
                 <!-- BPM Display & Input -->
