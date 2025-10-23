@@ -261,123 +261,108 @@
                                     v-model="form.blocks"
                                     item-key="title"
                                     tag="div"
-                                    class="space-y-4"
+                                    class="space-y-2"
                                     ghost-class="dragging-ghost"
                                     chosen-class="dragging-chosen"
                                     :animation="200"
                                 >
                                     <template #item="{ element: block, index }">
                                         <div
-                                            class="border border-neutral-200 rounded-lg p-4 dark:border-neutral-600 dark:bg-neutral-700 cursor-move hover:shadow-lg hover:border-accent-300 dark:hover:border-accent-600 transition-all"
+                                            class="border border-neutral-200 rounded-lg p-3 dark:border-neutral-600 dark:bg-neutral-700 cursor-move hover:shadow-md hover:border-accent-300 dark:hover:border-accent-600 transition-all"
                                         >
-                                        <div class="flex justify-between items-start mb-3">
-                                            <div class="flex items-center space-x-3">
-                                                <div class="flex-shrink-0 text-primary-400 dark:text-neutral-500 hover:text-accent-500 dark:hover:text-accent-400 transition-colors" title="Перетащите для изменения порядка">
-                                                    <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <!-- Компактная строка с inline редактированием -->
+                                            <div class="flex items-center gap-3">
+                                                <!-- Drag handle -->
+                                                <div class="flex-shrink-0 text-primary-400 dark:text-neutral-500 hover:text-accent-500 dark:hover:text-accent-400 transition-colors" title="Перетащите">
+                                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 8h16M4 16h16" />
                                                     </svg>
                                                 </div>
-                                                <h4 class="font-medium text-neutral-900 dark:text-neutral-100">
-                                                    Упражнение {{ index + 1 }}
-                                                </h4>
-                                            </div>
-                                            <DangerButton
-                                                type="button"
-                                                @click="removeBlock(index)"
-                                                class="text-sm"
-                                            >
-                                                Удалить
-                                            </DangerButton>
-                                        </div>
 
-                                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                            <div>
-                                                <InputLabel :for="`block_${index}_title`" value="Название" />
-                                                <TextInput
-                                                    :id="`block_${index}_title`"
-                                                    v-model="block.title"
-                                                    type="text"
-                                                    class="mt-1 block w-full"
-                                                    required
-                                                />
-                                            </div>
+                                                <!-- Номер -->
+                                                <div class="flex-shrink-0 w-8 h-8 rounded-full bg-accent-100 dark:bg-accent-900/30 flex items-center justify-center">
+                                                    <span class="text-sm font-bold text-accent-600 dark:text-accent-400">{{ index + 1 }}</span>
+                                                </div>
 
-                                            <div>
-                                                <InputLabel :for="`block_${index}_type`" value="Тип" />
-                                                <select
-                                                    :id="`block_${index}_type`"
-                                                    v-model="block.type"
-                                                    class="mt-1 block w-full border-neutral-300 focus:border-accent-500 focus:ring-accent-500 rounded-md shadow-sm dark:border-neutral-600 dark:bg-neutral-700 dark:text-neutral-100 dark:focus:border-accent-400 dark:focus:ring-accent-400"
-                                                    required
+                                                <!-- Название (inline редактирование) -->
+                                                <div class="flex-1 min-w-0">
+                                                    <input
+                                                        v-model="block.title"
+                                                        type="text"
+                                                        placeholder="Название упражнения"
+                                                        class="w-full px-2 py-1 text-sm border-0 border-b border-transparent hover:border-neutral-300 focus:border-accent-500 focus:ring-0 bg-transparent dark:text-neutral-100 dark:hover:border-neutral-600 dark:focus:border-accent-400 transition-colors"
+                                                        required
+                                                    />
+                                                </div>
+
+                                                <!-- Тип (компактный select) -->
+                                                <div class="flex-shrink-0">
+                                                    <select
+                                                        v-model="block.type"
+                                                        class="px-2 py-1 text-xs border-neutral-300 focus:border-accent-500 focus:ring-accent-500 rounded dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-100"
+                                                        required
+                                                    >
+                                                        <option value="warmup">🔥 Разминка</option>
+                                                        <option value="technique">⚡ Техника</option>
+                                                        <option value="repertoire">🎵 Репертуар</option>
+                                                        <option value="improvisation">🎨 Импровизация</option>
+                                                        <option value="sight_reading">👀 Чтение</option>
+                                                        <option value="theory">📚 Теория</option>
+                                                        <option value="break">☕ Перерыв</option>
+                                                        <option value="custom">⭐ Другое</option>
+                                                    </select>
+                                                </div>
+
+                                                <!-- Длительность (компактный input) -->
+                                                <div class="flex-shrink-0 flex items-center gap-1">
+                                                    <input
+                                                        v-model.number="block.duration"
+                                                        type="number"
+                                                        min="1"
+                                                        placeholder="15"
+                                                        class="w-16 px-2 py-1 text-sm text-center border-neutral-300 focus:border-accent-500 focus:ring-accent-500 rounded dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-100"
+                                                        required
+                                                    />
+                                                    <span class="text-xs text-neutral-500 dark:text-neutral-400">мин</span>
+                                                </div>
+
+                                                <!-- Кнопка удалить -->
+                                                <button
+                                                    type="button"
+                                                    @click="removeBlock(index)"
+                                                    class="flex-shrink-0 p-1.5 text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors"
+                                                    title="Удалить"
                                                 >
-                                                    <option value="warmup">🔥 Разминка</option>
-                                                    <option value="technique">⚡ Техника</option>
-                                                    <option value="repertoire">🎵 Репертуар</option>
-                                                    <option value="improvisation">🎨 Импровизация</option>
-                                                    <option value="sight_reading">👀 Чтение с листа</option>
-                                                    <option value="theory">📚 Теория</option>
-                                                    <option value="break">☕ Перерыв</option>
-                                                    <option value="custom">⭐ Пользовательский</option>
-                                                </select>
+                                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                                    </svg>
+                                                </button>
                                             </div>
 
-                                            <div>
-                                                <InputLabel :for="`block_${index}_duration`" value="Длительность (мин)" />
-                                                <input
-                                                    :id="`block_${index}_duration`"
-                                                    v-model.number="block.duration"
-                                                    type="number"
-                                                    min="1"
-                                                    class="mt-1 block w-full border-neutral-300 focus:border-accent-500 focus:ring-accent-500 rounded-md shadow-sm dark:border-neutral-600 dark:bg-neutral-700 dark:text-neutral-100 dark:focus:border-accent-400 dark:focus:ring-accent-400"
-                                                    required
-                                                />
+                                            <!-- Описание (опциональное, скрываемое) -->
+                                            <div v-if="block.description || block === expandedBlock" class="mt-2 ml-14">
+                                                <textarea
+                                                    v-model="block.description"
+                                                    placeholder="Описание (опционально)..."
+                                                    class="w-full px-2 py-1 text-xs border-neutral-300 focus:border-accent-500 focus:ring-accent-500 rounded dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-100"
+                                                    rows="1"
+                                                    @focus="expandedBlock = block"
+                                                    @blur="() => { if (!block.description) expandedBlock = null }"
+                                                ></textarea>
                                             </div>
-                                        </div>
-
-                                        <div class="mt-3">
-                                            <InputLabel :for="`block_${index}_description`" value="Описание" />
-                                            <textarea
-                                                :id="`block_${index}_description`"
-                                                v-model="block.description"
-                                                class="mt-1 block w-full border-neutral-300 focus:border-accent-500 focus:ring-accent-500 rounded-md shadow-sm dark:border-neutral-600 dark:bg-neutral-700 dark:text-neutral-100"
-                                                rows="2"
-                                            ></textarea>
-                                        </div>
+                                            <button
+                                                v-else
+                                                type="button"
+                                                @click="expandedBlock = block"
+                                                class="mt-2 ml-14 text-xs text-neutral-500 hover:text-accent-600 dark:text-neutral-400 dark:hover:text-accent-400 transition-colors"
+                                            >
+                                                + Добавить описание
+                                            </button>
                                         </div>
                                     </template>
                                 </draggable>
 
                                 <InputError class="mt-2" :message="form.errors.blocks" />
-                            </div>
-
-                            <!-- Краткий список текущих упражнений -->
-                            <div v-if="form.blocks.length > 0" class="mb-6 p-4 bg-accent-50 rounded-lg dark:bg-accent-900/20">
-                                <h4 class="font-medium text-neutral-900 dark:text-neutral-100 mb-3">Текущие упражнения ({{ form.blocks.length }})</h4>
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
-                                    <div
-                                        v-for="(block, index) in form.blocks"
-                                        :key="index"
-                                        class="flex items-center justify-between p-2 bg-white rounded border dark:bg-neutral-800 dark:border-neutral-600"
-                                    >
-                                        <div class="flex items-center space-x-2">
-                                            <span class="text-sm font-medium text-neutral-900 dark:text-neutral-100">{{ index + 1 }}.</span>
-                                            <span class="text-sm text-neutral-700 dark:text-neutral-300">{{ block.title }}</span>
-                                            <span class="text-xs px-2 py-1 bg-neutral-100 text-neutral-600 rounded dark:bg-neutral-600 dark:text-neutral-300">
-                                                {{ getTypeLabel(block.type) }}
-                                            </span>
-                                            <span class="text-xs px-2 py-1 bg-accent-100 text-accent-600 rounded dark:bg-accent-900/50 dark:text-accent-300">
-                                                {{ block.duration }} мин
-                                            </span>
-                                        </div>
-                                        <DangerButton
-                                            type="button"
-                                            @click="removeBlock(index)"
-                                            class="text-xs px-2 py-1"
-                                        >
-                                            ×
-                                        </DangerButton>
-                                    </div>
-                                </div>
                             </div>
 
                             <!-- Итого -->
@@ -475,6 +460,7 @@ const showExercisesList = ref(false)
 const selectedExercises = ref<Set<string>>(new Set())
 const exerciseSearchQuery = ref('')
 const exerciseSortBy = ref<'name' | 'usage' | 'duration'>('usage')
+const expandedBlock = ref<Block | null>(null)
 
 const totalDuration = computed(() => {
     return form.blocks.reduce((total, block) => {
