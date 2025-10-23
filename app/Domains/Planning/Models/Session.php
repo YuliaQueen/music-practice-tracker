@@ -228,7 +228,7 @@ class Session extends BaseModel
 
         $completedBlocks = $this->blocks->where('status', SessionBlock::STATUS_COMPLETED)->count();
 
-        return 0; //TODO
+        return (int) round(($completedBlocks / $totalBlocks) * 100);
     }
 
     /**

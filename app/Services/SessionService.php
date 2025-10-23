@@ -7,6 +7,7 @@ namespace App\Services;
 use App\Domains\Planning\Models\Exercise;
 use App\Domains\Planning\Models\Session;
 use App\Domains\Planning\Models\SessionBlock;
+use App\Domains\Planning\Models\Template;
 use App\Domains\User\Models\User;
 use App\DTOs\Sessions\CreateSessionBlockDTO;
 use App\DTOs\Sessions\CreateSessionDTO;
@@ -16,43 +17,309 @@ use App\Enums\SessionBlockStatus;
 use App\Enums\SessionStatus;
 use App\Events\SessionBlockCompleted;
 use App\Events\SessionCompleted;
+use App\Domains\Planning\Contracts\SessionRepositoryInterface;
+use App\Domains\Planning\Contracts\SessionBlockRepositoryInterface;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Database\Eloquent\Collection;
 
+/**
+ * Сервис для работы с сессиями практики
+ */
 class SessionService
 {
+    public function __construct(
+        private SessionRepositoryInterface $sessionRepository,
+        private SessionBlockRepositoryInterface $blockRepository
+    ) {
+    }
 
     /**
      * Создать новую сессию со всеми связанными блоками и упражнениями
+     *
+     * @param User              $user
+     * @param CreateSessionDTO  $dto
+     * @return Session
      */
     public function createSession(User $user, CreateSessionDTO $dto): Session
     {
-        $session = Session::create([
-            'user_id' => $user->id,
-            'practice_template_id' => $dto->template_id,
-            ...$dto->toArray(),
-            'planned_duration' => array_sum(array_column($dto->getBlocksArray(), 'planned_duration')),
-            'status' => SessionStatus::PLANNED,
-        ]);
+        try {
+            DB::beginTransaction();
 
-        $this->createSessionBlocks($session, $dto->blocks);
-        $this->createExercisesFromBlocks($user, $dto->blocks);
+            $session = $this->sessionRepository->create([
+                'user_id'              => $user->id,
+                'practice_template_id' => $dto->template_id,
+                ...$dto->toArray(),
+                'planned_duration'     => array_sum(array_column($dto->getBlocksArray(), 'planned_duration')),
+                'status'               => SessionStatus::PLANNED,
+            ]);
 
-        return $session->fresh(['blocks', 'template']);
+            $this->createSessionBlocks($session, $dto->blocks);
+            $this->createExercisesFromBlocks($user, $dto->blocks);
+
+            DB::commit();
+
+            return $session->fresh(['blocks', 'template']);
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            Log::error('Ошибка при создании сессии', [
+                'user_id' => $user->id,
+                'error'   => $e->getMessage(),
+            ]);
+
+            throw $e;
+        }
+    }
+
+    /**
+     * Получить предыдущие упражнения пользователя для автозаполнения
+     *
+     * @param int $userId
+     * @return Collection
+     */
+    public function getPreviousExercises(int $userId): Collection
+    {
+        $previousExercises = $this->blockRepository->getPreviousExercisesForUser($userId);
+
+        // Если нет упражнений из сессий, добавляем упражнения из библиотеки
+        if ($previousExercises->isEmpty()) {
+            $exerciseLibrary = Exercise::where('user_id', $userId)
+                ->select('title', 'description', 'type', 'planned_duration')
+                ->get()
+                ->map(function ($exercise) {
+                    return [
+                        'title'       => $exercise->title,
+                        'description' => $exercise->description,
+                        'type'        => $exercise->type,
+                        'duration'    => $exercise->planned_duration,
+                        'usage_count' => 0,
+                    ];
+                });
+
+            $previousExercises = $previousExercises->concat($exerciseLibrary);
+        }
+
+        return $previousExercises;
+    }
+
+    /**
+     * Получить доступные шаблоны для пользователя
+     *
+     * @param int $userId
+     * @return Collection
+     */
+    public function getAvailableTemplates(int $userId): Collection
+    {
+        return Template::availableFor($userId)
+            ->with('blocks')
+            ->orderBy('name')
+            ->get();
+    }
+
+    /**
+     * Начать сессию
+     *
+     * @param Session $session
+     * @return bool
+     */
+    public function startSession(Session $session): bool
+    {
+        if (!$session->canBeStarted()) {
+            return false;
+        }
+
+        try {
+            $this->sessionRepository->update($session, [
+                'status'     => SessionStatus::ACTIVE,
+                'started_at' => now(),
+            ]);
+
+            return true;
+        } catch (\Exception $e) {
+            Log::error('Ошибка при запуске сессии', [
+                'session_id' => $session->id,
+                'error'      => $e->getMessage(),
+            ]);
+
+            return false;
+        }
+    }
+
+    /**
+     * Приостановить сессию
+     *
+     * @param Session $session
+     * @return bool
+     */
+    public function pauseSession(Session $session): bool
+    {
+        if ($session->status !== SessionStatus::ACTIVE) {
+            return false;
+        }
+
+        try {
+            $this->sessionRepository->update($session, [
+                'status' => SessionStatus::PAUSED,
+            ]);
+
+            return true;
+        } catch (\Exception $e) {
+            Log::error('Ошибка при приостановке сессии', [
+                'session_id' => $session->id,
+                'error'      => $e->getMessage(),
+            ]);
+
+            return false;
+        }
+    }
+
+    /**
+     * Завершить сессию и обновить прогресс целей
+     *
+     * @param Session $session
+     * @return array
+     */
+    public function completeSession(Session $session): array
+    {
+        if (!$session->canBeCompleted()) {
+            return [
+                'success' => false,
+                'message' => 'Сессия не может быть завершена в текущем статусе',
+            ];
+        }
+
+        try {
+            DB::beginTransaction();
+
+            $actualDuration = $session->getTotalBlocksActualDuration();
+
+            $this->sessionRepository->update($session, [
+                'status'          => SessionStatus::COMPLETED,
+                'completed_at'    => now(),
+                'actual_duration' => $actualDuration,
+            ]);
+
+            // Отправляем событие для асинхронного обновления прогресса целей
+            SessionCompleted::dispatch($session);
+
+            DB::commit();
+
+            return [
+                'success' => true,
+                'message' => 'Сессия завершена!',
+            ];
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            Log::error('Ошибка при завершении сессии', [
+                'session_id' => $session->id,
+                'error'      => $e->getMessage(),
+            ]);
+
+            return [
+                'success' => false,
+                'message' => 'Ошибка при завершении сессии',
+            ];
+        }
+    }
+
+    /**
+     * Обновить блок сессии и обновить прогресс целей если блок завершен
+     *
+     * @param Session                $session
+     * @param SessionBlock           $block
+     * @param UpdateSessionBlockDTO  $dto
+     * @return array
+     */
+    public function updateSessionBlock(Session $session, SessionBlock $block, UpdateSessionBlockDTO $dto): array
+    {
+        try {
+            DB::beginTransaction();
+
+            $updateData = $dto->toArray();
+
+            // Если блок завершается, устанавливаем время завершения если не передано
+            if ($dto->status === SessionBlockStatus::COMPLETED && $dto->completed_at === null) {
+                $updateData['completed_at'] = now();
+            }
+
+            $this->blockRepository->update($block, $updateData);
+
+            // Отправляем событие для асинхронного обновления прогресса целей
+            if ($dto->status === SessionBlockStatus::COMPLETED) {
+                SessionBlockCompleted::dispatch($block);
+            }
+
+            DB::commit();
+
+            return [
+                'success' => true,
+                'message' => 'Блок обновлен',
+            ];
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            Log::error('Ошибка при обновлении блока сессии', [
+                'session_id' => $session->id,
+                'block_id'   => $block->id,
+                'error'      => $e->getMessage(),
+            ]);
+
+            return [
+                'success' => false,
+                'message' => 'Ошибка при обновлении блока',
+            ];
+        }
+    }
+
+    /**
+     * Удалить сессию со всеми блоками
+     *
+     * @param Session $session
+     * @return void
+     */
+    public function deleteSession(Session $session): void
+    {
+        try {
+            DB::beginTransaction();
+
+            // Удаляем все блоки сессии
+            $this->blockRepository->deleteForSession($session->id);
+
+            // Удаляем саму сессию
+            $this->sessionRepository->delete($session);
+
+            DB::commit();
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            Log::error('Ошибка при удалении сессии', [
+                'session_id' => $session->id,
+                'error'      => $e->getMessage(),
+            ]);
+
+            throw $e;
+        }
     }
 
     /**
      * Создать блоки для сессии
      *
-     * @param array<CreateSessionBlockDTO> $blocks
+     * @param Session                        $session
+     * @param array<CreateSessionBlockDTO>   $blocks
+     * @return void
      */
     private function createSessionBlocks(Session $session, array $blocks): void
     {
         foreach ($blocks as $index => $blockDTO) {
             $blockData = $blockDTO->toArray();
 
-            $session->blocks()->create([
+            $this->blockRepository->create([
+                'practice_session_id' => $session->id,
                 ...$blockData,
-                'status' => SessionBlockStatus::PLANNED,
-                'sort_order' => $index + 1,
+                'status'              => SessionBlockStatus::PLANNED,
+                'sort_order'          => $index + 1,
             ]);
         }
     }
@@ -60,7 +327,9 @@ class SessionService
     /**
      * Создать упражнения из блоков сессии (если они еще не существуют)
      *
-     * @param array<CreateSessionBlockDTO> $blocks
+     * @param User                           $user
+     * @param array<CreateSessionBlockDTO>   $blocks
+     * @return void
      */
     private function createExercisesFromBlocks(User $user, array $blocks): void
     {
@@ -72,113 +341,14 @@ class SessionService
 
             if (!$existingExercise) {
                 Exercise::create([
-                    'user_id' => $user->id,
-                    'title' => $blockDTO->title,
-                    'description' => $blockDTO->description,
-                    'type' => $blockDTO->type,
+                    'user_id'          => $user->id,
+                    'title'            => $blockDTO->title,
+                    'description'      => $blockDTO->description,
+                    'type'             => $blockDTO->type,
                     'planned_duration' => $blockDTO->duration,
-                    'status' => ExerciseStatus::PLANNED,
+                    'status'           => ExerciseStatus::PLANNED,
                 ]);
             }
         }
-    }
-
-    /**
-     * Начать сессию
-     */
-    public function startSession(Session $session): bool
-    {
-        if (!$session->canBeStarted()) {
-            return false;
-        }
-
-        $session->update([
-            'status' => SessionStatus::ACTIVE,
-            'started_at' => now(),
-        ]);
-
-        return true;
-    }
-
-    /**
-     * Приостановить сессию
-     */
-    public function pauseSession(Session $session): bool
-    {
-        if ($session->status !== SessionStatus::ACTIVE) {
-            return false;
-        }
-
-        $session->update([
-            'status' => SessionStatus::PAUSED,
-        ]);
-
-        return true;
-    }
-
-    /**
-     * Завершить сессию и обновить прогресс целей
-     */
-    public function completeSession(Session $session): array
-    {
-        if (!$session->canBeCompleted()) {
-            return [
-                'success' => false,
-                'message' => 'Сессия не может быть завершена в текущем статусе',
-            ];
-        }
-
-        $actualDuration = $session->getTotalBlocksActualDuration();
-
-        $session->update([
-            'status' => SessionStatus::COMPLETED,
-            'completed_at' => now(),
-            'actual_duration' => $actualDuration,
-        ]);
-
-        // Отправляем событие для асинхронного обновления прогресса целей
-        SessionCompleted::dispatch($session);
-
-        return [
-            'success' => true,
-            'message' => 'Сессия завершена!',
-        ];
-    }
-
-    /**
-     * Обновить блок сессии и обновить прогресс целей если блок завершен
-     */
-    public function updateSessionBlock(Session $session, SessionBlock $block, UpdateSessionBlockDTO $dto): array
-    {
-        $updateData = $dto->toArray();
-
-        // Если блок завершается, устанавливаем время завершения если не передано
-        if ($dto->status === SessionBlockStatus::COMPLETED && $dto->completed_at === null) {
-            $updateData['completed_at'] = now();
-        }
-
-        $block->update($updateData);
-
-        // Отправляем событие для асинхронного обновления прогресса целей
-        if ($dto->status === SessionBlockStatus::COMPLETED) {
-            SessionBlockCompleted::dispatch($block);
-        }
-
-        return [
-            'success' => true,
-            'message' => 'Блок обновлен',
-        ];
-    }
-
-    /**
-     * Удалить сессию со всеми блоками
-     */
-    public function deleteSession(Session $session): void
-    {
-        // Удаляем все блоки сессии
-        $session->blocks()->delete();
-
-        // Удаляем саму сессию
-        $session->delete();
     }
 }

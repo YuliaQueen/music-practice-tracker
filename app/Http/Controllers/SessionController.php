@@ -6,23 +6,27 @@ namespace App\Http\Controllers;
 
 use Inertia\Inertia;
 use Inertia\Response;
-use App\Domains\Recording\Models\AudioRecording;
 use Illuminate\Http\Request;
 use App\Services\SessionService;
 use Illuminate\Http\RedirectResponse;
 use App\DTOs\Sessions\CreateSessionDTO;
 use App\Domains\Planning\Models\Session;
-use App\Domains\Planning\Models\Exercise;
-use App\Domains\Planning\Models\Template;
 use App\DTOs\Sessions\UpdateSessionBlockDTO;
 use App\Domains\Planning\Models\SessionBlock;
 use App\Http\Requests\Session\StoreSessionRequest;
 use App\Http\Requests\Session\UpdateSessionBlockRequest;
+use App\Domains\Planning\Contracts\SessionRepositoryInterface;
+use App\Domains\Recording\Contracts\AudioRecordingRepositoryInterface;
 
+/**
+ * Контроллер для управления сессиями практики
+ */
 class SessionController extends Controller
 {
     public function __construct(
-        private SessionService $sessionService
+        private SessionService $sessionService,
+        private SessionRepositoryInterface $sessionRepository,
+        private AudioRecordingRepositoryInterface $audioRecordingRepository
     ) {
     }
 
@@ -31,10 +35,7 @@ class SessionController extends Controller
      */
     public function index(): Response
     {
-        $sessions = Session::forUser(auth()->id())
-            ->with(['template', 'blocks'])
-            ->orderBy('created_at', 'desc')
-            ->paginate(10);
+        $sessions = $this->sessionRepository->getForUser(auth()->id(), 10);
 
         return Inertia::render('Sessions/Index', [
             'sessions' => $sessions,
@@ -46,66 +47,25 @@ class SessionController extends Controller
      */
     public function create(Request $request): Response
     {
-        $templates = Template::availableFor(auth()->id())
-            ->with('blocks')
-            ->orderBy('name')
-            ->get();
-
-        // Получаем упражнения из всех сессий пользователя (включая незавершенные)
-        $previousExercises = SessionBlock::whereHas('session', function ($query) {
-            $query->where('user_id', auth()->id());
-        })
-            ->select('title', 'description', 'type', 'planned_duration')
-            ->distinct()
-            ->orderBy('title')
-            ->get()
-            ->groupBy('title')
-            ->map(function ($group) {
-                $first = $group->first();
-                return [
-                    'title' => $first->title,
-                    'description' => $first->description,
-                    'type' => $first->type,
-                    'duration' => $first->planned_duration,
-                    'usage_count' => $group->count(),
-                ];
-            })
-            ->values();
-
-        // Если нет упражнений из сессий, добавляем упражнения из библиотеки упражнений
-        if ($previousExercises->isEmpty()) {
-            $exerciseLibrary = Exercise::where('user_id', auth()->id())
-                ->select('title', 'description', 'type', 'planned_duration')
-                ->get()
-                ->map(function ($exercise) {
-                    return [
-                        'title' => $exercise->title,
-                        'description' => $exercise->description,
-                        'type' => $exercise->type,
-                        'duration' => $exercise->planned_duration,
-                        'usage_count' => 0, // Упражнения из библиотеки еще не использовались
-                    ];
-                });
-
-            $previousExercises = $previousExercises->concat($exerciseLibrary);
-        }
+        $templates = $this->sessionService->getAvailableTemplates(auth()->id());
+        $previousExercises = $this->sessionService->getPreviousExercises(auth()->id());
 
         // Получаем данные об упражнении, если они переданы
         $exerciseData = null;
         if ($request->has('exercise_id')) {
             $exerciseData = [
-                'id'   => $request->get('exercise_id'),
-                'title' => $request->get('exercise_title'),
-                'type' => $request->get('exercise_type'),
-                'duration' => $request->get('exercise_duration'),
+                'id'          => $request->get('exercise_id'),
+                'title'       => $request->get('exercise_title'),
+                'type'        => $request->get('exercise_type'),
+                'duration'    => $request->get('exercise_duration'),
                 'description' => $request->get('exercise_description'),
             ];
         }
 
         return Inertia::render('Sessions/Create', [
-            'templates' => $templates,
+            'templates'         => $templates,
             'previousExercises' => $previousExercises,
-            'exerciseData' => $exerciseData,
+            'exerciseData'      => $exerciseData,
         ]);
     }
 
@@ -131,16 +91,20 @@ class SessionController extends Controller
 
         $session->load(['blocks', 'template']);
 
-        // Получаем все аудио записи для блоков этой сессии
-        $blockIds = $session->blocks->pluck('id');
-        $audioRecordings = AudioRecording::whereIn('practice_session_block_id', $blockIds)
-            ->where('user_id', auth()->id())
-            ->orderBy('recorded_at', 'desc')
-            ->get();
+        // Получаем аудио записи для блоков этой сессии
+        $blockIds = $session->blocks->pluck('id')->toArray();
+        $audioRecordings = collect();
+
+        if (!empty($blockIds)) {
+            foreach ($blockIds as $blockId) {
+                $recordings = $this->audioRecordingRepository->getForSessionBlock($blockId);
+                $audioRecordings = $audioRecordings->concat($recordings);
+            }
+        }
 
         return Inertia::render('Sessions/Show', [
-            'session' => $session,
-            'audioRecordings' => $audioRecordings,
+            'session'         => $session,
+            'audioRecordings' => $audioRecordings->sortByDesc('recorded_at')->values(),
         ]);
     }
 
@@ -186,7 +150,7 @@ class SessionController extends Controller
         $result = $this->sessionService->completeSession($session);
 
         if (!$result['success']) {
-            return back()->with('error', $result['message    ']);
+            return back()->with('error', $result['message']);
         }
 
         return back()->with('success', $result['message']);
@@ -201,8 +165,11 @@ class SessionController extends Controller
 
         $dto = UpdateSessionBlockDTO::fromRequest($request);
 
-
         $result = $this->sessionService->updateSessionBlock($session, $block, $dto);
+
+        if (!$result['success']) {
+            return back()->with('error', $result['message']);
+        }
 
         return back()->with('success', $result['message']);
     }
