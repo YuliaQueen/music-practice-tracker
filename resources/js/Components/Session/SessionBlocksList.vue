@@ -224,7 +224,7 @@ const onDragEnd = () => {
 /* Ghost - элемент под курсором при перетаскивании */
 .dragging-ghost {
     opacity: 0.6 !important;
-    transform: scale(1.05) rotate(3deg) !important;
+    transform: scale(1.05) !important;
     cursor: grabbing !important;
     box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.2) !important;
 }
