@@ -25,12 +25,35 @@ class SessionRepository implements SessionRepositoryInterface
 
     /**
      * Получить сессии пользователя с пагинацией
+     *
+     * @param int   $userId
+     * @param int   $perPage
+     * @param array $filters
+     * @return LengthAwarePaginator
      */
-    public function getForUser(int $userId, int $perPage = 10): LengthAwarePaginator
+    public function getForUser(int $userId, int $perPage = 10, array $filters = []): LengthAwarePaginator
     {
-        return Session::forUser($userId)
-            ->with(['template', 'blocks'])
-            ->orderBy('created_at', 'desc')
+        $query = Session::forUser($userId)
+            ->with(['template', 'blocks']);
+
+        // Фильтр по названию
+        if (!empty($filters['search'])) {
+            $query->where('title', 'like', '%' . $filters['search'] . '%');
+        }
+
+        // Фильтр по упражнению
+        if (!empty($filters['exercise'])) {
+            $query->whereHas('blocks', function ($q) use ($filters) {
+                $q->where('title', $filters['exercise']);
+            });
+        }
+
+        // Фильтр по статусу
+        if (!empty($filters['status'])) {
+            $query->where('status', $filters['status']);
+        }
+
+        return $query->orderBy('created_at', 'desc')
             ->paginate($perPage);
     }
 

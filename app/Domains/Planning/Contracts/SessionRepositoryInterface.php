@@ -25,11 +25,12 @@ interface SessionRepositoryInterface
     /**
      * Получить сессии пользователя с пагинацией
      *
-     * @param int $userId
-     * @param int $perPage
+     * @param int   $userId
+     * @param int   $perPage
+     * @param array $filters
      * @return LengthAwarePaginator
      */
-    public function getForUser(int $userId, int $perPage = 10): LengthAwarePaginator;
+    public function getForUser(int $userId, int $perPage = 10, array $filters = []): LengthAwarePaginator;
 
     /**
      * Получить активные сессии пользователя

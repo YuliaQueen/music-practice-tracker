@@ -13,6 +13,73 @@
 
         <div class="py-12">
             <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+                <!-- Фильтры -->
+                <div class="mb-6 bg-white dark:bg-neutral-800 overflow-hidden shadow-sm sm:rounded-lg">
+                    <div class="p-6">
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <!-- Поиск -->
+                            <div>
+                                <label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
+                                    Поиск
+                                </label>
+                                <input
+                                    v-model="filters.search"
+                                    type="text"
+                                    placeholder="Название занятия..."
+                                    class="w-full px-3 py-2 border border-neutral-300 dark:border-neutral-600 rounded-md shadow-sm focus:outline-none focus:ring-accent-500 focus:border-accent-500 dark:bg-neutral-700 dark:text-white"
+                                    @input="applyFilters"
+                                />
+                            </div>
+
+                            <!-- Упражнение -->
+                            <div>
+                                <label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
+                                    Упражнение
+                                </label>
+                                <select
+                                    v-model="filters.exercise"
+                                    class="w-full px-3 py-2 border border-neutral-300 dark:border-neutral-600 rounded-md shadow-sm focus:outline-none focus:ring-accent-500 focus:border-accent-500 dark:bg-neutral-700 dark:text-white"
+                                    @change="applyFilters"
+                                >
+                                    <option value="">Все упражнения</option>
+                                    <option v-for="exercise in exercises" :key="exercise" :value="exercise">
+                                        {{ exercise }}
+                                    </option>
+                                </select>
+                            </div>
+
+                            <!-- Статус -->
+                            <div>
+                                <label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
+                                    Статус
+                                </label>
+                                <select
+                                    v-model="filters.status"
+                                    class="w-full px-3 py-2 border border-neutral-300 dark:border-neutral-600 rounded-md shadow-sm focus:outline-none focus:ring-accent-500 focus:border-accent-500 dark:bg-neutral-700 dark:text-white"
+                                    @change="applyFilters"
+                                >
+                                    <option value="">Все статусы</option>
+                                    <option value="planned">Запланировано</option>
+                                    <option value="active">Активно</option>
+                                    <option value="paused">Приостановлено</option>
+                                    <option value="completed">Завершено</option>
+                                    <option value="cancelled">Отменено</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <!-- Кнопка сброса фильтров -->
+                        <div v-if="hasActiveFilters" class="mt-4">
+                            <button
+                                @click="resetFilters"
+                                class="text-sm text-accent-600 dark:text-accent-400 hover:text-accent-800 dark:hover:text-accent-300"
+                            >
+                                ✕ Сбросить фильтры
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="bg-primary-50 overflow-hidden shadow-sm sm:rounded-lg dark:bg-neutral-800 dark:shadow-neutral-900/20">
                     <div class="p-6 text-primary-900 dark:text-neutral-100">
                         <div v-if="sessions.data.length === 0" class="text-center py-12">
@@ -186,6 +253,7 @@
 </template>
 
 <script setup lang="ts">
+import { ref, computed } from 'vue'
 import { useForm, router } from '@inertiajs/vue3'
 import { Link } from '@inertiajs/vue3'
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
@@ -242,11 +310,55 @@ interface PaginatedSessions {
 
 interface Props {
     sessions: PaginatedSessions
+    exercises?: string[]
+    filters?: {
+        search?: string
+        exercise?: string
+        status?: string
+    }
 }
 
 const props = defineProps<Props>()
 
 const form = useForm({})
+
+// Фильтры
+const filters = ref({
+    search: props.filters?.search || '',
+    exercise: props.filters?.exercise || '',
+    status: props.filters?.status || '',
+})
+
+const hasActiveFilters = computed(() => {
+    return filters.value.search !== '' || filters.value.exercise !== '' || filters.value.status !== ''
+})
+
+let filterTimeout: ReturnType<typeof setTimeout> | null = null
+
+const applyFilters = () => {
+    if (filterTimeout) {
+        clearTimeout(filterTimeout)
+    }
+    
+    filterTimeout = setTimeout(() => {
+        router.get(route('sessions.index'), filters.value, {
+            preserveState: true,
+            preserveScroll: true,
+        })
+    }, 300)
+}
+
+const resetFilters = () => {
+    filters.value = {
+        search: '',
+        exercise: '',
+        status: '',
+    }
+    router.get(route('sessions.index'), {}, {
+        preserveState: true,
+        preserveScroll: true,
+    })
+}
 
 const getStatusLabel = (status: string) => {
     const statusMap = {

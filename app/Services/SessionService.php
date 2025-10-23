@@ -98,18 +98,29 @@ class SessionService
      */
     public function getPreviousExercises(int $userId): Collection
     {
-        return Exercise::where('user_id', $userId)
+        // Получаем все упражнения пользователя
+        $exercises = Exercise::where('user_id', $userId)
             ->select('title', 'description', 'type', 'planned_duration')
             ->orderBy('title')
-            ->get()
-            ->map(function ($exercise) {
-                return [
-                    'title'       => $exercise->title,
-                    'description' => $exercise->description,
-                    'type'        => $exercise->type,
-                    'duration'    => $exercise->planned_duration,
-                ];
-            });
+            ->get();
+
+        // Подсчитываем количество использований каждого упражнения в сессиях
+        $usageCounts = SessionBlock::whereHas('session', function ($query) use ($userId) {
+                $query->where('user_id', $userId);
+            })
+            ->select('title', DB::raw('count(*) as usage_count'))
+            ->groupBy('title')
+            ->pluck('usage_count', 'title');
+
+        return $exercises->map(function ($exercise) use ($usageCounts) {
+            return [
+                'title'       => $exercise->title,
+                'description' => $exercise->description,
+                'type'        => $exercise->type,
+                'duration'    => $exercise->planned_duration,
+                'usage_count' => $usageCounts->get($exercise->title, 0),
+            ];
+        });
     }
 
     /**
@@ -124,6 +135,25 @@ class SessionService
             ->with('blocks')
             ->orderBy('name')
             ->get();
+    }
+
+    /**
+     * Получить список уникальных упражнений пользователя
+     *
+     * @param int $userId
+     * @return array
+     */
+    public function getUserExercises(int $userId): array
+    {
+        return SessionBlock::whereHas('session', function ($query) use ($userId) {
+                $query->where('user_id', $userId);
+            })
+            ->distinct()
+            ->pluck('title')
+            ->filter()
+            ->sort()
+            ->values()
+            ->toArray();
     }
 
     /**
