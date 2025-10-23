@@ -92,12 +92,14 @@ class SessionController extends Controller
         $this->authorize('view', $session);
 
         // Загружаем blocks с их аудио записями (eager loading)
-        // audioRecordings уже загружаются автоматически через $with в SessionBlock
-        $session->load(['blocks' => function ($query) {
-            $query->with(['audioRecordings' => function ($q) {
-                $q->orderBy('recorded_at', 'desc');
-            }]);
-        }, 'template']);
+        // $with в SessionBlock работает только при прямой загрузке,
+        // поэтому явно указываем audioRecordings здесь
+        $session->load([
+            'blocks.audioRecordings' => function ($query) {
+                $query->orderBy('recorded_at', 'desc');
+            },
+            'template'
+        ]);
 
         return Inertia::render('Sessions/Show', [
             'session' => $session,
