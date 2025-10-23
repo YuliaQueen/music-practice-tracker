@@ -72,6 +72,11 @@
                     @restart="restartTimerForBlock"
                 />
 
+                <!-- Метроном -->
+                <div class="mb-6">
+                    <MetronomeWidget />
+                </div>
+
                 <!-- Список блоков -->
                 <SessionBlocksList
                     :blocks="session.blocks"
@@ -112,6 +117,7 @@ import SessionBlocksList from '@/Components/Session/SessionBlocksList.vue'
 import SessionControlBar from '@/Components/Session/SessionControlBar.vue'
 import SoundSettingsModal from '@/Components/Session/SoundSettingsModal.vue'
 import TimerExtensionControls from '@/Components/Session/TimerExtensionControls.vue'
+import MetronomeWidget from '@/Components/Metronome/MetronomeWidget.vue'
 import { useTimerSounds } from '@/composables/useTimerSounds'
 import { getStatusLabel, getStatusBadgeClass } from '@/utils/statusHelpers'
 
