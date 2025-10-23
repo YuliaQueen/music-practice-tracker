@@ -28,6 +28,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
  * @property int            $planned_duration     Запланированная длительность в минутах
  * @property int|null       $actual_duration      Фактическая длительность в минутах
  * @property string         $status               Статус сессии
+ * @property bool           $auto_advance         Автоматически переходить к следующему упражнению
  * @property Carbon|null    $scheduled_for        Запланированное время начала
  * @property Carbon|null    $started_at           Фактическое время начала
  * @property Carbon|null    $completed_at         Время завершения
@@ -70,6 +71,7 @@ class Session extends BaseModel
         'planned_duration',
         'actual_duration',
         'status',
+        'auto_advance',
         'scheduled_for',
         'started_at',
         'completed_at',
@@ -78,6 +80,7 @@ class Session extends BaseModel
 
     protected $casts = [
         'status'           => SessionStatus::class,
+        'auto_advance'     => 'boolean',
         'planned_duration' => 'integer',
         'actual_duration'  => 'integer',
         'scheduled_for'    => 'datetime',

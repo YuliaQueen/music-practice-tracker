@@ -98,6 +98,25 @@
                                     ></textarea>
                                     <InputError class="mt-2" :message="form.errors.description" />
                                 </div>
+
+                                <!-- Автопереход между упражнениями -->
+                                <div class="mt-4">
+                                    <label class="flex items-center">
+                                        <input
+                                            id="auto_advance"
+                                            v-model="form.auto_advance"
+                                            type="checkbox"
+                                            class="rounded border-neutral-300 text-accent-600 shadow-sm focus:ring-accent-500 dark:border-neutral-600 dark:bg-neutral-700 dark:focus:ring-accent-400 dark:focus:ring-offset-neutral-800"
+                                        />
+                                        <span class="ml-2 text-sm text-neutral-600 dark:text-neutral-400">
+                                            🚀 <strong>Автопереход:</strong> Автоматически начинать следующее упражнение после завершения текущего
+                                        </span>
+                                    </label>
+                                    <p class="mt-1 text-xs text-neutral-500 dark:text-neutral-400 ml-6">
+                                        Упражнения будут запускаться одно за другим без дополнительных действий. Вы сможете приостановить или пропустить упражнение в любой момент.
+                                    </p>
+                                    <InputError class="mt-2" :message="form.errors.auto_advance" />
+                                </div>
                             </div>
 
                             <!-- Блоки упражнений -->
@@ -447,6 +466,7 @@ const form = useForm({
     title: '',
     description: '',
     template_id: null as number | null,
+    auto_advance: false,
     blocks: [] as Block[],
 })
 

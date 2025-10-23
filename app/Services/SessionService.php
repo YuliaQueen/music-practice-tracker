@@ -430,6 +430,11 @@ class SessionService
             // Отправляем событие для асинхронного обновления прогресса целей
             if ($dto->status === SessionBlockStatus::COMPLETED) {
                 SessionBlockCompleted::dispatch($block);
+
+                // Автопереход к следующему упражнению если включена опция
+                if ($session->auto_advance) {
+                    $this->autoAdvanceToNextBlock($session, $block);
+                }
             }
 
             DB::commit();
@@ -559,6 +564,52 @@ class SessionService
                     'status'           => ExerciseStatus::PLANNED,
                 ]);
             }
+        }
+    }
+
+    /**
+     * Автоматически перейти к следующему упражнению
+     *
+     * @param Session      $session
+     * @param SessionBlock $completedBlock
+     * @return void
+     */
+    protected function autoAdvanceToNextBlock(Session $session, SessionBlock $completedBlock): void
+    {
+        try {
+            // Находим следующее незавершенное упражнение
+            $nextBlock = $session->blocks()
+                ->where('status', SessionBlock::STATUS_PLANNED)
+                ->where('sort_order', '>', $completedBlock->sort_order)
+                ->orderBy('sort_order', 'asc')
+                ->first();
+
+            if ($nextBlock) {
+                $this->blockRepository->update($nextBlock, [
+                    'status'     => SessionBlock::STATUS_ACTIVE,
+                    'started_at' => now(),
+                ]);
+
+                Log::info('Автопереход к следующему упражнению', [
+                    'session_id'       => $session->id,
+                    'completed_block'  => $completedBlock->title,
+                    'next_block'       => $nextBlock->title,
+                    'next_block_id'    => $nextBlock->id,
+                ]);
+            } else {
+                Log::info('Автопереход: нет следующих упражнений', [
+                    'session_id'      => $session->id,
+                    'completed_block' => $completedBlock->title,
+                ]);
+            }
+        } catch (\Throwable $e) {
+            // Ошибка автоперехода не должна прерывать основной процесс
+            Log::error('Ошибка при автопереходе к следующему упражнению', [
+                'session_id'      => $session->id,
+                'completed_block' => $completedBlock->title,
+                'error'           => $e->getMessage(),
+                'trace'           => $e->getTraceAsString(),
+            ]);
         }
     }
 }
