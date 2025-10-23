@@ -39,6 +39,8 @@ Route::middleware('auth')->group(function () {
     Route::post('/sessions/{session}/start', [SessionController::class, 'start'])->name('sessions.start');
     Route::post('/sessions/{session}/pause', [SessionController::class, 'pause'])->name('sessions.pause');
     Route::post('/sessions/{session}/complete', [SessionController::class, 'complete'])->name('sessions.complete');
+    Route::post('/sessions/{session}/blocks/reorder', [SessionController::class, 'reorderBlocks'])->name('sessions.blocks.reorder');
+    Route::post('/sessions/{session}/blocks/{block}/start', [SessionController::class, 'startBlock'])->name('sessions.blocks.start');
     Route::patch('/sessions/{session}/blocks/{block}', [SessionController::class, 'updateBlock'])->name('sessions.blocks.update');
     
     // Статистика

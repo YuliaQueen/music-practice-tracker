@@ -50,31 +50,20 @@
                 </Transition>
 
                 <!-- Информация о сессии -->
-                <SessionInfo
-                    :session="session"
-                />
-
-                <!-- Таймер и текущий блок -->
-                <SessionTimer
-                    v-if="currentBlock"
-                    :current-block="currentBlock"
-                    :time-remaining="currentBlockTime"
-                    :progress="currentBlockProgress"
-                    :is-running="timerRunning"
-                />
-
-                <!-- Управление продлением времени -->
-                <TimerExtensionControls
-                    v-if="session.status === 'active' && session.blocks.length > 0"
-                    :blocks="session.blocks"
-                    v-model:selectedBlockId="selectedBlockForExtension"
-                    @extend="extendTimer"
-                    @restart="restartTimerForBlock"
-                />
-
-                <!-- Метроном -->
                 <div class="mb-6">
-                    <MetronomeWidget />
+                    <SessionInfo
+                        :session="session as any"
+                    />
+                </div>
+
+                <!-- Таймер и текущий блок (sticky) -->
+                <div v-if="currentBlock" class="sticky top-0 z-20 mb-6 bg-gradient-to-b from-neutral-50 via-neutral-50 to-transparent dark:from-neutral-900 dark:via-neutral-900 dark:to-transparent pb-2">
+                    <SessionTimer
+                        :current-block="currentBlock"
+                        :time-remaining="currentBlockTime"
+                        :progress="currentBlockProgress"
+                        :is-running="timerRunning"
+                    />
                 </div>
 
                 <!-- Аудио рекордер -->
@@ -88,15 +77,15 @@
                 <!-- Список блоков -->
                 <SessionBlocksList
                     :blocks="session.blocks"
+                    :session-id="session.id"
                 />
 
-                <!-- История аудио записей -->
-                <div v-if="audioRecordings.length > 0" class="mt-6">
-                    <AudioRecordingsList
-                        :recordings="audioRecordings"
-                        @refresh="refreshRecordings"
-                    />
+                <!-- Метроном (компактный, под упражнениями) -->
+                <div class="mt-6 mb-6">
+                    <CompactMetronome :initially-collapsed="true" />
                 </div>
+
+                <!-- Записи теперь показываются внутри каждого упражнения в SessionBlocksList -->
             </div>
         </div>
 
@@ -111,8 +100,8 @@
 
         <!-- Фиксированная панель управления -->
         <SessionControlBar
-            :session="session"
-            :current-block="currentBlock"
+            :session="session as any"
+            :current-block="currentBlock as any"
             :processing="form.processing"
             @start="startSession"
             @pause="pauseSession"
@@ -132,51 +121,14 @@ import SessionTimer from '@/Components/Session/SessionTimer.vue'
 import SessionBlocksList from '@/Components/Session/SessionBlocksList.vue'
 import SessionControlBar from '@/Components/Session/SessionControlBar.vue'
 import SoundSettingsModal from '@/Components/Session/SoundSettingsModal.vue'
-import TimerExtensionControls from '@/Components/Session/TimerExtensionControls.vue'
-import MetronomeWidget from '@/Components/Metronome/MetronomeWidget.vue'
+import CompactMetronome from '@/Components/Metronome/CompactMetronome.vue'
 import AudioRecorder from '@/Components/Audio/AudioRecorder.vue'
-import AudioRecordingsList from '@/Components/Audio/AudioRecordingsList.vue'
 import { useTimerSounds } from '@/composables/useTimerSounds'
 import { getStatusLabel, getStatusBadgeClass } from '@/utils/statusHelpers'
-
-interface SessionBlock {
-    id: number
-    title: string
-    description: string
-    type: string
-    planned_duration: number
-    actual_duration: number | null
-    status: string
-    started_at: string | null
-    completed_at: string | null
-}
-
-interface Session {
-    id: number
-    title: string
-    description: string
-    planned_duration: number
-    actual_duration: number | null
-    status: string
-    started_at: string | null
-    completed_at: string | null
-    blocks: SessionBlock[]
-}
-
-interface AudioRecording {
-    id: number
-    title: string | null
-    notes: string | null
-    file_path: string
-    audio_url: string | null
-    quality_rating: number | null
-    recorded_at: string
-    duration: number | null
-}
+import type { Session, SessionBlock } from '@/types/models'
 
 interface Props {
     session: Session
-    audioRecordings: AudioRecording[]
 }
 
 const props = defineProps<Props>()
@@ -207,7 +159,6 @@ const extensionNotification = ref<{ show: boolean; message: string; minutes: num
     message: '',
     minutes: 0
 })
-const selectedBlockForExtension = ref<number | null>(null)
 
 // Ключи для localStorage
 const TIMER_STATE_KEY = 'timer-state'
@@ -429,69 +380,7 @@ const completeCurrentBlock = () => {
 }
 
 // Продление времени
-const extendTimer = (minutes: number) => {
-    if (!selectedBlockForExtension.value) return
-
-    const selectedBlock = props.session.blocks.find(block => block.id === selectedBlockForExtension.value)
-    if (!selectedBlock) return
-
-    const newPlannedDuration = selectedBlock.planned_duration + minutes
-
-    const blockForm = useForm({
-        planned_duration: newPlannedDuration,
-    })
-
-    blockForm.patch(route('sessions.blocks.update', {
-        session: props.session.id,
-        block: selectedBlock.id
-    }), {
-        preserveScroll: true,
-        onSuccess: () => {
-            selectedBlock.planned_duration = newPlannedDuration
-
-            if (selectedBlock.id === currentBlock.value?.id && timerRunning.value) {
-                if (startTime.value) {
-                    const now = Date.now()
-                    const elapsed = Math.floor((now - startTime.value) / 1000)
-                    const newPlannedSeconds = newPlannedDuration * 60
-                    const newRemaining = Math.max(0, newPlannedSeconds - elapsed)
-                    currentBlockTime.value = newRemaining
-                }
-            }
-
-            saveTimerState()
-            showExtensionNotification(minutes, selectedBlock.title)
-        }
-    })
-}
-
-const restartTimerForBlock = () => {
-    if (!selectedBlockForExtension.value) return
-
-    const selectedBlock = props.session.blocks.find(block => block.id === selectedBlockForExtension.value)
-    if (!selectedBlock) return
-
-    const blockForm = useForm({
-        status: 'active',
-        actual_duration: null,
-        completed_at: null,
-    })
-
-    blockForm.patch(route('sessions.blocks.update', {
-        session: props.session.id,
-        block: selectedBlock.id
-    }), {
-        preserveScroll: true,
-        onSuccess: () => {
-            selectedBlock.status = 'active'
-            selectedBlock.actual_duration = null
-            selectedBlock.completed_at = null
-
-            resetTimer()
-            showExtensionNotification(0, selectedBlock.title, 'Перезапущен')
-        }
-    })
-}
+// Методы extendTimer и restartTimerForBlock удалены - теперь в SessionBlocksList.vue
 
 const showExtensionNotification = (minutes: number, blockTitle?: string, action?: string) => {
     const title = blockTitle ? ` для "${blockTitle}"` : ''
@@ -569,12 +458,8 @@ const deleteSession = () => {
 
 const handleRecordingSaved = (recordingId: number) => {
     console.log('Recording saved:', recordingId)
-    // Обновляем страницу, чтобы показать новую запись
-    router.reload({ only: ['audioRecordings'] })
-}
-
-const refreshRecordings = () => {
-    router.reload({ only: ['audioRecordings'] })
+    // Перезагружаем сессию, чтобы обновить записи в blocks
+    router.reload({ only: ['session'] })
 }
 
 // Управление звуками
@@ -592,10 +477,6 @@ const saveSoundSettings = () => {
 onMounted(() => {
     loadSoundSettings()
 
-    if (currentBlock.value) {
-        selectedBlockForExtension.value = currentBlock.value.id
-    }
-
     const timerRestored = restoreTimerState()
 
     if (!timerRestored && currentBlock.value && props.session.status === 'active') {
@@ -612,10 +493,6 @@ onUnmounted(() => {
 watch(currentBlock, (newBlock, oldBlock) => {
     if (oldBlock && newBlock && oldBlock.id !== newBlock.id) {
         resetTimer()
-    }
-
-    if (newBlock) {
-        selectedBlockForExtension.value = newBlock.id
     }
 
     if (newBlock && props.session.status === 'active' && !timerRunning.value) {

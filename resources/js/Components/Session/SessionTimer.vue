@@ -1,25 +1,25 @@
 <template>
-    <div class="bg-gradient-to-br from-primary-50/80 to-danger-50/80 dark:from-accent-900 dark:to-secondary-900 overflow-hidden shadow-2xl sm:rounded-2xl mb-6 border-2 border-primary-300 dark:border-accent-700">
-        <div class="p-6 sm:p-8">
+    <div class="bg-gradient-to-br from-primary-50/80 to-danger-50/80 dark:from-accent-900 dark:to-secondary-900 overflow-hidden shadow-lg sm:rounded-xl border border-primary-300 dark:border-accent-700">
+        <div class="p-3 sm:p-4">
             <div class="flex items-center justify-between">
                 <!-- Информация о блоке -->
                 <div class="flex-1">
-                    <div class="flex items-center space-x-3 mb-3">
-                        <span class="text-3xl sm:text-4xl">{{ getTypeIcon(currentBlock.type) }}</span>
-                        <h3 class="text-xl sm:text-2xl font-bold text-primary-800 dark:text-neutral-100">
+                    <div class="flex items-center space-x-2 mb-2">
+                        <span class="text-2xl sm:text-3xl">{{ getTypeIcon(currentBlock.type) }}</span>
+                        <h3 class="text-lg sm:text-xl font-bold text-primary-800 dark:text-neutral-100">
                             {{ currentBlock.title }}
                         </h3>
                     </div>
-                    <p v-if="currentBlock.description" class="text-base sm:text-lg text-primary-600 dark:text-neutral-300 mb-2">
+                    <p v-if="currentBlock.description" class="text-sm sm:text-base text-primary-600 dark:text-neutral-300 mb-1">
                         {{ currentBlock.description }}
                     </p>
-                    <div class="text-base sm:text-lg font-medium text-primary-500 dark:text-neutral-400">
-                        {{ currentBlock.planned_duration }} мин запланировано
+                    <div class="text-sm sm:text-base font-medium text-primary-500 dark:text-neutral-400">
+                        {{ currentBlock.planned_duration }} мин
                     </div>
                 </div>
 
-                <!-- Большой круговой таймер -->
-                <div class="relative w-40 h-40 sm:w-52 sm:h-52 ml-4 shadow-xl">
+                <!-- Компактный круговой таймер -->
+                <div class="relative w-28 h-28 sm:w-36 sm:h-36 ml-3 shadow-lg">
                     <svg class="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
                         <circle
                             cx="50"
@@ -48,12 +48,12 @@
                     <!-- Время в центре -->
                     <div class="absolute inset-0 flex flex-col items-center justify-center">
                         <div
-                            class="text-2xl sm:text-4xl font-bold transition-colors duration-300"
+                            class="text-xl sm:text-3xl font-bold transition-colors duration-300"
                             :class="progress >= 100 ? 'text-danger-500 dark:text-danger-400' : 'text-primary-600 dark:text-accent-400'"
                         >
                             {{ formatTime(timeRemaining) }}
                         </div>
-                        <div class="text-sm sm:text-base font-semibold text-primary-500 dark:text-neutral-400 mt-1">
+                        <div class="text-xs sm:text-sm font-semibold text-primary-500 dark:text-neutral-400 mt-0.5">
                             {{ Math.round(progress) }}%
                         </div>
                     </div>
@@ -61,10 +61,10 @@
             </div>
 
             <!-- Линейный прогресс-бар -->
-            <div class="mt-4">
-                <div class="w-full bg-primary-200 dark:bg-neutral-700 rounded-full h-2 overflow-hidden shadow-inner">
+            <div class="mt-2">
+                <div class="w-full bg-primary-200 dark:bg-neutral-700 rounded-full h-1.5 overflow-hidden shadow-inner">
                     <div
-                        class="h-2 rounded-full transition-all duration-1000 ease-out relative"
+                        class="h-1.5 rounded-full transition-all duration-1000 ease-out relative"
                         :class="progress >= 100 ? 'bg-gradient-to-r from-danger-400 to-danger-500' : 'bg-gradient-to-r from-primary-400 to-danger-500'"
                         :style="{ width: Math.min(progress, 100) + '%' }"
                     >

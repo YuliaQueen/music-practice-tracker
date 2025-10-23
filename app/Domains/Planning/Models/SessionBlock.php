@@ -104,6 +104,25 @@ class SessionBlock extends BaseModel
     ];
 
     /**
+     * Relationships to append to model's array/JSON form
+     */
+    protected $appends = ['audioRecordings'];
+
+    /**
+     * Accessor для автоматической сериализации audioRecordings
+     */
+    public function getAudioRecordingsAttribute()
+    {
+        // Если relationship уже загружен, возвращаем его
+        if ($this->relationLoaded('audioRecordings')) {
+            return $this->getRelation('audioRecordings');
+        }
+        
+        // Иначе возвращаем пустую коллекцию
+        return collect();
+    }
+
+    /**
      * Create a new factory instance for the model.
      */
     protected static function newFactory()

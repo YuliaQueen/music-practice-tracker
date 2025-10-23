@@ -74,8 +74,17 @@ readonly class AudioRecordingService
                 'recording' => $recording,
                 'message'   => 'Запись успешно сохранена',
             ];
-        } catch (\Exception $e) {
-            DB::rollBack();
+        } catch (\Throwable $e) {
+            if (DB::transactionLevel() > 0) {
+                try {
+                    DB::rollBack();
+                } catch (\Throwable $rollbackException) {
+                    Log::error('Ошибка при откате транзакции', [
+                        'user_id' => $userId,
+                        'error'   => $rollbackException->getMessage(),
+                    ]);
+                }
+            }
 
             // Удаляем файл если он был загружен
             if (isset($fileData['path'])) {
@@ -85,11 +94,12 @@ readonly class AudioRecordingService
             Log::error('Ошибка при создании аудио записи', [
                 'user_id' => $userId,
                 'error'   => $e->getMessage(),
+                'trace'   => $e->getTraceAsString(),
             ]);
 
             return [
                 'success' => false,
-                'message' => 'Ошибка при сохранении записи: ' . $e->getMessage(),
+                'message' => 'Ошибка при сохранении записи',
             ];
         }
     }
