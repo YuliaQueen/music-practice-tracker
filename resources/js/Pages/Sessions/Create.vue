@@ -223,7 +223,7 @@
                                                         <span class="text-xs px-2 py-1 bg-accent-100 text-accent-600 rounded dark:bg-accent-900/50 dark:text-accent-300">
                                                             {{ exercise.duration }} мин
                                                         </span>
-                                                        <span class="text-xs px-2 py-1 bg-success-100 text-success-600 rounded dark:bg-success-900/50 dark:text-success-300">
+                                                        <span v-if="exercise.usage_count > 0" class="text-xs px-2 py-1 bg-success-100 text-success-600 rounded dark:bg-success-900/50 dark:text-success-300">
                                                             {{ exercise.usage_count }} раз
                                                         </span>
                                                     </div>
@@ -478,7 +478,7 @@ const filteredExercises = computed(() => {
         const query = exerciseSearchQuery.value.toLowerCase()
         exercises = exercises.filter(exercise => 
             exercise.title.toLowerCase().includes(query) ||
-            exercise.description.toLowerCase().includes(query) ||
+            (exercise.description && exercise.description.toLowerCase().includes(query)) ||
             exercise.type.toLowerCase().includes(query)
         )
     }

@@ -22,6 +22,11 @@ use App\Domains\Planning\Contracts\SessionRepositoryInterface;
  */
 class SessionController extends Controller
 {
+    /**
+     * Количество сессий на странице
+     */
+    private const SESSIONS_PER_PAGE = 10;
+
     public function __construct(
         private readonly SessionService             $sessionService,
         private readonly SessionRepositoryInterface $sessionRepository
@@ -31,12 +36,26 @@ class SessionController extends Controller
     /**
      * Показать список сессий пользователя
      */
-    public function index(): Response
+    public function index(Request $request): Response
     {
-        $sessions = $this->sessionRepository->getForUser(auth()->id(), 10);
+        $filters = [
+            'search'   => $request->input('search'),
+            'exercise' => $request->input('exercise'),
+            'status'   => $request->input('status'),
+        ];
+
+        $sessions = $this->sessionRepository->getForUser(
+            auth()->id(),
+            self::SESSIONS_PER_PAGE,
+            $filters
+        );
+
+        $exercises = $this->sessionService->getUserExercises(auth()->id());
 
         return Inertia::render('Sessions/Index', [
-            'sessions' => $sessions,
+            'sessions'  => $sessions,
+            'exercises' => $exercises,
+            'filters'   => $filters,
         ]);
     }
 
