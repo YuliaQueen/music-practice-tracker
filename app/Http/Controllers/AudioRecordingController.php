@@ -1,43 +1,42 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers;
 
-use App\Models\AudioRecording;
+use Inertia\Inertia;
+use Inertia\Response;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
+use Illuminate\Http\RedirectResponse;
 use App\Domains\Planning\Models\Exercise;
 use App\Domains\Planning\Models\SessionBlock;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\Gate;
-use Illuminate\Support\Str;
-use Inertia\Inertia;
+use App\Domains\Recording\Models\AudioRecording;
+use Symfony\Component\HttpFoundation\StreamedResponse;
+use App\Domains\Recording\Services\AudioRecordingService;
+use App\Http\Requests\AudioRecording\StoreAudioRecordingRequest;
+use App\Http\Requests\AudioRecording\UpdateAudioRecordingRequest;
+use App\Domains\Recording\Contracts\AudioRecordingRepositoryInterface;
 
 class AudioRecordingController extends Controller
 {
+    public function __construct(
+        private readonly AudioRecordingService             $service,
+        private readonly AudioRecordingRepositoryInterface $repository
+    ) {}
+
     /**
-     * Display a listing of the resource.
+     * Показать список аудио записей пользователя
      */
-    public function index(Request $request)
+    public function index(Request $request): Response
     {
-        $query = AudioRecording::where('user_id', auth()->id())
-            ->with(['exercise', 'sessionBlock'])
-            ->orderBy('recorded_at', 'desc');
+        $filters = $request->only(['exercise_id', 'session_block_id', 'quality_rating']);
 
-        // Фильтрация по упражнению
-        if ($request->has('exercise_id')) {
-            $query->where('exercise_id', $request->exercise_id);
-        }
-
-        // Фильтрация по блоку сессии
-        if ($request->has('session_block_id')) {
-            $query->where('practice_session_block_id', $request->session_block_id);
-        }
-
-        // Фильтрация по оценке качества
-        if ($request->has('quality_rating')) {
-            $query->where('quality_rating', $request->quality_rating);
-        }
-
-        $recordings = $query->paginate(20);
+        $recordings = $this->repository->getForUser(
+            auth()->id(),
+            20,
+            $filters
+        );
 
         return Inertia::render('AudioRecordings/Index', [
             'recordings' => $recordings,
@@ -45,83 +44,32 @@ class AudioRecordingController extends Controller
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Сохранить новую аудио запись
      */
-    public function store(Request $request)
+    public function store(StoreAudioRecordingRequest $request): RedirectResponse
     {
-        $validated = $request->validate([
-            'audio_file' => 'required|file|mimes:webm,mp4,m4a,wav,mp3|max:51200', // max 50MB
-            'exercise_id' => 'nullable|exists:exercises,id',
-            'practice_session_block_id' => 'nullable|exists:practice_session_blocks,id',
-            'title' => 'nullable|string|max:255',
-            'notes' => 'nullable|string',
-            'quality_rating' => 'nullable|integer|min:1|max:5',
-        ]);
+        $result = $this->service->createRecording(
+            auth()->id(),
+            $request->file('audio_file'),
+            $request->validated()
+        );
 
-        // Проверка: запись должна быть связана либо с упражнением, либо с блоком сессии
-        if (empty($validated['exercise_id']) && empty($validated['practice_session_block_id'])) {
-            return back()->withErrors(['error' => 'Запись должна быть связана с упражнением или блоком сессии']);
+        if (!$result['success']) {
+            return back()->withErrors(['error' => $result['message']]);
         }
-
-        if (!empty($validated['exercise_id']) && !empty($validated['practice_session_block_id'])) {
-            return back()->withErrors(['error' => 'Запись может быть связана только с упражнением ИЛИ блоком сессии']);
-        }
-
-        // Проверка прав доступа
-        if (!empty($validated['exercise_id'])) {
-            $exercise = Exercise::findOrFail($validated['exercise_id']);
-            if ($exercise->user_id !== auth()->id()) {
-                abort(403, 'Unauthorized');
-            }
-        }
-
-        if (!empty($validated['practice_session_block_id'])) {
-            $sessionBlock = SessionBlock::with('session')->findOrFail($validated['practice_session_block_id']);
-            if ($sessionBlock->session->user_id !== auth()->id()) {
-                abort(403, 'Unauthorized');
-            }
-        }
-
-        // Сохраняем файл в MinIO
-        $file = $request->file('audio_file');
-        $originalFileName = $file->getClientOriginalName();
-        $extension = $file->getClientOriginalExtension();
-        $uniqueFilename = Str::uuid() . '.' . $extension;
-        $filePath = 'audio-recordings/' . auth()->id() . '/' . $uniqueFilename;
-
-        try {
-            Storage::disk('minio')->put($filePath, file_get_contents($file->getPathname()));
-        } catch (\Exception $e) {
-            return back()->withErrors(['error' => 'Ошибка при загрузке файла в хранилище: ' . $e->getMessage()]);
-        }
-
-        // Создаём запись в БД
-        $recording = AudioRecording::create([
-            'user_id' => auth()->id(),
-            'exercise_id' => $validated['exercise_id'] ?? null,
-            'practice_session_block_id' => $validated['practice_session_block_id'] ?? null,
-            'title' => $validated['title'] ?? null,
-            'notes' => $validated['notes'] ?? null,
-            'file_path' => $filePath,
-            'file_name' => $originalFileName,
-            'mime_type' => $file->getMimeType(),
-            'file_size' => $file->getSize(),
-            'quality_rating' => $validated['quality_rating'] ?? null,
-            'recorded_at' => now(),
-        ]);
 
         return back()->with([
             'flash' => [
-                'recordingId' => $recording->id,
-                'message' => 'Запись успешно сохранена',
+                'recordingId' => $result['recording']->id,
+                'message'     => $result['message'],
             ],
         ]);
     }
 
     /**
-     * Display the specified resource.
+     * Показать аудио запись
      */
-    public function show(AudioRecording $audioRecording)
+    public function show(AudioRecording $audioRecording): Response
     {
         Gate::authorize('view', $audioRecording);
 
@@ -133,105 +81,104 @@ class AudioRecordingController extends Controller
     }
 
     /**
-     * Update the specified resource in storage.
+     * Обновить аудио запись
      */
-    public function update(Request $request, AudioRecording $audioRecording)
+    public function update(UpdateAudioRecordingRequest $request, AudioRecording $audioRecording): RedirectResponse
     {
         Gate::authorize('update', $audioRecording);
 
-        $validated = $request->validate([
-            'title' => 'nullable|string|max:255',
-            'notes' => 'nullable|string',
-            'quality_rating' => 'nullable|integer|min:1|max:5',
-        ]);
+        $result = $this->service->updateRecording(
+            $audioRecording,
+            $request->validated()
+        );
 
-        $audioRecording->update($validated);
+        if (!$result['success']) {
+            return back()->withErrors(['error' => $result['message']]);
+        }
 
-        return back()->with('message', 'Запись обновлена');
+        return back()->with('message', $result['message']);
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Удалить аудио запись
      */
-    public function destroy(AudioRecording $audioRecording)
+    public function destroy(AudioRecording $audioRecording): RedirectResponse
     {
         Gate::authorize('delete', $audioRecording);
 
-        // Файл будет удален автоматически через событие модели
-        $audioRecording->delete();
+        $result = $this->service->deleteRecording($audioRecording);
 
-        return back()->with('message', 'Запись удалена');
+        if (!$result['success']) {
+            return back()->withErrors(['error' => $result['message']]);
+        }
+
+        return back()->with('message', $result['message']);
     }
 
     /**
-     * Stream the audio file for playback.
+     * Стриминг аудио файла для воспроизведения
      */
-    public function stream(AudioRecording $audioRecording)
+    public function stream(AudioRecording $audioRecording): StreamedResponse
     {
         Gate::authorize('view', $audioRecording);
 
-        if (!Storage::disk('minio')->exists($audioRecording->file_path)) {
+        $stream = $this->service->getFileStream($audioRecording);
+
+        if ($stream === false) {
             abort(404, 'Файл не найден');
         }
 
-        return response()->stream(function () use ($audioRecording) {
-            $stream = Storage::disk('minio')->readStream($audioRecording->file_path);
+        return response()->stream(function () use ($stream) {
             fpassthru($stream);
             if (is_resource($stream)) {
                 fclose($stream);
             }
         }, 200, [
-            'Content-Type' => $audioRecording->mime_type,
-            'Content-Length' => $audioRecording->file_size,
-            'Accept-Ranges' => 'bytes',
-            'Cache-Control' => 'public, max-age=3600',
+            'Content-Type'   => $audioRecording->mime_type,
+            'Content-Length' => (string)$audioRecording->file_size,
+            'Accept-Ranges'  => 'bytes',
+            'Cache-Control'  => 'public, max-age=3600',
         ]);
     }
 
     /**
-     * Download the audio file.
+     * Скачать аудио файл
      */
-    public function download(AudioRecording $audioRecording)
+    public function download(AudioRecording $audioRecording): StreamedResponse
     {
         Gate::authorize('view', $audioRecording);
 
-        if (!Storage::disk('minio')->exists($audioRecording->file_path)) {
+        if (!$audioRecording->fileExists()) {
             abort(404, 'Файл не найден');
         }
 
-        return Storage::disk('minio')->download($audioRecording->file_path, $audioRecording->file_name);
+        return \Storage::disk('minio')->download(
+            $audioRecording->file_path,
+            $audioRecording->file_name
+        );
     }
 
     /**
-     * Get recordings for a specific exercise.
+     * Получить записи для конкретного упражнения
      */
     public function forExercise(Exercise $exercise)
     {
-        if ($exercise->user_id !== auth()->id()) {
-            abort(403);
-        }
+        $this->authorize('view', $exercise);
 
-        $recordings = $exercise->audioRecordings()
-            ->orderBy('recorded_at', 'desc')
-            ->get();
+        $recordings = $this->repository->getForExercise($exercise->id);
 
         return response()->json(['recordings' => $recordings]);
     }
 
     /**
-     * Get recordings for a specific session block.
+     * Получить записи для конкретного блока сессии
      */
     public function forSessionBlock(SessionBlock $sessionBlock)
     {
         $sessionBlock->load('session');
+        $this->authorize('view', $sessionBlock->session);
 
-        if ($sessionBlock->session->user_id !== auth()->id()) {
-            abort(403);
-        }
-
-        $recordings = $sessionBlock->audioRecordings()
-            ->orderBy('recorded_at', 'desc')
-            ->get();
+        $recordings = $this->repository->getForSessionBlock($sessionBlock->id);
 
         return response()->json(['recordings' => $recordings]);
     }

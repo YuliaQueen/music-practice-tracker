@@ -1,8 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Policies;
 
-use App\Models\AudioRecording;
+use App\Domains\Recording\Models\AudioRecording;
 use App\Domains\User\Models\User;
 
 class AudioRecordingPolicy
