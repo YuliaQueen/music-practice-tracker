@@ -2,19 +2,37 @@
     <div class="bg-primary-50/90 dark:bg-neutral-800 overflow-hidden shadow-lg sm:rounded-xl border border-primary-200 dark:border-neutral-700">
         <div class="p-4 sm:p-6">
             <div class="mb-4">
-                <div class="flex items-center justify-between">
+                <button
+                    @click="isCollapsed = !isCollapsed"
+                    class="w-full flex items-center justify-between hover:bg-primary-100/50 dark:hover:bg-neutral-700/50 rounded-lg px-2 py-2 transition-colors"
+                >
                     <h3 class="text-lg sm:text-xl font-bold text-primary-800 dark:text-neutral-100 flex items-center">
                         <svg class="w-5 h-5 mr-2 text-primary-500 dark:text-accent-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
                         </svg>
                         Упражнения
+                        <span class="ml-2 text-sm font-normal text-primary-600 dark:text-neutral-400">
+                            ({{ localBlocks.length }})
+                        </span>
                     </h3>
-                </div>
-                
+                    <svg
+                        class="w-5 h-5 text-primary-500 dark:text-neutral-400 transition-transform duration-200"
+                        :class="{ 'rotate-180': !isCollapsed }"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                    >
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Контент (сворачиваемый) -->
+            <div v-show="!isCollapsed">
                 <!-- Подсказка о перетаскивании -->
                 <div 
                     v-if="canReorder" 
-                    class="mt-2 px-3 py-2 bg-accent-50 dark:bg-accent-900/20 border border-accent-200 dark:border-accent-800 rounded-lg"
+                    class="mb-3 px-3 py-2 bg-accent-50 dark:bg-accent-900/20 border border-accent-200 dark:border-accent-800 rounded-lg"
                 >
                     <div class="flex items-center text-xs sm:text-sm text-accent-700 dark:text-accent-300">
                         <svg class="w-4 h-4 sm:w-5 sm:h-5 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -30,9 +48,8 @@
                         </span>
                     </div>
                 </div>
-            </div>
 
-            <draggable
+                <draggable
                 v-model="localBlocks"
                 :disabled="!canReorder"
                 item-key="id"
@@ -123,6 +140,7 @@
                     </div>
                 </template>
             </draggable>
+            </div>
         </div>
     </div>
 </template>
@@ -163,6 +181,7 @@ const props = defineProps<Props>();
 const localBlocks = ref<SessionBlock[]>([...props.blocks]);
 const isStarting = ref(false);
 const isDragging = ref(false);
+const isCollapsed = ref(false);
 
 // Можно изменять порядок если есть хотя бы 2 незавершенных блока
 const canReorder = computed(() => {
