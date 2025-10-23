@@ -132,7 +132,7 @@ class SessionBlock extends BaseModel
      */
     public function audioRecordings(): HasMany
     {
-        return $this->hasMany(\App\Models\AudioRecording::class, 'practice_session_block_id');
+        return $this->hasMany(\App\Domains\Recording\Models\AudioRecording::class, 'practice_session_block_id');
     }
 
     /**

@@ -6,7 +6,7 @@ namespace App\Http\Controllers;
 
 use Inertia\Inertia;
 use Inertia\Response;
-use App\Models\AudioRecording;
+use App\Domains\Recording\Models\AudioRecording;
 use Illuminate\Http\Request;
 use App\Services\SessionService;
 use Illuminate\Http\RedirectResponse;

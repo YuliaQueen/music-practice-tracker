@@ -140,7 +140,7 @@ class Exercise extends BaseModel
      */
     public function audioRecordings(): HasMany
     {
-        return $this->hasMany(\App\Models\AudioRecording::class, 'exercise_id');
+        return $this->hasMany(\App\Domains\Recording\Models\AudioRecording::class, 'exercise_id');
     }
 
     /**
