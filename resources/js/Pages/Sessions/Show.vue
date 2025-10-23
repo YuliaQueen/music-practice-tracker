@@ -72,50 +72,9 @@
                     @restart="restartTimerForBlock"
                 />
 
-                <!-- Метроном (сворачиваемый) -->
+                <!-- Метроном -->
                 <div class="mb-6">
-                    <div class="bg-primary-50 dark:bg-neutral-800 rounded-xl border border-primary-200 dark:border-neutral-700 overflow-hidden shadow-sm">
-                        <!-- Компактная кнопка -->
-                        <button
-                            @click="metronomeExpanded = !metronomeExpanded"
-                            class="w-full px-4 py-3 flex items-center justify-between hover:bg-primary-100 dark:hover:bg-neutral-700 transition-colors"
-                        >
-                            <div class="flex items-center space-x-3">
-                                <span class="text-2xl">🎵</span>
-                                <div class="text-left">
-                                    <h3 class="text-sm font-semibold text-primary-800 dark:text-neutral-100">
-                                        Метроном
-                                    </h3>
-                                    <p class="text-xs text-primary-600 dark:text-neutral-400">
-                                        {{ metronomeExpanded ? 'Свернуть' : 'Развернуть для настройки' }}
-                                    </p>
-                                </div>
-                            </div>
-                            <svg
-                                class="w-5 h-5 text-primary-500 dark:text-neutral-400 transition-transform duration-200"
-                                :class="{ 'rotate-180': metronomeExpanded }"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                            >
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                            </svg>
-                        </button>
-
-                        <!-- Развернутый контент -->
-                        <Transition
-                            enter-active-class="transition-all duration-300 ease-out"
-                            enter-from-class="max-h-0 opacity-0"
-                            enter-to-class="max-h-96 opacity-100"
-                            leave-active-class="transition-all duration-300 ease-in"
-                            leave-from-class="max-h-96 opacity-100"
-                            leave-to-class="max-h-0 opacity-0"
-                        >
-                            <div v-if="metronomeExpanded" class="px-4 pb-4">
-                                <MetronomeWidget />
-                            </div>
-                        </Transition>
-                    </div>
+                    <MetronomeWidget />
                 </div>
 
                 <!-- Аудио рекордер -->
@@ -244,7 +203,6 @@ const timerInterval = ref<number | null>(null)
 const startTime = ref<number | null>(null)
 const blockStartTime = ref<number | null>(null)
 const warningPlayed = ref(false)
-const metronomeExpanded = ref(false)
 const showSoundSettings = ref(false)
 const extensionNotification = ref<{ show: boolean; message: string; minutes: number }>({
     show: false,
