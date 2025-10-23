@@ -1,20 +1,34 @@
 <template>
     <div class="bg-primary-50/90 dark:bg-neutral-800 overflow-hidden shadow-lg sm:rounded-xl border border-primary-200 dark:border-neutral-700">
         <div class="p-4 sm:p-6">
-            <div class="flex items-center justify-between mb-4">
-                <h3 class="text-lg sm:text-xl font-bold text-primary-800 dark:text-neutral-100 flex items-center">
-                    <svg class="w-5 h-5 mr-2 text-primary-500 dark:text-accent-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
-                    </svg>
-                    Упражнения
-                </h3>
+            <div class="mb-4">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-lg sm:text-xl font-bold text-primary-800 dark:text-neutral-100 flex items-center">
+                        <svg class="w-5 h-5 mr-2 text-primary-500 dark:text-accent-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
+                        </svg>
+                        Упражнения
+                    </h3>
+                </div>
                 
                 <!-- Подсказка о перетаскивании -->
-                <div v-if="canReorder" class="text-xs text-primary-500 dark:text-neutral-400 flex items-center">
-                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" />
-                    </svg>
-                    Перетащите для изменения порядка
+                <div 
+                    v-if="canReorder" 
+                    class="mt-2 px-3 py-2 bg-accent-50 dark:bg-accent-900/20 border border-accent-200 dark:border-accent-800 rounded-lg"
+                >
+                    <div class="flex items-center text-xs sm:text-sm text-accent-700 dark:text-accent-300">
+                        <svg class="w-4 h-4 sm:w-5 sm:h-5 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <span>
+                            <strong>Совет:</strong> Зажмите и перетащите любое упражнение для изменения порядка. 
+                            Иконка <span class="inline-flex align-middle mx-1">
+                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16" />
+                                </svg>
+                            </span> указывает что можно перетаскивать.
+                        </span>
+                    </div>
                 </div>
             </div>
 
@@ -23,17 +37,19 @@
                 :disabled="!canReorder"
                 item-key="id"
                 @end="onDragEnd"
+                @start="isDragging = true"
                 :animation="200"
-                handle=".drag-handle"
-                ghost-class="opacity-50"
+                ghost-class="opacity-50 scale-105"
+                chosen-class="shadow-2xl ring-2 ring-accent-400"
+                drag-class="rotate-2"
                 class="space-y-2 sm:space-y-3"
             >
                 <template #item="{ element: block }">
                     <div
                         :class="[
-                            'group relative border rounded-lg p-3 sm:p-4 transition-all duration-300 hover:shadow-md',
+                            'group relative border rounded-lg p-3 sm:p-4 transition-all duration-300',
                             getBlockStatusClass(block.status),
-                            canReorder ? 'cursor-move' : ''
+                            canReorder ? 'cursor-move hover:shadow-lg hover:scale-[1.02] hover:border-accent-300 dark:hover:border-accent-600 select-none' : 'hover:shadow-md'
                         ]"
                     >
                         <!-- Индикатор прогресса слева -->
@@ -43,19 +59,26 @@
 
                         <div class="flex items-center justify-between">
                             <div class="flex items-center space-x-3 flex-1 min-w-0">
-                                <!-- Drag handle -->
+                                <!-- Drag handle - иконка для визуального указания -->
                                 <div 
                                     v-if="canReorder"
-                                    class="drag-handle flex-shrink-0 cursor-grab active:cursor-grabbing text-primary-400 dark:text-neutral-500 hover:text-primary-600 dark:hover:text-neutral-300 transition-colors"
+                                    class="flex-shrink-0 text-primary-400 dark:text-neutral-500 group-hover:text-accent-500 dark:group-hover:text-accent-400 transition-all group-hover:scale-110"
+                                    title="Зажмите и перетащите"
                                 >
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16" />
+                                    <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 8h16M4 16h16" />
                                     </svg>
                                 </div>
                                 
                                 <!-- Номер упражнения -->
-                                <div class="flex-shrink-0 w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-primary-100 dark:bg-neutral-700 flex items-center justify-center">
-                                    <span class="text-xs sm:text-sm font-bold text-primary-600 dark:text-neutral-300">
+                                <div 
+                                    class="flex-shrink-0 w-6 h-6 sm:w-8 sm:h-8 rounded-full flex items-center justify-center transition-all"
+                                    :class="canReorder ? 'bg-accent-100 dark:bg-accent-900/30' : 'bg-primary-100 dark:bg-neutral-700'"
+                                >
+                                    <span 
+                                        class="text-xs sm:text-sm font-bold transition-colors"
+                                        :class="canReorder ? 'text-accent-600 dark:text-accent-400' : 'text-primary-600 dark:text-neutral-300'"
+                                    >
                                         {{ block.sort_order }}
                                     </span>
                                 </div>
@@ -138,6 +161,7 @@ const props = defineProps<Props>();
 
 const localBlocks = ref<SessionBlock[]>([...props.blocks]);
 const isStarting = ref(false);
+const isDragging = ref(false);
 
 // Можно изменять порядок только для запланированных сессий
 const canReorder = computed(() => {
@@ -164,6 +188,8 @@ const startBlock = (blockId: number) => {
 };
 
 const onDragEnd = () => {
+    isDragging.value = false;
+    
     // Обновляем sort_order локально для немедленного отображения
     localBlocks.value.forEach((block, index) => {
         block.sort_order = index + 1;
@@ -177,6 +203,9 @@ const onDragEnd = () => {
         { block_ids: blockIds },
         {
             preserveScroll: true,
+            onSuccess: () => {
+                // Показываем уведомление об успехе (опционально)
+            },
             onError: () => {
                 // При ошибке возвращаем исходный порядок
                 localBlocks.value = [...props.blocks];
