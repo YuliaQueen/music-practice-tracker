@@ -65,12 +65,15 @@ class SessionService
                 'session' => $session->fresh(['blocks', 'template']),
                 'message' => 'Сессия создана успешно',
             ];
-        } catch (\Exception $e) {
-            DB::rollBack();
+        } catch (\Throwable $e) {
+            if (DB::transactionLevel() > 0) {
+                DB::rollBack();
+            }
 
             Log::error('Ошибка при создании сессии', [
                 'user_id' => $user->id,
                 'error'   => $e->getMessage(),
+                'trace'   => $e->getTraceAsString(),
             ]);
 
             return [
@@ -217,12 +220,15 @@ class SessionService
                 'success' => true,
                 'message' => 'Сессия завершена!',
             ];
-        } catch (\Exception $e) {
-            DB::rollBack();
+        } catch (\Throwable $e) {
+            if (DB::transactionLevel() > 0) {
+                DB::rollBack();
+            }
 
             Log::error('Ошибка при завершении сессии', [
                 'session_id' => $session->id,
                 'error'      => $e->getMessage(),
+                'trace'      => $e->getTraceAsString(),
             ]);
 
             return [
@@ -265,13 +271,16 @@ class SessionService
                 'success' => true,
                 'message' => 'Блок обновлен',
             ];
-        } catch (\Exception $e) {
-            DB::rollBack();
+        } catch (\Throwable $e) {
+            if (DB::transactionLevel() > 0) {
+                DB::rollBack();
+            }
 
             Log::error('Ошибка при обновлении блока сессии', [
                 'session_id' => $session->id,
                 'block_id'   => $block->id,
                 'error'      => $e->getMessage(),
+                'trace'      => $e->getTraceAsString(),
             ]);
 
             return [
@@ -304,12 +313,15 @@ class SessionService
                 'success' => true,
                 'message' => 'Сессия успешно удалена',
             ];
-        } catch (\Exception $e) {
-            DB::rollBack();
+        } catch (\Throwable $e) {
+            if (DB::transactionLevel() > 0) {
+                DB::rollBack();
+            }
 
             Log::error('Ошибка при удалении сессии', [
                 'session_id' => $session->id,
                 'error'      => $e->getMessage(),
+                'trace'      => $e->getTraceAsString(),
             ]);
 
             return [
