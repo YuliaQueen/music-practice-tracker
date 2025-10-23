@@ -13,6 +13,59 @@
 
         <div class="py-12">
             <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+                <!-- Фильтры -->
+                <div class="mb-6 bg-white dark:bg-neutral-800 overflow-hidden shadow-sm sm:rounded-lg">
+                    <div class="p-6">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <!-- Поиск по названию -->
+                            <div>
+                                <label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
+                                    Поиск по названию
+                                </label>
+                                <input
+                                    v-model="filters.search"
+                                    type="text"
+                                    placeholder="Название упражнения..."
+                                    class="w-full px-3 py-2 border border-neutral-300 dark:border-neutral-600 rounded-md shadow-sm focus:outline-none focus:ring-accent-500 focus:border-accent-500 dark:bg-neutral-700 dark:text-white"
+                                    @input="applyFilters"
+                                />
+                            </div>
+
+                            <!-- Фильтр по типу -->
+                            <div>
+                                <label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
+                                    Тип упражнения
+                                </label>
+                                <select
+                                    v-model="filters.type"
+                                    class="w-full px-3 py-2 border border-neutral-300 dark:border-neutral-600 rounded-md shadow-sm focus:outline-none focus:ring-accent-500 focus:border-accent-500 dark:bg-neutral-700 dark:text-white"
+                                    @change="applyFilters"
+                                >
+                                    <option value="">Все типы</option>
+                                    <option value="warmup">🔥 Разминка</option>
+                                    <option value="technique">⚡ Техника</option>
+                                    <option value="repertoire">🎵 Репертуар</option>
+                                    <option value="improvisation">🎨 Импровизация</option>
+                                    <option value="sight_reading">👀 Чтение с листа</option>
+                                    <option value="theory">📚 Теория</option>
+                                    <option value="break">☕ Перерыв</option>
+                                    <option value="custom">⭐ Другое</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <!-- Кнопка сброса фильтров -->
+                        <div v-if="hasActiveFilters" class="mt-4">
+                            <button
+                                @click="resetFilters"
+                                class="text-sm text-accent-600 dark:text-accent-400 hover:text-accent-800 dark:hover:text-accent-300"
+                            >
+                                ✕ Сбросить фильтры
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="bg-primary-50 overflow-hidden shadow-sm sm:rounded-lg dark:bg-neutral-800 dark:shadow-neutral-900/20">
                     <div class="p-6 text-primary-900 dark:text-neutral-100">
                         <div v-if="exercises.data.length === 0" class="text-center py-12">
@@ -131,6 +184,7 @@
 </template>
 
 <script setup lang="ts">
+import { ref, computed } from 'vue'
 import { useForm, router } from '@inertiajs/vue3'
 import { Link } from '@inertiajs/vue3'
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
@@ -162,10 +216,50 @@ interface ExercisesData {
 
 interface Props {
     exercises: ExercisesData
+    filters?: {
+        search?: string
+        type?: string
+    }
 }
 
 const props = defineProps<Props>()
 const form = useForm({})
+
+// Фильтры
+const filters = ref({
+    search: props.filters?.search || '',
+    type: props.filters?.type || '',
+})
+
+const hasActiveFilters = computed(() => {
+    return filters.value.search !== '' || filters.value.type !== ''
+})
+
+let filterTimeout: ReturnType<typeof setTimeout> | null = null
+
+const applyFilters = () => {
+    if (filterTimeout) {
+        clearTimeout(filterTimeout)
+    }
+    
+    filterTimeout = setTimeout(() => {
+        router.get(route('exercises.index'), filters.value, {
+            preserveState: true,
+            preserveScroll: true,
+        })
+    }, 300)
+}
+
+const resetFilters = () => {
+    filters.value = {
+        search: '',
+        type: '',
+    }
+    router.get(route('exercises.index'), {}, {
+        preserveState: true,
+        preserveScroll: true,
+    })
+}
 
 // Функции для управления упражнениями
 const getTypeIcon = (type: string): string => {
