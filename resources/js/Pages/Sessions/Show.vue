@@ -56,8 +56,8 @@
                     />
                 </div>
 
-                <!-- Таймер и текущий блок -->
-                <div v-if="currentBlock" class="mb-6">
+                <!-- Таймер и текущий блок (sticky) -->
+                <div v-if="currentBlock" class="sticky top-0 z-20 mb-6 bg-gradient-to-b from-neutral-50 via-neutral-50 to-transparent dark:from-neutral-900 dark:via-neutral-900 dark:to-transparent pb-2">
                     <SessionTimer
                         :current-block="currentBlock"
                         :time-remaining="currentBlockTime"
