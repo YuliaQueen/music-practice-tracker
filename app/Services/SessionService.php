@@ -93,32 +93,49 @@ class SessionService
     /**
      * Получить предыдущие упражнения пользователя для автозаполнения
      *
+     * Возвращает упражнения из предыдущих сессий + упражнения из библиотеки,
+     * объединенные по названию и типу
+     *
      * @param int $userId
      * @return Collection
      */
     public function getPreviousExercises(int $userId): Collection
     {
+        // Получаем упражнения из предыдущих сессий
         $previousExercises = $this->blockRepository->getPreviousExercisesForUser($userId);
 
-        // Если нет упражнений из сессий, добавляем упражнения из библиотеки
-        if ($previousExercises->isEmpty()) {
-            $exerciseLibrary = Exercise::where('user_id', $userId)
-                ->select('title', 'description', 'type', 'planned_duration')
-                ->get()
-                ->map(function ($exercise) {
-                    return [
-                        'title'       => $exercise->title,
-                        'description' => $exercise->description,
-                        'type'        => $exercise->type,
-                        'duration'    => $exercise->planned_duration,
-                        'usage_count' => 0,
-                    ];
-                });
+        // Получаем упражнения из библиотеки
+        $exerciseLibrary = Exercise::where('user_id', $userId)
+            ->select('title', 'description', 'type', 'planned_duration')
+            ->get()
+            ->map(function ($exercise) {
+                return [
+                    'title'       => $exercise->title,
+                    'description' => $exercise->description,
+                    'type'        => $exercise->type,
+                    'duration'    => $exercise->planned_duration,
+                    'usage_count' => 0, // Упражнения из библиотеки еще не использовались в сессиях
+                ];
+            });
 
-            $previousExercises = $previousExercises->concat($exerciseLibrary);
-        }
+        // Объединяем коллекции
+        $allExercises = $previousExercises->concat($exerciseLibrary);
 
-        return $previousExercises;
+        // Группируем по комбинации title + type и берем первое (с наибольшим usage_count)
+        $uniqueExercises = $allExercises
+            ->groupBy(function ($exercise) {
+                return $exercise['title'] . '|' . $exercise['type'];
+            })
+            ->map(function ($group) {
+                // Если есть упражнение из сессий (usage_count > 0), берем его
+                // Иначе берем из библиотеки
+                return $group->sortByDesc('usage_count')->first();
+            })
+            ->values()
+            ->sortByDesc('usage_count') // Сортируем по частоте использования
+            ->values();
+
+        return $uniqueExercises;
     }
 
     /**
