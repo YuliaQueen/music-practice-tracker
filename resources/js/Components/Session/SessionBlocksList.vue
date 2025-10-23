@@ -42,6 +42,7 @@
                 ghost-class="opacity-50 scale-105"
                 chosen-class="shadow-2xl ring-2 ring-accent-400"
                 drag-class="rotate-2"
+                tag="div"
                 class="space-y-2 sm:space-y-3"
             >
                 <template #item="{ element: block }">
@@ -163,11 +164,21 @@ const localBlocks = ref<SessionBlock[]>([...props.blocks]);
 const isStarting = ref(false);
 const isDragging = ref(false);
 
-// Можно изменять порядок только для запланированных сессий
+// Можно изменять порядок если есть хотя бы 2 незавершенных блока
 const canReorder = computed(() => {
-    return localBlocks.value.every(block => 
-        block.status === 'planned' || block.status === 'paused'
+    const unfinishedBlocks = localBlocks.value.filter(block => 
+        block.status === 'planned' || block.status === 'paused' || block.status === 'active'
     );
+    
+    // Отладка
+    console.log('SessionBlocksList - canReorder check:', {
+        totalBlocks: localBlocks.value.length,
+        unfinishedBlocks: unfinishedBlocks.length,
+        canReorder: unfinishedBlocks.length >= 2,
+        blockStatuses: localBlocks.value.map(b => ({ id: b.id, title: b.title, status: b.status }))
+    });
+    
+    return unfinishedBlocks.length >= 2;
 });
 
 const startBlock = (blockId: number) => {
