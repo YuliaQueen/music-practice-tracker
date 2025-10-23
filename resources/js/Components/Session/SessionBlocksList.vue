@@ -24,6 +24,13 @@
 
                     <div class="flex items-center justify-between">
                         <div class="flex items-center space-x-3 flex-1 min-w-0">
+                            <!-- Номер упражнения -->
+                            <div class="flex-shrink-0 w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-primary-100 dark:bg-neutral-700 flex items-center justify-center">
+                                <span class="text-xs sm:text-sm font-bold text-primary-600 dark:text-neutral-300">
+                                    {{ block.sort_order }}
+                                </span>
+                            </div>
+                            
                             <div class="flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 rounded-lg"
                                  :class="getBlockIconBgClass(block.status)">
                                 <span class="text-lg sm:text-xl">{{ getTypeIcon(block.type) }}</span>
@@ -45,6 +52,20 @@
                                 </div>
                             </div>
                         </div>
+
+                        <!-- Кнопка начать упражнение -->
+                        <button
+                            v-if="block.status === 'planned' || block.status === 'paused'"
+                            @click="startBlock(block.id)"
+                            class="ml-2 px-3 py-1.5 sm:px-4 sm:py-2 bg-accent-500 hover:bg-accent-600 text-white text-xs sm:text-sm font-medium rounded-lg transition-colors duration-200 flex items-center space-x-1"
+                            :disabled="isStarting"
+                        >
+                            <svg class="w-3 h-3 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <span class="hidden sm:inline">Начать</span>
+                        </button>
                     </div>
                 </div>
             </div>
@@ -53,6 +74,8 @@
 </template>
 
 <script setup lang="ts">
+import { ref } from 'vue';
+import { router } from '@inertiajs/vue3';
 import { getTypeIcon } from '@/utils/exerciseHelpers';
 import {
     getStatusLabel,
@@ -70,13 +93,34 @@ interface SessionBlock {
     planned_duration: number
     actual_duration: number | null
     status: string
+    sort_order: number
     started_at: string | null
     completed_at: string | null
 }
 
 interface Props {
     blocks: SessionBlock[]
+    sessionId: number
 }
 
-defineProps<Props>();
+const props = defineProps<Props>();
+
+const isStarting = ref(false);
+
+const startBlock = (blockId: number) => {
+    if (isStarting.value) return;
+    
+    isStarting.value = true;
+    
+    router.post(
+        route('sessions.blocks.start', { session: props.sessionId, block: blockId }),
+        {},
+        {
+            preserveScroll: true,
+            onFinish: () => {
+                isStarting.value = false;
+            }
+        }
+    );
+};
 </script>

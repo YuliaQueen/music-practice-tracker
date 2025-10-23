@@ -88,6 +88,7 @@
                 <!-- Список блоков -->
                 <SessionBlocksList
                     :blocks="session.blocks"
+                    :session-id="session.id"
                 />
 
                 <!-- История аудио записей -->

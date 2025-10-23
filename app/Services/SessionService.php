@@ -244,6 +244,64 @@ class SessionService
     }
 
     /**
+     * Начать выполнение конкретного блока сессии
+     *
+     * @param Session      $session
+     * @param SessionBlock $block
+     * @return array{success: bool, message: string}
+     */
+    public function startSessionBlock(Session $session, SessionBlock $block): array
+    {
+        // Проверяем что блок принадлежит этой сессии
+        if ($block->practice_session_id !== $session->id) {
+            return [
+                'success' => false,
+                'message' => 'Блок не принадлежит этой сессии',
+            ];
+        }
+
+        // Проверяем что блок можно начать
+        if (!$block->canBeStarted()) {
+            return [
+                'success' => false,
+                'message' => 'Блок не может быть запущен в текущем статусе',
+            ];
+        }
+
+        try {
+            // Приостанавливаем текущий активный блок, если есть
+            $currentBlock = $session->getCurrentBlock();
+            if ($currentBlock && $currentBlock->id !== $block->id) {
+                $this->blockRepository->update($currentBlock, [
+                    'status' => SessionBlockStatus::PAUSED,
+                ]);
+            }
+
+            // Запускаем выбранный блок
+            $this->blockRepository->update($block, [
+                'status'     => SessionBlockStatus::ACTIVE,
+                'started_at' => now(),
+            ]);
+
+            return [
+                'success' => true,
+                'message' => 'Упражнение начато',
+            ];
+        } catch (\Throwable $e) {
+            Log::error('Ошибка при запуске блока сессии', [
+                'session_id' => $session->id,
+                'block_id'   => $block->id,
+                'error'      => $e->getMessage(),
+            ]);
+
+            return [
+                'success' => false,
+                'message' => 'Ошибка при запуске упражнения',
+            ];
+        }
+    }
+
+    /**
      * Обновить блок сессии и обновить прогресс целей если блок завершен
      *
      * @param Session                $session

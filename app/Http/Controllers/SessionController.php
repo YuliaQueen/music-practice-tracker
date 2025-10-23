@@ -161,6 +161,22 @@ class SessionController extends Controller
     }
 
     /**
+     * Начать выполнение блока сессии
+     */
+    public function startBlock(Session $session, SessionBlock $block): RedirectResponse
+    {
+        $this->authorize('update', $session);
+
+        $result = $this->sessionService->startSessionBlock($session, $block);
+
+        if (!$result['success']) {
+            return back()->with('error', $result['message']);
+        }
+
+        return back()->with('success', $result['message']);
+    }
+
+    /**
      * Обновить блок сессии
      */
     public function updateBlock(UpdateSessionBlockRequest $request, Session $session, SessionBlock $block): RedirectResponse
