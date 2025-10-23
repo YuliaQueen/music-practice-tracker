@@ -128,6 +128,7 @@ class SessionService
 
     /**
      * Начать сессию
+     * Автоматически запускает первое упражнение
      *
      * @param Session $session
      * @return bool
@@ -139,16 +140,52 @@ class SessionService
         }
 
         try {
+            DB::beginTransaction();
+
+            // Обновляем статус сессии
             $this->sessionRepository->update($session, [
                 'status'     => SessionStatus::ACTIVE,
                 'started_at' => now(),
             ]);
 
+            // Автоматически стартуем первое упражнение
+            $firstBlock = $session->blocks()
+                ->where('status', SessionBlock::STATUS_PLANNED)
+                ->orderBy('sort_order', 'asc')
+                ->first();
+
+            if ($firstBlock) {
+                $this->blockRepository->update($firstBlock, [
+                    'status'     => SessionBlock::STATUS_ACTIVE,
+                    'started_at' => now(),
+                ]);
+
+                Log::info('Автоматически запущено первое упражнение', [
+                    'session_id' => $session->id,
+                    'block_id'   => $firstBlock->id,
+                    'block_title' => $firstBlock->title,
+                ]);
+            }
+
+            DB::commit();
+
             return true;
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
+            if (DB::transactionLevel() > 0) {
+                try {
+                    DB::rollBack();
+                } catch (\Throwable $rollbackException) {
+                    Log::error('Ошибка при откате транзакции', [
+                        'session_id' => $session->id,
+                        'error'      => $rollbackException->getMessage(),
+                    ]);
+                }
+            }
+
             Log::error('Ошибка при запуске сессии', [
                 'session_id' => $session->id,
                 'error'      => $e->getMessage(),
+                'trace'      => $e->getTraceAsString(),
             ]);
 
             return false;
