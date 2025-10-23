@@ -86,9 +86,9 @@
                     :session-id="session.id"
                 />
 
-                <!-- Метроном (под упражнениями) -->
+                <!-- Метроном (компактный, под упражнениями) -->
                 <div class="mt-6 mb-6">
-                    <MetronomeWidget :initially-collapsed="true" />
+                    <CompactMetronome :initially-collapsed="true" />
                 </div>
 
                 <!-- История аудио записей -->
@@ -134,7 +134,7 @@ import SessionBlocksList from '@/Components/Session/SessionBlocksList.vue'
 import SessionControlBar from '@/Components/Session/SessionControlBar.vue'
 import SoundSettingsModal from '@/Components/Session/SoundSettingsModal.vue'
 import TimerExtensionControls from '@/Components/Session/TimerExtensionControls.vue'
-import MetronomeWidget from '@/Components/Metronome/MetronomeWidget.vue'
+import CompactMetronome from '@/Components/Metronome/CompactMetronome.vue'
 import AudioRecorder from '@/Components/Audio/AudioRecorder.vue'
 import AudioRecordingsList from '@/Components/Audio/AudioRecordingsList.vue'
 import { useTimerSounds } from '@/composables/useTimerSounds'
