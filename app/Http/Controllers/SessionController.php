@@ -76,10 +76,14 @@ class SessionController extends Controller
     {
         $dto = CreateSessionDTO::fromRequest($request);
 
-        $session = $this->sessionService->createSession(auth()->user(), $dto);
+        $result = $this->sessionService->createSession(auth()->user(), $dto);
 
-        return redirect()->route('sessions.show', $session)
-            ->with('success', 'Сессия создана успешно!');
+        if (!$result['success']) {
+            return back()->withInput()->with('error', $result['message']);
+        }
+
+        return redirect()->route('sessions.show', $result['session'])
+            ->with('success', $result['message']);
     }
 
     /**
@@ -181,9 +185,13 @@ class SessionController extends Controller
     {
         $this->authorize('delete', $session);
 
-        $this->sessionService->deleteSession($session);
+        $result = $this->sessionService->deleteSession($session);
+
+        if (!$result['success']) {
+            return back()->with('error', $result['message']);
+        }
 
         return redirect()->route('sessions.index')
-            ->with('success', 'Сессия успешно удалена');
+            ->with('success', $result['message']);
     }
 }

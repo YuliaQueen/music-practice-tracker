@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use Throwable;
 use App\Domains\Planning\Models\Exercise;
 use App\Domains\Planning\Models\Session;
 use App\Domains\Planning\Models\SessionBlock;
@@ -37,11 +38,11 @@ class SessionService
     /**
      * Создать новую сессию со всеми связанными блоками и упражнениями
      *
-     * @param User              $user
-     * @param CreateSessionDTO  $dto
-     * @return Session
+     * @param User             $user
+     * @param CreateSessionDTO $dto
+     * @return array{success: bool, session?: Session, message: string}
      */
-    public function createSession(User $user, CreateSessionDTO $dto): Session
+    public function createSession(User $user, CreateSessionDTO $dto): array
     {
         try {
             DB::beginTransaction();
@@ -59,7 +60,11 @@ class SessionService
 
             DB::commit();
 
-            return $session->fresh(['blocks', 'template']);
+            return [
+                'success' => true,
+                'session' => $session->fresh(['blocks', 'template']),
+                'message' => 'Сессия создана успешно',
+            ];
         } catch (\Exception $e) {
             DB::rollBack();
 
@@ -68,7 +73,10 @@ class SessionService
                 'error'   => $e->getMessage(),
             ]);
 
-            throw $e;
+            return [
+                'success' => false,
+                'message' => 'Ошибка при создании сессии',
+            ];
         }
     }
 
@@ -277,9 +285,9 @@ class SessionService
      * Удалить сессию со всеми блоками
      *
      * @param Session $session
-     * @return void
+     * @return array{success: bool, message: string}
      */
-    public function deleteSession(Session $session): void
+    public function deleteSession(Session $session): array
     {
         try {
             DB::beginTransaction();
@@ -291,6 +299,11 @@ class SessionService
             $this->sessionRepository->delete($session);
 
             DB::commit();
+
+            return [
+                'success' => true,
+                'message' => 'Сессия успешно удалена',
+            ];
         } catch (\Exception $e) {
             DB::rollBack();
 
@@ -299,7 +312,10 @@ class SessionService
                 'error'      => $e->getMessage(),
             ]);
 
-            throw $e;
+            return [
+                'success' => false,
+                'message' => 'Ошибка при удалении сессии',
+            ];
         }
     }
 
