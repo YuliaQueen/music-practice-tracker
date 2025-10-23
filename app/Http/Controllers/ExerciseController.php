@@ -8,18 +8,29 @@ use Inertia\Inertia;
 use Inertia\Response;
 use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
+use App\Services\ExerciseService;
 use App\Domains\Planning\Models\Exercise;
 use App\DTOs\Exercises\CreateExerciseDTO;
 use App\DTOs\Exercises\UpdateExerciseDTO;
 use App\Http\Requests\Exercise\StoreExerciseRequest;
 use App\Http\Requests\Exercise\UpdateExerciseRequest;
+use App\Domains\Planning\Contracts\ExerciseRepositoryInterface;
 
+/**
+ * Контроллер для управления упражнениями
+ */
 class ExerciseController extends Controller
 {
     /**
      * Количество упражнений на странице
      */
     private const EXERCISES_PER_PAGE = 10;
+
+    public function __construct(
+        private readonly ExerciseService              $exerciseService,
+        private readonly ExerciseRepositoryInterface $exerciseRepository
+    ) {
+    }
 
     /**
      * Показать список упражнений пользователя
@@ -31,20 +42,11 @@ class ExerciseController extends Controller
             'type'   => $request->input('type'),
         ];
 
-        $query = Exercise::forUser(auth()->id());
-
-        // Фильтр по названию
-        if (!empty($filters['search'])) {
-            $query->where('title', 'like', '%' . $filters['search'] . '%');
-        }
-
-        // Фильтр по типу
-        if (!empty($filters['type'])) {
-            $query->where('type', $filters['type']);
-        }
-
-        $exercises = $query->orderBy('created_at', 'desc')
-            ->paginate(self::EXERCISES_PER_PAGE);
+        $exercises = $this->exerciseRepository->getForUser(
+            auth()->id(),
+            self::EXERCISES_PER_PAGE,
+            $filters
+        );
 
         return Inertia::render('Exercises/Index', [
             'exercises' => $exercises,
@@ -59,14 +61,14 @@ class ExerciseController extends Controller
     {
         $dto = CreateExerciseDTO::fromRequest($request);
 
-        Exercise::create([
-            'user_id' => auth()->id(),
-            ...$dto->toArray(),
-            'status' => Exercise::STATUS_PLANNED,
-        ]);
+        $result = $this->exerciseService->createExercise(auth()->user(), $dto);
+
+        if (!$result['success']) {
+            return back()->withInput()->with('error', $result['message']);
+        }
 
         return redirect()->route('exercises.index')
-            ->with('success', 'Упражнение успешно создано');
+            ->with('success', $result['message']);
     }
 
     /**
@@ -110,10 +112,14 @@ class ExerciseController extends Controller
 
         $dto = UpdateExerciseDTO::fromRequest($request);
 
-        $exercise->update($dto->toArray());
+        $result = $this->exerciseService->updateExercise($exercise, $dto);
+
+        if (!$result['success']) {
+            return back()->withInput()->with('error', $result['message']);
+        }
 
         return redirect()->route('exercises.index')
-            ->with('success', 'Упражнение успешно обновлено');
+            ->with('success', $result['message']);
     }
 
     /**
@@ -123,10 +129,14 @@ class ExerciseController extends Controller
     {
         $this->authorize('delete', $exercise);
 
-        $exercise->delete();
+        $result = $this->exerciseService->deleteExercise($exercise);
+
+        if (!$result['success']) {
+            return back()->with('error', $result['message']);
+        }
 
         return redirect()->route('exercises.index')
-            ->with('success', 'Упражнение успешно удалено');
+            ->with('success', $result['message']);
     }
 
 }
