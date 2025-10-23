@@ -148,6 +148,7 @@ interface SessionBlock {
     planned_duration: number
     actual_duration: number | null
     status: string
+    sort_order: number
     started_at: string | null
     completed_at: string | null
 }
