@@ -72,11 +72,6 @@
                     @restart="restartTimerForBlock"
                 />
 
-                <!-- Метроном -->
-                <div class="mb-6">
-                    <MetronomeWidget />
-                </div>
-
                 <!-- Аудио рекордер -->
                 <div v-if="currentBlock" class="mb-6">
                     <AudioRecorder
@@ -90,6 +85,11 @@
                     :blocks="session.blocks"
                     :session-id="session.id"
                 />
+
+                <!-- Метроном (под упражнениями) -->
+                <div class="mt-6 mb-6">
+                    <MetronomeWidget :initially-collapsed="true" />
+                </div>
 
                 <!-- История аудио записей -->
                 <div v-if="audioRecordings.length > 0" class="mt-6">

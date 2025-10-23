@@ -602,6 +602,14 @@ import { ref } from 'vue';
 import { useMetronome, TimeSignature } from '@/composables/useMetronome';
 import { useSimpleI18n } from '@/composables/useSimpleI18n';
 
+interface Props {
+    initiallyCollapsed?: boolean
+}
+
+const props = withDefaults(defineProps<Props>(), {
+    initiallyCollapsed: false
+});
+
 const { t } = useSimpleI18n();
 
 const {
@@ -657,7 +665,7 @@ const {
     setSpeedTrainerCycle,
 } = useMetronome();
 
-const isCollapsed = ref(false);
+const isCollapsed = ref(props.initiallyCollapsed);
 
 const toggleCollapse = () => {
     isCollapsed.value = !isCollapsed.value;
