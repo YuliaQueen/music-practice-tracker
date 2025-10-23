@@ -231,15 +231,15 @@ const onDragEnd = () => {
 
 /* Chosen - оригинальный элемент на своем месте (когда начинаем тянуть) */
 .dragging-chosen {
-    opacity: 0.3 !important;
-    border: 2px dashed #94a3b8 !important;
-    background: #f1f5f9 !important;
+    opacity: 0.5 !important;
+    border: 2px dashed #cbd5e1 !important;
+    background: #f8fafc !important;
 }
 
 /* Темная тема для chosen */
 :global(.dark) .dragging-chosen {
-    background: #1e293b !important;
-    border-color: #475569 !important;
+    background: #0f172a !important;
+    border-color: #334155 !important;
 }
 
 /* Drag - дополнительные эффекты во время перетаскивания */
