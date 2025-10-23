@@ -39,9 +39,9 @@
                 @end="onDragEnd"
                 @start="isDragging = true"
                 :animation="200"
-                ghost-class="opacity-50 scale-105"
-                chosen-class="shadow-2xl ring-2 ring-accent-400"
-                drag-class="rotate-2"
+                ghost-class="dragging-ghost"
+                chosen-class="dragging-chosen"
+                drag-class="dragging-active"
                 tag="div"
                 class="space-y-2 sm:space-y-3"
             >
@@ -225,3 +225,21 @@ const onDragEnd = () => {
     );
 };
 </script>
+
+<style scoped>
+/* Стили для drag & drop */
+.dragging-ghost {
+    opacity: 0.5;
+    transform: scale(1.05);
+}
+
+.dragging-chosen {
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    outline: 2px solid rgb(var(--color-accent-400));
+    outline-offset: 2px;
+}
+
+.dragging-active {
+    transform: rotate(2deg);
+}
+</style>

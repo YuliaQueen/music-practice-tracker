@@ -163,7 +163,7 @@ class SessionController extends Controller
     /**
      * Изменить порядок блоков в сессии
      */
-    public function reorderBlocks(Request $request, Session $session)
+    public function reorderBlocks(Request $request, Session $session): RedirectResponse
     {
         $this->authorize('update', $session);
 
@@ -175,10 +175,10 @@ class SessionController extends Controller
         $result = $this->sessionService->reorderSessionBlocks($session, $request->input('block_ids'));
 
         if (!$result['success']) {
-            return response()->json($result, 400);
+            return back()->with('error', $result['message']);
         }
 
-        return response()->json($result);
+        return back()->with('success', $result['message']);
     }
 
     /**
