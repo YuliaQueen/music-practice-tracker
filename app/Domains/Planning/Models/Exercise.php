@@ -136,6 +136,14 @@ class Exercise extends BaseModel
     }
 
     /**
+     * Связь с аудио записями упражнения
+     */
+    public function audioRecordings(): HasMany
+    {
+        return $this->hasMany(\App\Models\AudioRecording::class, 'exercise_id');
+    }
+
+    /**
      * Scope для получения упражнений пользователя
      */
     public function scopeForUser(Builder $query, int $userId): Builder

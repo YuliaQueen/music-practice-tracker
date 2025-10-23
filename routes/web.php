@@ -6,6 +6,7 @@ use App\Http\Controllers\StatisticsController;
 use App\Http\Controllers\ExerciseController;
 use App\Http\Controllers\GoalController;
 use App\Http\Controllers\NoteController;
+use App\Http\Controllers\AudioRecordingController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -58,6 +59,12 @@ Route::middleware('auth')->group(function () {
     Route::get('/notes/{note}/download', [NoteController::class, 'download'])->name('notes.download');
     Route::get('/notes/{note}/proxy', [NoteController::class, 'proxy'])->name('notes.proxy');
     Route::get('/exercises/{exercise}/notes', [NoteController::class, 'forExercise'])->name('exercises.notes');
+
+    // Аудио записи
+    Route::resource('audio-recordings', AudioRecordingController::class);
+    Route::get('/audio-recordings/{audioRecording}/download', [AudioRecordingController::class, 'download'])->name('audio-recordings.download');
+    Route::get('/exercises/{exercise}/audio-recordings', [AudioRecordingController::class, 'forExercise'])->name('exercises.audio-recordings');
+    Route::get('/session-blocks/{sessionBlock}/audio-recordings', [AudioRecordingController::class, 'forSessionBlock'])->name('session-blocks.audio-recordings');
 });
 
 require __DIR__.'/auth.php';

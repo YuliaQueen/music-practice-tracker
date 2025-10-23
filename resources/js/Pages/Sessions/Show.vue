@@ -77,6 +77,14 @@
                     <MetronomeWidget />
                 </div>
 
+                <!-- Аудио рекордер -->
+                <div v-if="currentBlock" class="mb-6">
+                    <AudioRecorder
+                        :session-block-id="currentBlock.id"
+                        @saved="handleRecordingSaved"
+                    />
+                </div>
+
                 <!-- Список блоков -->
                 <SessionBlocksList
                     :blocks="session.blocks"
@@ -118,6 +126,7 @@ import SessionControlBar from '@/Components/Session/SessionControlBar.vue'
 import SoundSettingsModal from '@/Components/Session/SoundSettingsModal.vue'
 import TimerExtensionControls from '@/Components/Session/TimerExtensionControls.vue'
 import MetronomeWidget from '@/Components/Metronome/MetronomeWidget.vue'
+import AudioRecorder from '@/Components/Audio/AudioRecorder.vue'
 import { useTimerSounds } from '@/composables/useTimerSounds'
 import { getStatusLabel, getStatusBadgeClass } from '@/utils/statusHelpers'
 
@@ -535,6 +544,11 @@ const deleteSession = () => {
             }
         })
     }
+}
+
+const handleRecordingSaved = (recordingId: number) => {
+    console.log('Recording saved:', recordingId)
+    // Можно добавить уведомление или обновить список записей
 }
 
 // Управление звуками
