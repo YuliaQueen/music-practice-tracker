@@ -104,7 +104,9 @@ export default defineConfig({
         host: '0.0.0.0', // Слушать на всех интерфейсах
         port: 5173,
         hmr: {
-            host: '192.168.0.244', // Твой локальный IP для Hot Module Replacement
+            // Для локальной разработки на мобильных устройствах укажите свой IP:
+            // host: process.env.VITE_HMR_HOST || 'localhost',
+            protocol: 'ws',
         },
         watch: {
             usePolling: true, // Для лучшей работы с Docker
