@@ -134,6 +134,7 @@ interface AudioRecording {
     title: string | null
     notes: string | null
     file_path: string
+    audio_url: string | null
     quality_rating: number | null
     recorded_at: string
     duration: number | null
@@ -163,7 +164,7 @@ const sortedRecordings = computed(() => {
 })
 
 const getAudioUrl = (recording: AudioRecording) => {
-    return `/storage/${recording.file_path}`
+    return recording.audio_url || ''
 }
 
 const formatDate = (dateString: string) => {

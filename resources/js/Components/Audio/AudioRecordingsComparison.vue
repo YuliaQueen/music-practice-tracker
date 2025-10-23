@@ -206,6 +206,7 @@ interface AudioRecording {
     title: string | null
     notes: string | null
     file_path: string
+    audio_url: string | null
     quality_rating: number | null
     recorded_at: string
 }
@@ -310,7 +311,7 @@ const getRatingWidth = (rating: number | null) => {
 }
 
 const getAudioUrl = (recording: AudioRecording) => {
-    return `/storage/${recording.file_path}`
+    return recording.audio_url || ''
 }
 
 const formatDate = (dateString: string) => {

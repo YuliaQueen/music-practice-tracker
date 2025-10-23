@@ -70,11 +70,24 @@ class AudioRecording extends Model
     }
 
     /**
-     * Получить URL для скачивания аудиофайла
+     * Получить временный URL для прослушивания аудиофайла (действует 1 час)
      */
-    public function getAudioUrlAttribute(): string
+    public function getAudioUrlAttribute(): ?string
     {
-        return Storage::url($this->file_path);
+        if (!$this->file_path) {
+            return null;
+        }
+
+        try {
+            // Генерируем временный URL, действительный в течение 1 часа
+            return Storage::disk('minio')->temporaryUrl(
+                $this->file_path,
+                now()->addHour()
+            );
+        } catch (\Exception $e) {
+            \Log::error('Ошибка при генерации URL для аудио записи: ' . $e->getMessage());
+            return null;
+        }
     }
 
     /**
@@ -113,13 +126,17 @@ class AudioRecording extends Model
     }
 
     /**
-     * Удалить аудиофайл при удалении записи
+     * Удалить аудиофайл из MinIO при удалении записи
      */
     protected static function booted(): void
     {
         static::deleted(function (AudioRecording $recording) {
-            if ($recording->file_path && Storage::exists($recording->file_path)) {
-                Storage::delete($recording->file_path);
+            if ($recording->file_path && Storage::disk('minio')->exists($recording->file_path)) {
+                try {
+                    Storage::disk('minio')->delete($recording->file_path);
+                } catch (\Exception $e) {
+                    \Log::error('Ошибка при удалении аудио файла из MinIO: ' . $e->getMessage());
+                }
             }
         });
     }

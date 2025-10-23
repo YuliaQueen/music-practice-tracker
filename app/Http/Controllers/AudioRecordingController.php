@@ -8,6 +8,7 @@ use App\Domains\Planning\Models\SessionBlock;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Str;
 use Inertia\Inertia;
 
 class AudioRecordingController extends Controller
@@ -81,10 +82,18 @@ class AudioRecordingController extends Controller
             }
         }
 
-        // Сохраняем файл
+        // Сохраняем файл в MinIO
         $file = $request->file('audio_file');
-        $fileName = time() . '_' . $file->getClientOriginalName();
-        $filePath = $file->storeAs('audio-recordings/' . auth()->id(), $fileName, 'public');
+        $originalFileName = $file->getClientOriginalName();
+        $extension = $file->getClientOriginalExtension();
+        $uniqueFilename = Str::uuid() . '.' . $extension;
+        $filePath = 'audio-recordings/' . auth()->id() . '/' . $uniqueFilename;
+
+        try {
+            Storage::disk('minio')->put($filePath, file_get_contents($file->getPathname()));
+        } catch (\Exception $e) {
+            return back()->withErrors(['error' => 'Ошибка при загрузке файла в хранилище: ' . $e->getMessage()]);
+        }
 
         // Создаём запись в БД
         $recording = AudioRecording::create([
@@ -94,7 +103,7 @@ class AudioRecordingController extends Controller
             'title' => $validated['title'] ?? null,
             'notes' => $validated['notes'] ?? null,
             'file_path' => $filePath,
-            'file_name' => $fileName,
+            'file_name' => $originalFileName,
             'mime_type' => $file->getMimeType(),
             'file_size' => $file->getSize(),
             'quality_rating' => $validated['quality_rating'] ?? null,
@@ -161,11 +170,11 @@ class AudioRecordingController extends Controller
     {
         Gate::authorize('view', $audioRecording);
 
-        if (!Storage::disk('public')->exists($audioRecording->file_path)) {
+        if (!Storage::disk('minio')->exists($audioRecording->file_path)) {
             abort(404, 'Файл не найден');
         }
 
-        return Storage::disk('public')->download($audioRecording->file_path, $audioRecording->file_name);
+        return Storage::disk('minio')->download($audioRecording->file_path, $audioRecording->file_name);
     }
 
     /**
