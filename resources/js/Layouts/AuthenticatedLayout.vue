@@ -224,7 +224,7 @@ const { t } = useSimpleI18n();
 
                     <!-- Responsive Settings Options -->
                     <div
-                        class="border-t border-primary-200 pb-1 pt-4 dark:border-neutral-700"
+                        class="border-t border-primary-200 pb-4 pt-4 dark:border-neutral-700"
                     >
                         <div class="px-4">
                             <div
@@ -238,18 +238,23 @@ const { t } = useSimpleI18n();
                         </div>
 
                         <div class="mt-3 space-y-1">
-                            <div class="px-4 py-2">
+                            <div class="px-4 py-2 flex items-center justify-between">
+                                <span class="text-sm font-medium text-primary-800 dark:text-neutral-200">Тема</span>
                                 <ThemeToggle />
                             </div>
+                            <div class="px-4 py-2 flex items-center justify-between">
+                                <span class="text-sm font-medium text-primary-800 dark:text-neutral-200">Язык</span>
+                                <LanguageSwitcher />
+                            </div>
                             <ResponsiveNavLink :href="route('profile.edit')">
-                                Профиль
+                                {{ t('navigation.profile') }}
                             </ResponsiveNavLink>
                             <ResponsiveNavLink
                                 :href="route('logout')"
                                 method="post"
                                 as="button"
                             >
-                                Выйти
+                                {{ t('navigation.logout') }}
                             </ResponsiveNavLink>
                         </div>
                     </div>

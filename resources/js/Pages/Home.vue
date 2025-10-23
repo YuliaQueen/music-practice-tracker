@@ -15,24 +15,24 @@ defineProps<{
     
     <div class="min-h-screen bg-gradient-to-br from-secondary-50 via-accent-50 to-accent-100 dark:from-neutral-900 dark:via-secondary-900 dark:to-accent-900">
         <!-- Navigation -->
-        <nav class="relative px-6 py-4">
-            <div class="max-w-7xl mx-auto flex items-center justify-between">
-                <div class="flex items-center space-x-2">
-                    <div class="w-8 h-8 bg-gradient-to-r from-secondary-600 to-accent-600 rounded-lg flex items-center justify-center">
-                        <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
+        <nav class="relative px-4 sm:px-6 py-4">
+            <div class="max-w-7xl mx-auto flex items-center justify-between gap-2">
+                <div class="flex items-center space-x-2 min-w-0 flex-shrink">
+                    <div class="w-7 h-7 sm:w-8 sm:h-8 bg-gradient-to-r from-secondary-600 to-accent-600 rounded-lg flex items-center justify-center flex-shrink-0">
+                        <svg class="w-4 h-4 sm:w-5 sm:h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
                             <path d="M18 3a1 1 0 00-1.196-.98l-10 2A1 1 0 006 5v9.114A4.369 4.369 0 005 14c-1.657 0-3 .895-3 2s1.343 2 3 2 3-.895 3-2V7.82l8-1.6v5.894A4.369 4.369 0 0015 12c-1.657 0-3 .895-3 2s1.343 2 3 2 3-.895 3-2V3z"/>
                         </svg>
                     </div>
-                    <span class="text-xl font-bold text-neutral-900 dark:text-white">
+                    <span class="text-base sm:text-xl font-bold text-neutral-900 dark:text-white truncate">
                         {{ t('home.appName') }}
                     </span>
                 </div>
                 
-                <div v-if="canLogin" class="flex items-center space-x-4">
+                <div v-if="canLogin" class="flex items-center gap-2 sm:gap-4 flex-shrink-0">
                     <Link
                         v-if="$page.props.auth.user"
                         :href="route('dashboard')"
-                        class="px-4 py-2 bg-gradient-to-r from-secondary-600 to-accent-600 text-white rounded-lg hover:from-secondary-700 hover:to-accent-700 transition-all duration-200 font-medium"
+                        class="px-3 sm:px-4 py-2 text-sm sm:text-base bg-gradient-to-r from-secondary-600 to-accent-600 text-white rounded-lg hover:from-secondary-700 hover:to-accent-700 transition-all duration-200 font-medium whitespace-nowrap"
                     >
                         {{ t('navigation.dashboard') }}
                     </Link>
@@ -40,14 +40,14 @@ defineProps<{
                     <template v-else>
                         <Link
                             :href="route('login')"
-                            class="px-4 py-2 text-neutral-700 dark:text-neutral-300 hover:text-secondary-600 dark:hover:text-secondary-400 transition-colors duration-200 font-medium"
+                            class="px-3 sm:px-4 py-2 text-sm sm:text-base text-neutral-700 dark:text-neutral-300 hover:text-secondary-600 dark:hover:text-secondary-400 transition-colors duration-200 font-medium whitespace-nowrap"
                         >
                             {{ t('navigation.login') }}
                         </Link>
                         <Link
                             v-if="canRegister"
                             :href="route('register')"
-                            class="px-4 py-2 bg-gradient-to-r from-secondary-600 to-accent-600 text-white rounded-lg hover:from-secondary-700 hover:to-accent-700 transition-all duration-200 font-medium"
+                            class="px-3 sm:px-4 py-2 text-sm sm:text-base bg-gradient-to-r from-secondary-600 to-accent-600 text-white rounded-lg hover:from-secondary-700 hover:to-accent-700 transition-all duration-200 font-medium whitespace-nowrap"
                         >
                             {{ t('navigation.register') }}
                         </Link>
@@ -58,15 +58,15 @@ defineProps<{
 
         <!-- Hero Section -->
         <main class="relative">
-            <div class="max-w-7xl mx-auto px-6 py-20">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 py-12 sm:py-20">
                 <div class="text-center">
                     <!-- Hero Title -->
-                    <h1 class="text-5xl md:text-6xl font-bold text-neutral-900 dark:text-white mb-6">
+                    <h1 class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-neutral-900 dark:text-white mb-4 sm:mb-6">
                         {{ t('home.hero.title') }}
                     </h1>
                     
                     <!-- Hero Subtitle -->
-                    <p class="text-xl md:text-2xl text-neutral-600 dark:text-neutral-300 mb-8 max-w-3xl mx-auto leading-relaxed">
+                    <p class="text-base sm:text-lg md:text-xl lg:text-2xl text-neutral-600 dark:text-neutral-300 mb-6 sm:mb-8 max-w-3xl mx-auto leading-relaxed">
                         {{ t('home.hero.subtitle') }}
                     </p>
                     

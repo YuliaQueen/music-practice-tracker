@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
+  <!-- Monochrome version for mask-icon -->
+  <path d="M24.5 7.5a1 1 0 00-1.196-.98l-10 2A1 1 0 0012.5 9.5v9.114A4.369 4.369 0 0011.5 18.5c-1.657 0-3 .895-3 2s1.343 2 3 2 3-.895 3-2v-8.18l8-1.6v5.894A4.369 4.369 0 0021.5 16.5c-1.657 0-3 .895-3 2s1.343 2 3 2 3-.895 3-2v-11z"
+        fill="#6366f1"
+        transform="translate(-3, 0)"/>
+</svg>
