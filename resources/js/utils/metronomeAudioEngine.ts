@@ -99,7 +99,8 @@ export class MetronomeAudioEngine {
         gainNode.connect(this.audioContext.destination);
 
         // Volume envelope for click sound with stronger accent
-        const clickVolume = isAccent ? volume * 2.0 : volume;
+        // Multiply by 1.5 for better audibility
+        const clickVolume = isAccent ? volume * 3.0 : volume * 1.5;
         gainNode.gain.value = clickVolume;
         gainNode.gain.exponentialRampToValueAtTime(0.01, time + 0.03);
 
@@ -210,7 +211,8 @@ export class MetronomeAudioEngine {
         oscillator.connect(gainNode);
         gainNode.connect(this.audioContext.destination);
 
-        const clickVolume = isAccent ? volume * 2.0 : volume;
+        // Multiply by 1.5 for better audibility
+        const clickVolume = isAccent ? volume * 3.0 : volume * 1.5;
         gainNode.gain.value = clickVolume;
         gainNode.gain.exponentialRampToValueAtTime(0.01, time + 0.1);
 

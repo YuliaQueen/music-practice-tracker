@@ -6,10 +6,10 @@
             </h2>
         </template>
 
-        <div class="py-12">
-            <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-                <div class="bg-primary-50 overflow-hidden shadow-sm sm:rounded-lg dark:bg-neutral-800 dark:shadow-neutral-900/20">
-                    <div class="p-6 text-primary-900 dark:text-neutral-100">
+        <div class="py-6 sm:py-12">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="bg-primary-50 overflow-hidden shadow-sm rounded-lg dark:bg-neutral-800 dark:shadow-neutral-900/20">
+                    <div class="p-4 sm:p-6 text-primary-900 dark:text-neutral-100">
                         <form @submit.prevent="submit">
                             <!-- Основная информация -->
                             <div class="mb-6">
@@ -36,24 +36,24 @@
                                 
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div>
-                                        <div class="flex items-center justify-between mb-2">
+                                        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-2">
                                             <InputLabel for="title" value="Название занятия" />
-                                            <div class="flex gap-2">
+                                            <div class="flex gap-1 sm:gap-2">
                                                 <button
                                                     type="button"
                                                     @click="generateSimpleTitle"
-                                                    class="text-xs px-2 py-1 bg-neutral-100 text-neutral-600 rounded hover:bg-neutral-200 transition-colors dark:bg-neutral-700 dark:text-neutral-300 dark:hover:bg-neutral-600"
+                                                    class="text-xs px-2 py-1.5 bg-neutral-100 text-neutral-600 rounded hover:bg-neutral-200 transition-colors dark:bg-neutral-700 dark:text-neutral-300 dark:hover:bg-neutral-600 whitespace-nowrap"
                                                     title="Генерировать название с датой и временем"
                                                 >
-                                                    🕐 Дата и время
+                                                    🕐 <span class="hidden sm:inline">Дата и время</span><span class="sm:hidden">Дата</span>
                                                 </button>
                                                 <button
                                                     type="button"
                                                     @click="generateAutoTitle"
-                                                    class="text-xs px-2 py-1 bg-accent-100 text-accent-600 rounded hover:bg-accent-200 transition-colors dark:bg-accent-900/50 dark:text-accent-300 dark:hover:bg-accent-800/50"
+                                                    class="text-xs px-2 py-1.5 bg-accent-100 text-accent-600 rounded hover:bg-accent-200 transition-colors dark:bg-accent-900/50 dark:text-accent-300 dark:hover:bg-accent-800/50 whitespace-nowrap"
                                                     title="Генерировать название с упражнениями, датой и временем"
                                                 >
-                                                    🎯 С упражнениями
+                                                    🎯 <span class="hidden sm:inline">С упражнениями</span><span class="sm:hidden">Авто</span>
                                                 </button>
                                             </div>
                                         </div>
@@ -121,52 +121,52 @@
 
                             <!-- Блоки упражнений -->
                             <div class="mb-6">
-                                <div class="flex justify-between items-center mb-4">
-                                    <h3 class="text-lg font-medium text-neutral-900 dark:text-neutral-100">Упражнения</h3>
-                                    <div class="flex space-x-2">
+                                <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 sm:gap-2 mb-4">
+                                    <h3 class="text-base sm:text-lg font-medium text-neutral-900 dark:text-neutral-100">Упражнения</h3>
+                                    <div class="flex flex-col sm:flex-row gap-2">
                                         <SecondaryButton
                                             v-if="previousExercises.length > 0"
                                             type="button"
                                             @click="showExercisesList = !showExercisesList"
-                                            class="text-sm"
+                                            class="text-xs sm:text-sm w-full sm:w-auto"
                                         >
-                                            📚 Из библиотеки упражнений
+                                            📚 <span class="hidden sm:inline">Из библиотеки упражнений</span><span class="sm:hidden">Библиотека</span>
                                         </SecondaryButton>
                                         <PrimaryButton
                                             type="button"
                                             @click="addBlock"
-                                            class="text-sm"
+                                            class="text-xs sm:text-sm w-full sm:w-auto"
                                         >
-                                            + Добавить упражнение
+                                            + <span class="hidden sm:inline">Добавить упражнение</span><span class="sm:hidden">Добавить</span>
                                         </PrimaryButton>
                                     </div>
                                 </div>
 
                                 <!-- Список упражнений из библиотеки -->
-                                <div v-if="showExercisesList && previousExercises.length > 0" class="mb-6 p-4 bg-neutral-50 rounded-lg dark:bg-neutral-700">
-                                    <div class="flex justify-between items-center mb-4">
-                                        <h4 class="font-medium text-neutral-900 dark:text-neutral-100">Выберите упражнения из библиотеки</h4>
-                                        <div class="flex space-x-2">
+                                <div v-if="showExercisesList && previousExercises.length > 0" class="mb-6 p-3 sm:p-4 bg-neutral-50 rounded-lg dark:bg-neutral-700">
+                                    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-4">
+                                        <h4 class="text-sm sm:text-base font-medium text-neutral-900 dark:text-neutral-100">Выберите упражнения из библиотеки</h4>
+                                        <div class="flex flex-col sm:flex-row gap-2">
                                             <SecondaryButton
                                                 type="button"
                                                 @click="clearExerciseSelection"
-                                                class="text-sm"
+                                                class="text-xs sm:text-sm w-full sm:w-auto"
                                                 :disabled="selectedExercises.size === 0"
                                             >
-                                                Очистить выбор
+                                                <span class="hidden sm:inline">Очистить выбор</span><span class="sm:hidden">Очистить</span>
                                             </SecondaryButton>
                                             <PrimaryButton
                                                 type="button"
                                                 @click="addSelectedExercises"
-                                                class="text-sm"
+                                                class="text-xs sm:text-sm w-full sm:w-auto"
                                                 :disabled="selectedExercises.size === 0"
                                             >
-                                                Добавить выбранные ({{ selectedExercises.size }})
+                                                <span class="hidden sm:inline">Добавить выбранные</span><span class="sm:hidden">Добавить</span> ({{ selectedExercises.size }})
                                             </PrimaryButton>
                                             <DangerButton
                                                 type="button"
                                                 @click="closeExercisesList"
-                                                class="text-sm"
+                                                class="text-xs sm:text-sm w-full sm:w-auto"
                                             >
                                                 ✕ Закрыть
                                             </DangerButton>
@@ -374,14 +374,15 @@
                             </div>
 
                             <!-- Кнопки -->
-                            <div class="flex items-center justify-end space-x-4">
+                            <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-end gap-2 sm:gap-4">
                                 <SecondaryButton
                                     type="button"
                                     @click="$inertia.visit(route('sessions.index'))"
+                                    class="w-full sm:w-auto"
                                 >
                                     Отмена
                                 </SecondaryButton>
-                                <PrimaryButton :class="{ 'opacity-25': form.processing }" :disabled="form.processing">
+                                <PrimaryButton :class="{ 'opacity-25': form.processing }" :disabled="form.processing" class="w-full sm:w-auto">
                                     Создать занятие
                                 </PrimaryButton>
                             </div>

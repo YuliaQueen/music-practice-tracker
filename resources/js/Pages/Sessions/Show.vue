@@ -1,18 +1,18 @@
 <template>
     <AuthenticatedLayout>
         <template #header>
-            <div class="flex justify-between items-center">
-                <h2 class="font-semibold text-xl text-primary-800 dark:text-neutral-200 leading-tight">
+            <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
+                <h2 class="font-semibold text-lg sm:text-xl text-primary-800 dark:text-neutral-200 leading-tight pr-2">
                     {{ session.title }}
                 </h2>
-                <div class="flex space-x-2">
-                    <span :class="getStatusBadgeClass(session.status)">{{ getStatusLabel(session.status) }}</span>
+                <div class="flex items-center gap-2 flex-shrink-0">
+                    <span :class="getStatusBadgeClass(session.status)" class="whitespace-nowrap">{{ getStatusLabel(session.status) }}</span>
                     <DangerButton
                         @click="deleteSession"
                         size="sm"
-                        class="text-xs"
+                        class="text-xs whitespace-nowrap"
                     >
-                        🗑️ Удалить
+                        🗑️ <span class="hidden sm:inline">Удалить</span>
                     </DangerButton>
                 </div>
             </div>

@@ -1,13 +1,13 @@
 <template>
-    <div class="metronome-widget bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
+    <div class="metronome-widget bg-white dark:bg-gray-800 rounded-lg shadow-lg p-4 sm:p-6">
         <!-- Header -->
-        <div class="flex items-center justify-between mb-6">
-            <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">
+        <div class="flex items-center justify-between mb-4 sm:mb-6">
+            <h3 class="text-base sm:text-lg font-semibold text-gray-900 dark:text-gray-100">
                 {{ t('metronome.title') }}
             </h3>
             <button
                 @click="toggleCollapse"
-                class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 p-1"
             >
                 <svg
                     class="w-5 h-5 transition-transform"
@@ -28,21 +28,21 @@
 
         <div v-show="!isCollapsed">
             <!-- BPM Display -->
-            <div class="text-center mb-6">
-                <div class="text-5xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+            <div class="text-center mb-4 sm:mb-6">
+                <div class="text-4xl sm:text-5xl font-bold text-gray-900 dark:text-gray-100 mb-1 sm:mb-2">
                     {{ bpm }}
                 </div>
-                <div class="text-sm text-gray-600 dark:text-gray-400">
+                <div class="text-xs sm:text-sm text-gray-600 dark:text-gray-400">
                     {{ t('metronome.bpm') }}
                 </div>
             </div>
 
             <!-- Tempo Presets -->
-            <div class="mb-6">
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 text-center">
+            <div class="mb-4 sm:mb-6">
+                <label class="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 text-center">
                     {{ t('metronome.tempoPresets') }}
                 </label>
-                <div class="grid grid-cols-3 gap-2">
+                <div class="grid grid-cols-3 gap-1 sm:gap-2">
                     <button
                         @click="applyTempoPreset('largo')"
                         class="preset-btn"
@@ -95,7 +95,7 @@
             </div>
 
             <!-- Visual Beat Indicator -->
-            <div class="flex justify-center items-center gap-2 mb-6 h-16">
+            <div class="flex justify-center items-center gap-1 sm:gap-2 mb-4 sm:mb-6 h-12 sm:h-16">
                 <div
                     v-for="beat in beatsPerMeasure"
                     :key="beat"
@@ -110,38 +110,38 @@
             </div>
 
             <!-- BPM Slider -->
-            <div class="mb-6">
-                <div class="flex items-center justify-between mb-2">
+            <div class="mb-4 sm:mb-6">
+                <div class="flex items-center justify-between gap-1 sm:gap-2 mb-2">
                     <button
                         @click="decrementBpm(5)"
-                        class="btn-small"
+                        class="btn-small text-xs sm:text-sm px-2 sm:px-3"
                         :disabled="bpm <= 30"
                     >
                         -5
                     </button>
                     <button
                         @click="decrementBpm(1)"
-                        class="btn-small"
+                        class="btn-small text-xs sm:text-sm px-2 sm:px-3"
                         :disabled="bpm <= 30"
                     >
                         -1
                     </button>
                     <button
                         @click="tapTempo"
-                        class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+                        class="px-2 sm:px-4 py-1 sm:py-2 text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
                     >
                         {{ t('metronome.tap') }}
                     </button>
                     <button
                         @click="incrementBpm(1)"
-                        class="btn-small"
+                        class="btn-small text-xs sm:text-sm px-2 sm:px-3"
                         :disabled="bpm >= 300"
                     >
                         +1
                     </button>
                     <button
                         @click="incrementBpm(5)"
-                        class="btn-small"
+                        class="btn-small text-xs sm:text-sm px-2 sm:px-3"
                         :disabled="bpm >= 300"
                     >
                         +5
@@ -163,16 +163,16 @@
             </div>
 
             <!-- Controls Row 1: Time Signature & Volume -->
-            <div class="grid grid-cols-2 gap-4 mb-4">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 mb-4">
                 <!-- Time Signature -->
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    <label class="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                         {{ t('metronome.timeSignature') }}
                     </label>
                     <select
                         :value="timeSignature"
                         @change="setTimeSignature(($event.target as HTMLSelectElement).value as TimeSignature)"
-                        class="w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400"
+                        class="w-full px-2 sm:px-3 py-1.5 sm:py-2 text-sm bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400"
                     >
                         <option value="2/4">2/4</option>
                         <option value="3/4">3/4</option>
@@ -187,18 +187,23 @@
 
                 <!-- Volume -->
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    <label class="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                         {{ t('metronome.volume') }}
                     </label>
-                    <input
-                        type="range"
-                        :value="volume"
-                        @input="setVolume(parseFloat(($event.target as HTMLInputElement).value))"
-                        min="0"
-                        max="1"
-                        step="0.05"
-                        class="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer slider"
-                    />
+                    <div class="flex items-center gap-2">
+                        <input
+                            type="range"
+                            :value="volume"
+                            @input="setVolume(parseFloat(($event.target as HTMLInputElement).value))"
+                            min="0"
+                            max="1"
+                            step="0.05"
+                            class="flex-1 h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer slider"
+                        />
+                        <span class="text-xs sm:text-sm text-gray-600 dark:text-gray-400 min-w-[2.5rem] text-right">
+                            {{ Math.round(volume * 100) }}%
+                        </span>
+                    </div>
                 </div>
             </div>
 
@@ -567,7 +572,7 @@
             <!-- Play/Stop Button -->
             <button
                 @click="toggle"
-                class="w-full py-3 px-4 rounded-lg font-semibold text-white transition-all transform hover:scale-105 active:scale-95"
+                class="w-full py-2 sm:py-3 px-4 rounded-lg text-sm sm:text-base font-semibold text-white transition-all transform hover:scale-105 active:scale-95"
                 :class="isPlaying
                     ? 'bg-red-500 hover:bg-red-600 dark:bg-red-600 dark:hover:bg-red-700'
                     : 'bg-green-500 hover:bg-green-600 dark:bg-green-600 dark:hover:bg-green-700'
@@ -576,7 +581,7 @@
                 <span class="flex items-center justify-center gap-2">
                     <svg
                         v-if="!isPlaying"
-                        class="w-6 h-6"
+                        class="w-4 h-4 sm:w-6 sm:h-6"
                         fill="currentColor"
                         viewBox="0 0 24 24"
                     >
@@ -584,7 +589,7 @@
                     </svg>
                     <svg
                         v-else
-                        class="w-6 h-6"
+                        class="w-4 h-4 sm:w-6 sm:h-6"
                         fill="currentColor"
                         viewBox="0 0 24 24"
                     >
@@ -674,7 +679,7 @@ const toggleCollapse = () => {
 
 <style scoped>
 .beat-indicator {
-    @apply w-12 h-12 flex items-center justify-center rounded-full border-2 border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-400 font-semibold transition-all duration-150;
+    @apply w-8 h-8 sm:w-12 sm:h-12 flex items-center justify-center rounded-full border-2 border-gray-300 dark:border-gray-600 text-xs sm:text-base text-gray-600 dark:text-gray-400 font-semibold transition-all duration-150;
 }
 
 .beat-active {
@@ -702,7 +707,7 @@ const toggleCollapse = () => {
 }
 
 .preset-btn {
-    @apply px-2 py-2 text-sm text-gray-700 dark:text-gray-300 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-700 dark:to-gray-800 rounded-md hover:from-blue-50 hover:to-blue-100 dark:hover:from-blue-900/30 dark:hover:to-blue-800/30 border border-gray-200 dark:border-gray-600 hover:border-blue-300 dark:hover:border-blue-600 transition-all duration-200 shadow-sm hover:shadow-md;
+    @apply px-1 py-1 sm:px-2 sm:py-2 text-xs sm:text-sm text-gray-700 dark:text-gray-300 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-700 dark:to-gray-800 rounded-md hover:from-blue-50 hover:to-blue-100 dark:hover:from-blue-900/30 dark:hover:to-blue-800/30 border border-gray-200 dark:border-gray-600 hover:border-blue-300 dark:hover:border-blue-600 transition-all duration-200 shadow-sm hover:shadow-md;
 }
 
 /* Custom slider styling */
