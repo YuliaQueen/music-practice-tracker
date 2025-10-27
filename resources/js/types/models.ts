@@ -54,5 +54,14 @@ export interface Session {
     created_at: string
     updated_at: string
     blocks: SessionBlock[]
-    template?: any  // Можно типизировать позже
+    template?: any
+    // Pomodoro поля
+    session_mode: 'standard' | 'pomodoro'
+    pomodoro_enabled: boolean
+    pomodoro_work_duration: number
+    pomodoro_short_break: number
+    pomodoro_long_break: number
+    pomodoro_cycles_before_long_break: number
+    pomodoro_completed_cycles: number
+    pomodoro_total_cycles: number
 }

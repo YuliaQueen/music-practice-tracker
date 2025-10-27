@@ -91,9 +91,25 @@ class SessionController extends Controller
      */
     public function store(StoreSessionRequest $request): RedirectResponse
     {
-        $dto = CreateSessionDTO::fromRequest($request);
+        $sessionMode = $request->input('session_mode', 'standard');
 
-        $result = $this->sessionService->createSession(auth()->user(), $dto);
+        // Если режим Pomodoro, используем специальный метод
+        if ($sessionMode === 'pomodoro') {
+            $result = $this->sessionService->createPomodoroSession(
+                auth()->user(),
+                $request->input('title'),
+                $request->input('description'),
+                (int) $request->input('pomodoro_total_minutes', 120),
+                (int) $request->input('pomodoro_work_duration', 25),
+                (int) $request->input('pomodoro_short_break', 5),
+                (int) $request->input('pomodoro_long_break', 15),
+                (int) $request->input('pomodoro_cycles_before_long_break', 4)
+            );
+        } else {
+            // Стандартная сессия
+            $dto = CreateSessionDTO::fromRequest($request);
+            $result = $this->sessionService->createSession(auth()->user(), $dto);
+        }
 
         if (!$result['success']) {
             return back()->withInput()->with('error', $result['message']);

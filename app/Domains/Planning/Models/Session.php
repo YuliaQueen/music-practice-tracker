@@ -76,6 +76,15 @@ class Session extends BaseModel
         'started_at',
         'completed_at',
         'metadata',
+        // Pomodoro fields
+        'session_mode',
+        'pomodoro_enabled',
+        'pomodoro_work_duration',
+        'pomodoro_short_break',
+        'pomodoro_long_break',
+        'pomodoro_cycles_before_long_break',
+        'pomodoro_completed_cycles',
+        'pomodoro_total_cycles',
     ];
 
     protected $casts = [
@@ -87,6 +96,14 @@ class Session extends BaseModel
         'started_at'       => 'datetime',
         'completed_at'     => 'datetime',
         'metadata'         => 'array',
+        // Pomodoro casts
+        'pomodoro_enabled'                  => 'boolean',
+        'pomodoro_work_duration'            => 'integer',
+        'pomodoro_short_break'              => 'integer',
+        'pomodoro_long_break'               => 'integer',
+        'pomodoro_cycles_before_long_break' => 'integer',
+        'pomodoro_completed_cycles'         => 'integer',
+        'pomodoro_total_cycles'             => 'integer',
     ];
 
     /**

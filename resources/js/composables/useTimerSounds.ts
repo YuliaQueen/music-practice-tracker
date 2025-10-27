@@ -1,138 +1,187 @@
-import { ref } from 'vue'
+import {ref} from 'vue'
 
 interface SoundSettings {
-  enabled: boolean
-  volume: number
-  startSound: boolean
-  pauseSound: boolean
-  completeSound: boolean
-  warningSound: boolean
+    enabled: boolean
+    volume: number
+    startSound: boolean
+    pauseSound: boolean
+    completeSound: boolean
+    warningSound: boolean
 }
 
 const defaultSettings: SoundSettings = {
-  enabled: true,
-  volume: 0.7,
-  startSound: true,
-  pauseSound: true,
-  completeSound: true,
-  warningSound: true,
+    enabled: true,
+    volume: 0.7,
+    startSound: true,
+    pauseSound: true,
+    completeSound: true,
+    warningSound: true,
 }
 
+// Музыкальные ноты (частоты в Гц)
+const NOTES = {
+    C5: 523.25,
+    E5: 659.25,
+    G5: 783.99,
+    A5: 880,
+    C6: 1046.50,
+    Cs6: 1108.73,
+    E6: 1318.51,
+    G6: 1567.98,
+} as const
+
+// Константы для звуков
+const VOLUME_MULTIPLIER = 0.25
+const SUSTAIN_LEVEL = 0.7
+const MIN_GAIN = 0.001
+const DEFAULT_ATTACK = 0.01
+const DEFAULT_RELEASE = 0.1
+const CHORD_ATTACK = 0.02
+const CHORD_RELEASE = 0.15
+
 export function useTimerSounds() {
-  const settings = ref<SoundSettings>({ ...defaultSettings })
-  const audioContext = ref<AudioContext | null>(null)
+    const settings = ref<SoundSettings>({...defaultSettings})
+    const audioContext = ref<AudioContext | null>(null)
 
-  // Инициализация AudioContext
-  const initAudioContext = () => {
-    if (!audioContext.value) {
-      audioContext.value = new (window.AudioContext || (window as any).webkitAudioContext)()
+    // Инициализация AudioContext
+    const initAudioContext = async () => {
+        if (!audioContext.value) {
+            audioContext.value = new (window.AudioContext || (window as any).webkitAudioContext)()
+        }
+        // Resume context if it's suspended (required by browsers for autoplay policy)
+        if (audioContext.value.state === 'suspended') {
+            try {
+                await audioContext.value.resume()
+            } catch (e) {
+                console.warn('AudioContext resume failed:', e)
+            }
+        }
     }
-  }
 
-  // Генерация звука с помощью Web Audio API
-  const generateSound = (frequency: number, duration: number, type: OscillatorType = 'sine') => {
-    if (!settings.value.enabled) return
+    // Генерация звука с помощью Web Audio API с плавными переходами
+    const generateSound = (frequency: number, duration: number, type: OscillatorType = 'sine', attackTime = 0.01, releaseTime = 0.1) => {
+        if (!settings.value.enabled) return
 
-    initAudioContext()
-    
-    if (!audioContext.value) return
+        initAudioContext()
 
-    const oscillator = audioContext.value.createOscillator()
-    const gainNode = audioContext.value.createGain()
+        if (!audioContext.value) return
 
-    oscillator.connect(gainNode)
-    gainNode.connect(audioContext.value.destination)
+        const oscillator = audioContext.value.createOscillator()
+        const gainNode = audioContext.value.createGain()
 
-    oscillator.frequency.setValueAtTime(frequency, audioContext.value.currentTime)
-    oscillator.type = type
+        oscillator.connect(gainNode)
+        gainNode.connect(audioContext.value.destination)
 
-    // Настройка громкости
-    gainNode.gain.setValueAtTime(0, audioContext.value.currentTime)
-    gainNode.gain.linearRampToValueAtTime(settings.value.volume * 0.3, audioContext.value.currentTime + 0.01)
-    gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.value.currentTime + duration)
+        oscillator.frequency.setValueAtTime(frequency, audioContext.value.currentTime)
+        oscillator.type = type
 
-    oscillator.start(audioContext.value.currentTime)
-    oscillator.stop(audioContext.value.currentTime + duration)
-  }
+        // Плавное нарастание и затухание (ADSR envelope)
+        const now = audioContext.value.currentTime
+        const maxGain = settings.value.volume * 0.25
 
-  // Звук начала таймера
-  const playStartSound = () => {
-    if (!settings.value.startSound) return
-    generateSound(800, 0.2, 'sine')
-  }
+        gainNode.gain.setValueAtTime(0, now)
+        gainNode.gain.linearRampToValueAtTime(maxGain, now + attackTime)
+        gainNode.gain.linearRampToValueAtTime(maxGain * 0.7, now + duration - releaseTime)
+        gainNode.gain.exponentialRampToValueAtTime(0.001, now + duration)
 
-  // Звук паузы
-  const playPauseSound = () => {
-    if (!settings.value.pauseSound) return
-    generateSound(600, 0.15, 'triangle')
-  }
-
-  // Звук завершения блока
-  const playCompleteSound = () => {
-    if (!settings.value.completeSound) return
-    // Восходящая мелодия
-    generateSound(523, 0.1, 'sine') // C5
-    setTimeout(() => generateSound(659, 0.1, 'sine'), 100) // E5
-    setTimeout(() => generateSound(784, 0.2, 'sine'), 200) // G5
-  }
-
-  // Звук предупреждения (за 30 секунд до окончания)
-  const playWarningSound = () => {
-    if (!settings.value.warningSound) return
-    // Двойной звук предупреждения
-    generateSound(1000, 0.1, 'square')
-    setTimeout(() => generateSound(1000, 0.1, 'square'), 150)
-  }
-
-  // Звук окончания времени
-  const playTimeUpSound = () => {
-    if (!settings.value.completeSound) return
-    // Серия звуков окончания времени
-    generateSound(400, 0.2, 'square')
-    setTimeout(() => generateSound(300, 0.2, 'square'), 200)
-    setTimeout(() => generateSound(200, 0.3, 'square'), 400)
-  }
-
-  // Звук переключения блока
-  const playBlockSwitchSound = () => {
-    if (!settings.value.startSound) return
-    generateSound(1000, 0.1, 'sine')
-    setTimeout(() => generateSound(1200, 0.1, 'sine'), 100)
-  }
-
-  // Обновление настроек
-  const updateSettings = (newSettings: Partial<SoundSettings>) => {
-    settings.value = { ...settings.value, ...newSettings }
-  }
-
-  // Загрузка настроек из localStorage
-  const loadSettings = () => {
-    const saved = localStorage.getItem('timer-sound-settings')
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved)
-        settings.value = { ...defaultSettings, ...parsed }
-      } catch (e) {
-        console.warn('Не удалось загрузить настройки звука:', e)
-      }
+        oscillator.start(now)
+        oscillator.stop(now + duration)
     }
-  }
 
-  // Сохранение настроек в localStorage
-  const saveSettings = () => {
-    localStorage.setItem('timer-sound-settings', JSON.stringify(settings.value))
-  }
+    // Генерация аккорда (несколько частот одновременно)
+    const generateChord = (frequencies: number[], duration: number, type: OscillatorType = 'sine') => {
+        frequencies.forEach(freq => generateSound(freq, duration, type, 0.02, 0.15))
+    }
 
-  return {
-    settings,
-    playStartSound,
-    playPauseSound,
-    playCompleteSound,
-    playWarningSound,
-    playTimeUpSound,
-    playBlockSwitchSound,
-    updateSettings,
-    loadSettings,
-    saveSettings,
-  }
+    // Звук начала таймера - восходящий аккорд (C мажор)
+    const playStartSound = () => {
+        if (!settings.value.startSound) return
+        // Мягкий C мажорный аккорд с арпеджио
+        generateSound(523.25, 0.3, 'sine', 0.02, 0.2) // C5
+        setTimeout(() => generateSound(659.25, 0.3, 'sine', 0.02, 0.2), 50) // E5
+        setTimeout(() => generateSound(783.99, 0.35, 'sine', 0.02, 0.25), 100) // G5
+    }
+
+    // Звук паузы - нисходящий мягкий звук
+    const playPauseSound = () => {
+        if (!settings.value.pauseSound) return
+        // Мягкое нисходящее движение
+        generateSound(880, 0.25, 'sine', 0.03, 0.18) // A5
+        setTimeout(() => generateSound(659.25, 0.3, 'sine', 0.03, 0.2), 80) // E5
+    }
+
+    // Звук завершения блока - радостная мелодия
+    const playCompleteSound = () => {
+        if (!settings.value.completeSound) return
+        // Позитивная восходящая мелодия (пентатоника)
+        generateSound(523.25, 0.15, 'sine', 0.01, 0.1) // C5
+        setTimeout(() => generateSound(659.25, 0.15, 'sine', 0.01, 0.1), 100) // E5
+        setTimeout(() => generateSound(783.99, 0.15, 'sine', 0.01, 0.1), 200) // G5
+        setTimeout(() => generateSound(1046.50, 0.25, 'sine', 0.02, 0.15), 300) // C6
+    }
+
+    // Звук предупреждения - мягкое колокольчик-напоминание
+    const playWarningSound = () => {
+        if (!settings.value.warningSound) return
+        // Мягкий колокольный звук
+        generateSound(880, 0.2, 'sine', 0.01, 0.15) // A5
+        setTimeout(() => {
+            generateSound(880, 0.2, 'sine', 0.01, 0.15)
+            generateSound(1108.73, 0.2, 'sine', 0.01, 0.15) // C#6 (терция)
+        }, 250)
+    }
+
+    // Звук окончания времени - приятный завершающий аккорд
+    const playTimeUpSound = () => {
+        if (!settings.value.completeSound) return
+        // Финальный аккорд C мажор с октавой
+        generateChord([523.25, 659.25, 783.99], 0.4, 'sine') // C5-E5-G5
+        setTimeout(() => {
+            generateChord([1046.50, 1318.51, 1567.98], 0.5, 'sine') // C6-E6-G6
+        }, 200)
+    }
+
+    // Звук переключения блока - легкий переход
+    const playBlockSwitchSound = () => {
+        if (!settings.value.startSound) return
+        // Быстрый восходящий звук перехода
+        generateSound(783.99, 0.12, 'sine', 0.01, 0.08) // G5
+        setTimeout(() => generateSound(1046.50, 0.15, 'sine', 0.01, 0.1), 80) // C6
+    }
+
+    // Обновление настроек
+    const updateSettings = (newSettings: Partial<SoundSettings>) => {
+        settings.value = {...settings.value, ...newSettings}
+    }
+
+    // Загрузка настроек из localStorage
+    const loadSettings = () => {
+        const saved = localStorage.getItem('timer-sound-settings')
+        if (saved) {
+            try {
+                const parsed = JSON.parse(saved)
+                settings.value = {...defaultSettings, ...parsed}
+            } catch (e) {
+                console.warn('Не удалось загрузить настройки звука:', e)
+            }
+        }
+    }
+
+    // Сохранение настроек в localStorage
+    const saveSettings = () => {
+        localStorage.setItem('timer-sound-settings', JSON.stringify(settings.value))
+    }
+
+    return {
+        settings,
+        playStartSound,
+        playPauseSound,
+        playCompleteSound,
+        playWarningSound,
+        playTimeUpSound,
+        playBlockSwitchSound,
+        updateSettings,
+        loadSettings,
+        saveSettings,
+    }
 }
