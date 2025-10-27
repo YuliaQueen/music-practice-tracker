@@ -4,34 +4,37 @@ declare(strict_types=1);
 
 namespace App\Services;
 
-use Throwable;
-use App\Domains\Planning\Models\Exercise;
-use App\Domains\Planning\Models\Session;
-use App\Domains\Planning\Models\SessionBlock;
-use App\Domains\Planning\Models\Template;
-use App\Domains\User\Models\User;
-use App\DTOs\Sessions\CreateSessionBlockDTO;
-use App\DTOs\Sessions\CreateSessionDTO;
-use App\DTOs\Sessions\UpdateSessionBlockDTO;
-use App\Enums\ExerciseStatus;
-use App\Enums\SessionBlockStatus;
 use App\Enums\SessionStatus;
-use App\Events\SessionBlockCompleted;
+use App\Enums\ExerciseStatus;
 use App\Events\SessionCompleted;
+use App\Domains\User\Models\User;
+use App\Enums\SessionBlockStatus;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Log;
+use App\Traits\DatabaseTransactions;
+use App\Events\SessionBlockCompleted;
+use App\DTOs\Sessions\CreateSessionDTO;
+use App\Domains\Planning\Models\Session;
+use App\Domains\Planning\Models\Exercise;
+use App\Domains\Planning\Models\Template;
+use App\DTOs\Sessions\CreateSessionBlockDTO;
+use App\DTOs\Sessions\UpdateSessionBlockDTO;
+use App\Domains\Planning\Models\SessionBlock;
 use App\Domains\Planning\Contracts\SessionRepositoryInterface;
 use App\Domains\Planning\Contracts\SessionBlockRepositoryInterface;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Collection;
 
 /**
  * Сервис для работы с сессиями практики
  */
 class SessionService
 {
+    use DatabaseTransactions;
+
     public function __construct(
-        private SessionRepositoryInterface $sessionRepository,
-        private SessionBlockRepositoryInterface $blockRepository
+        private SessionRepositoryInterface      $sessionRepository,
+        private SessionBlockRepositoryInterface $blockRepository,
+        private PomodoroService                 $pomodoroService
     ) {
     }
 
@@ -44,50 +47,132 @@ class SessionService
      */
     public function createSession(User $user, CreateSessionDTO $dto): array
     {
-        try {
-            DB::beginTransaction();
+        $result = $this->executeInTransaction(
+            callback    : function () use ($user, $dto) {
+                $session = $this->sessionRepository->create([
+                    'user_id'              => $user->id,
+                    'practice_template_id' => $dto->template_id,
+                    ...$dto->toArray(),
+                    'planned_duration'     => array_sum(array_column($dto->getBlocksArray(), 'planned_duration')),
+                    'status'               => SessionStatus::PLANNED,
+                ]);
 
-            $session = $this->sessionRepository->create([
-                'user_id'              => $user->id,
-                'practice_template_id' => $dto->template_id,
-                ...$dto->toArray(),
-                'planned_duration'     => array_sum(array_column($dto->getBlocksArray(), 'planned_duration')),
-                'status'               => SessionStatus::PLANNED,
-            ]);
+                $this->createSessionBlocks($session, $dto->blocks);
+                $this->createExercisesFromBlocks($user, $dto->blocks);
 
-            $this->createSessionBlocks($session, $dto->blocks);
-            $this->createExercisesFromBlocks($user, $dto->blocks);
+                return $session->fresh(['blocks', 'template']);
+            },
+            errorContext: 'Ошибка при создании сессии',
+            logContext  : ['user_id' => $user->id]
+        );
 
-            DB::commit();
-
+        if ($result['success']) {
             return [
                 'success' => true,
-                'session' => $session->fresh(['blocks', 'template']),
+                'session' => $result['result'],
                 'message' => 'Сессия создана успешно',
             ];
-        } catch (\Throwable $e) {
-            if (DB::transactionLevel() > 0) {
-                try {
-                    DB::rollBack();
-                } catch (\Throwable $rollbackException) {
-                    Log::error('Ошибка при откате транзакции', [
-                        'user_id' => $user->id,
-                        'error'   => $rollbackException->getMessage(),
-                    ]);
-                }
-            }
+        }
 
-            Log::error('Ошибка при создании сессии', [
-                'user_id' => $user->id,
-                'error'   => $e->getMessage(),
-                'trace'   => $e->getTraceAsString(),
-            ]);
+        return $result;
+    }
 
+    /**
+     * Создать Pomodoro-сессию с автоматическим расчетом слотов
+     *
+     * @param User        $user
+     * @param string      $title
+     * @param string|null $description
+     * @param int         $totalMinutes
+     * @param int         $workDuration
+     * @param int         $shortBreak
+     * @param int         $longBreak
+     * @param int         $cyclesBeforeLongBreak
+     * @return array{success: bool, session?: Session, message: string}
+     */
+    public function createPomodoroSession(
+        User    $user,
+        string  $title,
+        ?string $description,
+        int     $totalMinutes,
+        int     $workDuration = 25,
+        int     $shortBreak = 5,
+        int     $longBreak = 15,
+        int     $cyclesBeforeLongBreak = 4
+    ): array {
+        // Рассчитываем слоты Pomodoro
+        $pomodoroResult = $this->pomodoroService->calculatePomodoroSlots(
+            $totalMinutes,
+            $workDuration,
+            $shortBreak,
+            $longBreak,
+            $cyclesBeforeLongBreak
+        );
+
+        if (!$pomodoroResult['success']) {
             return [
                 'success' => false,
-                'message' => 'Ошибка при создании сессии',
+                'message' => $pomodoroResult['message'],
             ];
         }
+
+        $result = $this->executeInTransaction(
+            callback    : function () use (
+                $user,
+                $title,
+                $description,
+                $totalMinutes,
+                $workDuration,
+                $shortBreak,
+                $longBreak,
+                $cyclesBeforeLongBreak,
+                $pomodoroResult
+            ) {
+                // Создаем сессию с Pomodoro настройками
+                $session = $this->sessionRepository->create([
+                    'user_id'                           => $user->id,
+                    'title'                             => $title,
+                    'description'                       => $description,
+                    'session_mode'                      => 'pomodoro',
+                    'pomodoro_enabled'                  => true,
+                    'pomodoro_work_duration'            => $workDuration,
+                    'pomodoro_short_break'              => $shortBreak,
+                    'pomodoro_long_break'               => $longBreak,
+                    'pomodoro_cycles_before_long_break' => $cyclesBeforeLongBreak,
+                    'pomodoro_total_cycles'             => $pomodoroResult['totalCycles'],
+                    'planned_duration'                  => $totalMinutes,
+                    'status'                            => SessionStatus::PLANNED,
+                    'auto_advance'                      => true, // Pomodoro всегда с автопереходом
+                ]);
+
+                // Создаем блоки из рассчитанных слотов
+                foreach ($pomodoroResult['slots'] as $index => $slot) {
+                    $this->blockRepository->create([
+                        'practice_session_id' => $session->id,
+                        'title'               => $slot['title'],
+                        'description'         => $slot['description'],
+                        'type'                => $slot['type'],
+                        'planned_duration'    => $slot['duration'],
+                        'status'              => SessionBlockStatus::PLANNED->value,
+                        'sort_order'          => $index + 1,
+                    ]);
+                }
+
+                return $session->fresh(['blocks']);
+            },
+            errorContext: 'Ошибка при создании Pomodoro-сессии',
+            logContext  : ['user_id' => $user->id]
+        );
+
+        if ($result['success']) {
+            return [
+                'success' => true,
+                'session' => $result['result'],
+                'message' => 'Pomodoro-сессия создана успешно',
+            ];
+        }
+
+        return $result;
     }
 
     /**
@@ -169,57 +254,41 @@ class SessionService
             return false;
         }
 
-        try {
-            DB::beginTransaction();
-
-            // Обновляем статус сессии
-            $this->sessionRepository->update($session, [
-                'status'     => SessionStatus::ACTIVE,
-                'started_at' => now(),
-            ]);
-
-            // Автоматически стартуем первое упражнение
-            $firstBlock = $session->blocks()
-                ->where('status', SessionBlock::STATUS_PLANNED)
-                ->orderBy('sort_order', 'asc')
-                ->first();
-
-            if ($firstBlock) {
-                $this->blockRepository->update($firstBlock, [
-                    'status'     => SessionBlock::STATUS_ACTIVE,
+        $result = $this->executeInTransaction(
+            callback    : function () use ($session) {
+                // Обновляем статус сессии
+                $updatedSession = $this->sessionRepository->update($session, [
+                    'status'     => SessionStatus::ACTIVE,
                     'started_at' => now(),
                 ]);
 
-                Log::info('Автоматически запущено первое упражнение', [
-                    'session_id' => $session->id,
-                    'block_id'   => $firstBlock->id,
-                    'block_title' => $firstBlock->title,
-                ]);
-            }
+                // Автоматически стартуем первое упражнение
+                // Используем прямой запрос к БД вместо отношений модели
+                $firstBlock = SessionBlock::where('practice_session_id', $session->id)
+                    ->where('status', SessionBlockStatus::PLANNED->value)
+                    ->orderBy('sort_order', 'asc')
+                    ->first();
 
-            DB::commit();
+                if ($firstBlock) {
+                    $this->blockRepository->update($firstBlock, [
+                        'status'     => SessionBlockStatus::ACTIVE->value,
+                        'started_at' => now(),
+                    ]);
 
-            return true;
-        } catch (\Throwable $e) {
-            if (DB::transactionLevel() > 0) {
-                try {
-                    DB::rollBack();
-                } catch (\Throwable $rollbackException) {
-                    Log::error('Ошибка при откате транзакции', [
-                        'session_id' => $session->id,
-                        'error'      => $rollbackException->getMessage(),
+                    Log::info('Автоматически запущено первое упражнение', [
+                        'session_id'  => $session->id,
+                        'block_id'    => $firstBlock->id,
+                        'block_title' => $firstBlock->title,
                     ]);
                 }
-            }
 
-            Log::error('Ошибка при запуске сессии', [
-                'session_id' => $session->id,
-                'error'      => $e->getMessage(),
-                'trace'      => $e->getTraceAsString(),
-            ]);
+                return true;
+            },
+            errorContext: 'Ошибка при запуске сессии',
+            logContext  : ['session_id' => $session->id]
+        );
 
-            return false;
-        }
+        return $result['success'];
     }
 
     /**
@@ -230,7 +299,7 @@ class SessionService
      */
     public function pauseSession(Session $session): bool
     {
-        if ($session->status !== SessionStatus::ACTIVE) {
+        if ($session->status != SessionStatus::ACTIVE) {
             return false;
         }
 
@@ -265,49 +334,33 @@ class SessionService
             ];
         }
 
-        try {
-            DB::beginTransaction();
+        $result = $this->executeInTransaction(
+            callback    : function () use ($session) {
+                $actualDuration = $session->getTotalBlocksActualDuration();
 
-            $actualDuration = $session->getTotalBlocksActualDuration();
+                $this->sessionRepository->update($session, [
+                    'status'          => SessionStatus::COMPLETED,
+                    'completed_at'    => now(),
+                    'actual_duration' => $actualDuration,
+                ]);
 
-            $this->sessionRepository->update($session, [
-                'status'          => SessionStatus::COMPLETED,
-                'completed_at'    => now(),
-                'actual_duration' => $actualDuration,
-            ]);
+                // Отправляем событие для асинхронного обновления прогресса целей
+                SessionCompleted::dispatch($session);
 
-            // Отправляем событие для асинхронного обновления прогресса целей
-            SessionCompleted::dispatch($session);
+                return true;
+            },
+            errorContext: 'Ошибка при завершении сессии',
+            logContext  : ['session_id' => $session->id]
+        );
 
-            DB::commit();
-
+        if ($result['success']) {
             return [
                 'success' => true,
                 'message' => 'Сессия завершена!',
             ];
-        } catch (\Throwable $e) {
-            if (DB::transactionLevel() > 0) {
-                try {
-                    DB::rollBack();
-                } catch (\Throwable $rollbackException) {
-                    Log::error('Ошибка при откате транзакции', [
-                        'session_id' => $session->id,
-                        'error'      => $rollbackException->getMessage(),
-                    ]);
-                }
-            }
-
-            Log::error('Ошибка при завершении сессии', [
-                'session_id' => $session->id,
-                'error'      => $e->getMessage(),
-                'trace'      => $e->getTraceAsString(),
-            ]);
-
-            return [
-                'success' => false,
-                'message' => 'Ошибка при завершении сессии',
-            ];
         }
+
+        return $result;
     }
 
     /**
@@ -319,62 +372,42 @@ class SessionService
      */
     public function reorderSessionBlocks(Session $session, array $blockIds): array
     {
-        try {
-            DB::beginTransaction();
+        $result = $this->executeInTransaction(
+            callback    : function () use ($session, $blockIds) {
+                // Проверяем, что все блоки принадлежат этой сессии
+                $sessionBlocks   = $this->blockRepository->getForSession($session->id);
+                $sessionBlockIds = $sessionBlocks->pluck('id')->toArray();
 
-            // Проверяем что все блоки принадлежат этой сессии
-            $sessionBlocks = $this->blockRepository->getForSession($session->id);
-            $sessionBlockIds = $sessionBlocks->pluck('id')->toArray();
-
-            foreach ($blockIds as $blockId) {
-                if (!in_array($blockId, $sessionBlockIds)) {
-                    DB::rollBack();
-                    return [
-                        'success' => false,
-                        'message' => 'Некоторые блоки не принадлежат этой сессии',
-                    ];
+                foreach ($blockIds as $blockId) {
+                    if (!in_array($blockId, $sessionBlockIds)) {
+                        throw new \InvalidArgumentException('Некоторые блоки не принадлежат этой сессии');
+                    }
                 }
-            }
 
-            // Обновляем sort_order для каждого блока
-            foreach ($blockIds as $index => $blockId) {
-                $block = $sessionBlocks->firstWhere('id', $blockId);
-                if ($block) {
-                    $this->blockRepository->update($block, [
-                        'sort_order' => $index + 1,
-                    ]);
+                // Обновляем sort_order для каждого блока
+                foreach ($blockIds as $index => $blockId) {
+                    $block = $sessionBlocks->firstWhere('id', $blockId);
+                    if ($block) {
+                        $this->blockRepository->update($block, [
+                            'sort_order' => $index + 1,
+                        ]);
+                    }
                 }
-            }
 
-            DB::commit();
+                return true;
+            },
+            errorContext: 'Ошибка при изменении порядка блоков',
+            logContext  : ['session_id' => $session->id]
+        );
 
+        if ($result['success']) {
             return [
                 'success' => true,
                 'message' => 'Порядок упражнений обновлен',
             ];
-        } catch (\Throwable $e) {
-            if (DB::transactionLevel() > 0) {
-                try {
-                    DB::rollBack();
-                } catch (\Throwable $rollbackException) {
-                    Log::error('Ошибка при откате транзакции', [
-                        'session_id' => $session->id,
-                        'error'      => $rollbackException->getMessage(),
-                    ]);
-                }
-            }
-
-            Log::error('Ошибка при изменении порядка блоков', [
-                'session_id' => $session->id,
-                'error'      => $e->getMessage(),
-                'trace'      => $e->getTraceAsString(),
-            ]);
-
-            return [
-                'success' => false,
-                'message' => 'Ошибка при изменении порядка упражнений',
-            ];
         }
+
+        return $result;
     }
 
     /**
@@ -386,7 +419,7 @@ class SessionService
      */
     public function startSessionBlock(Session $session, SessionBlock $block): array
     {
-        // Проверяем что блок принадлежит этой сессии
+        // Проверяем, что блок принадлежит этой сессии
         if ($block->practice_session_id !== $session->id) {
             return [
                 'success' => false,
@@ -394,7 +427,7 @@ class SessionService
             ];
         }
 
-        // Проверяем что блок можно начать
+        // Проверяем, что блок можно начать
         if (!$block->canBeStarted()) {
             return [
                 'success' => false,
@@ -407,13 +440,13 @@ class SessionService
             $currentBlock = $session->getCurrentBlock();
             if ($currentBlock && $currentBlock->id !== $block->id) {
                 $this->blockRepository->update($currentBlock, [
-                    'status' => SessionBlockStatus::PAUSED,
+                    'status' => SessionBlockStatus::PAUSED->value,
                 ]);
             }
 
             // Запускаем выбранный блок
             $this->blockRepository->update($block, [
-                'status'     => SessionBlockStatus::ACTIVE,
+                'status'     => SessionBlockStatus::ACTIVE->value,
                 'started_at' => now(),
             ]);
 
@@ -445,59 +478,66 @@ class SessionService
      */
     public function updateSessionBlock(Session $session, SessionBlock $block, UpdateSessionBlockDTO $dto): array
     {
-        try {
-            DB::beginTransaction();
+        $result = $this->executeInTransaction(
+            callback    : function () use ($session, $block, $dto) {
+                $updateData = $dto->toArray();
 
-            $updateData = $dto->toArray();
-
-            // Если блок завершается, устанавливаем время завершения если не передано
-            if ($dto->status === SessionBlockStatus::COMPLETED && $dto->completed_at === null) {
-                $updateData['completed_at'] = now();
-            }
-
-            $this->blockRepository->update($block, $updateData);
-
-            // Отправляем событие для асинхронного обновления прогресса целей
-            if ($dto->status === SessionBlockStatus::COMPLETED) {
-                SessionBlockCompleted::dispatch($block);
-
-                // Автопереход к следующему упражнению если включена опция
-                if ($session->auto_advance) {
-                    $this->autoAdvanceToNextBlock($session, $block);
+                // Если блок завершается, устанавливаем время завершения если не передано
+                if ($dto->status === SessionBlockStatus::COMPLETED->value && $dto->completed_at === null) {
+                    $updateData['completed_at'] = now();
                 }
-            }
 
-            DB::commit();
+                $updatedBlock = $this->blockRepository->update($block, $updateData);
 
+                Log::info('Блок обновлен', [
+                    'block_id' => $updatedBlock->id,
+                    'block_title' => $updatedBlock->title,
+                    'old_status' => $block->status,
+                    'new_status' => $updatedBlock->status,
+                ]);
+
+                // Отправляем событие для асинхронного обновления прогресса целей
+                if ($dto->status === SessionBlockStatus::COMPLETED->value) {
+                    SessionBlockCompleted::dispatch($updatedBlock);
+
+                    // Автопереход к следующему упражнению, если включена опция
+                    Log::info('Проверка auto_advance для сессии', [
+                        'session_id'   => $session->id,
+                        'auto_advance' => $session->auto_advance,
+                        'block_id'     => $block->id,
+                        'block_title'  => $block->title,
+                    ]);
+
+                    if ($session->auto_advance) {
+                        Log::info('Вызов autoAdvanceToNextBlock', [
+                            'session_id' => $session->id,
+                            'block_id'   => $updatedBlock->id,
+                        ]);
+                        $this->autoAdvanceToNextBlock($session, $updatedBlock);
+                    } else {
+                        Log::info('auto_advance отключен для сессии', [
+                            'session_id' => $session->id,
+                        ]);
+                    }
+                }
+
+                return true;
+            },
+            errorContext: 'Ошибка при обновлении блока сессии',
+            logContext  : [
+                'session_id' => $session->id,
+                'block_id'   => $block->id,
+            ]
+        );
+
+        if ($result['success']) {
             return [
                 'success' => true,
                 'message' => 'Блок обновлен',
             ];
-        } catch (\Throwable $e) {
-            if (DB::transactionLevel() > 0) {
-                try {
-                    DB::rollBack();
-                } catch (\Throwable $rollbackException) {
-                    Log::error('Ошибка при откате транзакции', [
-                        'session_id' => $session->id,
-                        'block_id'   => $block->id,
-                        'error'      => $rollbackException->getMessage(),
-                    ]);
-                }
-            }
-
-            Log::error('Ошибка при обновлении блока сессии', [
-                'session_id' => $session->id,
-                'block_id'   => $block->id,
-                'error'      => $e->getMessage(),
-                'trace'      => $e->getTraceAsString(),
-            ]);
-
-            return [
-                'success' => false,
-                'message' => 'Ошибка при обновлении блока',
-            ];
         }
+
+        return $result;
     }
 
     /**
@@ -508,44 +548,28 @@ class SessionService
      */
     public function deleteSession(Session $session): array
     {
-        try {
-            DB::beginTransaction();
+        $result = $this->executeInTransaction(
+            callback    : function () use ($session) {
+                // Удаляем все блоки сессии
+                $this->blockRepository->deleteForSession($session->id);
 
-            // Удаляем все блоки сессии
-            $this->blockRepository->deleteForSession($session->id);
+                // Удаляем саму сессию
+                $this->sessionRepository->delete($session);
 
-            // Удаляем саму сессию
-            $this->sessionRepository->delete($session);
+                return true;
+            },
+            errorContext: 'Ошибка при удалении сессии',
+            logContext  : ['session_id' => $session->id]
+        );
 
-            DB::commit();
-
+        if ($result['success']) {
             return [
                 'success' => true,
                 'message' => 'Сессия успешно удалена',
             ];
-        } catch (\Throwable $e) {
-            if (DB::transactionLevel() > 0) {
-                try {
-                    DB::rollBack();
-                } catch (\Throwable $rollbackException) {
-                    Log::error('Ошибка при откате транзакции', [
-                        'session_id' => $session->id,
-                        'error'      => $rollbackException->getMessage(),
-                    ]);
-                }
-            }
-
-            Log::error('Ошибка при удалении сессии', [
-                'session_id' => $session->id,
-                'error'      => $e->getMessage(),
-                'trace'      => $e->getTraceAsString(),
-            ]);
-
-            return [
-                'success' => false,
-                'message' => 'Ошибка при удалении сессии',
-            ];
         }
+
+        return $result;
     }
 
     /**
@@ -563,7 +587,7 @@ class SessionService
             $this->blockRepository->create([
                 'practice_session_id' => $session->id,
                 ...$blockData,
-                'status'              => SessionBlockStatus::PLANNED,
+                'status'              => SessionBlockStatus::PLANNED->value,
                 'sort_order'          => $index + 1,
             ]);
         }
@@ -608,15 +632,16 @@ class SessionService
     {
         try {
             // Находим следующее незавершенное упражнение
-            $nextBlock = $session->blocks()
-                ->where('status', SessionBlock::STATUS_PLANNED)
+            // Используем прямой запрос к БД для получения актуальных данных
+            $nextBlock = SessionBlock::where('practice_session_id', $session->id)
+                ->where('status', SessionBlockStatus::PLANNED->value)
                 ->where('sort_order', '>', $completedBlock->sort_order)
                 ->orderBy('sort_order', 'asc')
                 ->first();
 
             if ($nextBlock) {
                 $this->blockRepository->update($nextBlock, [
-                    'status'     => SessionBlock::STATUS_ACTIVE,
+                    'status' => SessionBlockStatus::ACTIVE->value,
                     'started_at' => now(),
                 ]);
 

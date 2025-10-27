@@ -131,9 +131,9 @@
                                 </div>
                             </div>
 
-                            <!-- Кнопка начать упражнение -->
+                            <!-- Кнопка начать упражнение (скрыта для сессий с автопереходом) -->
                             <button
-                                v-if="block.status === 'planned' || block.status === 'paused'"
+                                v-if="(block.status === 'planned' || block.status === 'paused') && !props.autoAdvance"
                                 @click="startBlock(block.id)"
                                 class="ml-2 px-3 py-1.5 sm:px-4 sm:py-2 bg-accent-500 hover:bg-accent-600 text-white text-xs sm:text-sm font-medium rounded-lg transition-colors duration-200 flex items-center space-x-1"
                                 :disabled="isStarting"
@@ -286,6 +286,8 @@ import type { SessionBlock } from '@/types/models';
 interface Props {
     blocks: SessionBlock[]
     sessionId: number
+    sessionMode?: 'standard' | 'pomodoro'
+    autoAdvance?: boolean
 }
 
 const props = defineProps<Props>();
@@ -296,12 +298,19 @@ const isDragging = ref(false);
 const isCollapsed = ref(false);
 const expandedRecordings = ref<Record<number, boolean>>({});
 
-// Можно изменять порядок если есть хотя бы 2 незавершенных блока
+// Можно изменять порядок если:
+// 1. Сессия не в режиме Pomodoro
+// 2. Есть хотя бы 2 незавершенных блока
 const canReorder = computed(() => {
-    const unfinishedBlocks = localBlocks.value.filter(block => 
+    // Для Pomodoro-сессий перетаскивание запрещено
+    if (props.sessionMode === 'pomodoro') {
+        return false;
+    }
+
+    const unfinishedBlocks = localBlocks.value.filter(block =>
         block.status === 'planned' || block.status === 'paused' || block.status === 'active'
     );
-    
+
     return unfinishedBlocks.length >= 2;
 });
 

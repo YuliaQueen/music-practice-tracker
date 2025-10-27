@@ -16,6 +16,8 @@ final readonly class CreateSessionDTO
         public ?string $description,
         public ?int  $template_id,
         public array $blocks,
+        public string $session_mode = 'standard',
+        public bool $auto_advance = false,
     ) {}
 
     public static function fromRequest(StoreSessionRequest $request): self
@@ -28,10 +30,12 @@ final readonly class CreateSessionDTO
         );
 
         return new self(
-            title      : $validated['title'],
-            description: $validated['description'] ?? null,
-            template_id: $validated['template_id'] ?? null,
-            blocks     : $blocks,
+            title       : $validated['title'],
+            description : $validated['description'] ?? null,
+            template_id : $validated['template_id'] ?? null,
+            blocks      : $blocks,
+            session_mode: $validated['session_mode'] ?? 'standard',
+            auto_advance: $validated['auto_advance'] ?? false,
         );
     }
 
@@ -51,9 +55,11 @@ final readonly class CreateSessionDTO
     public function toArray(): array
     {
         return [
-            'title'       => $this->title,
-            'description' => $this->description,
-            'template_id' => $this->template_id,
+            'title'        => $this->title,
+            'description'  => $this->description,
+            'template_id'  => $this->template_id,
+            'session_mode' => $this->session_mode,
+            'auto_advance' => $this->auto_advance,
         ];
     }
 }

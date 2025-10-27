@@ -6,15 +6,59 @@
             </h2>
         </template>
 
-        <div class="py-6 sm:py-12">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="bg-primary-50 overflow-hidden shadow-sm rounded-lg dark:bg-neutral-800 dark:shadow-neutral-900/20">
-                    <div class="p-4 sm:p-6 text-primary-900 dark:text-neutral-100">
+        <div class="py-12">
+            <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+                <div class="bg-primary-50 overflow-hidden shadow-sm sm:rounded-lg dark:bg-neutral-800 dark:shadow-neutral-900/20">
+                    <div class="p-6 text-primary-900 dark:text-neutral-100">
                         <form @submit.prevent="submit">
                             <!-- Основная информация -->
                             <div class="mb-6">
                                 <h3 class="text-lg font-medium text-primary-900 dark:text-neutral-100 mb-4">Основная информация</h3>
-                                
+
+                                <!-- Выбор режима сессии -->
+                                <div class="mb-6 p-4 bg-neutral-50 rounded-lg dark:bg-neutral-700/50 border border-neutral-200 dark:border-neutral-600">
+                                    <label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-3">
+                                        Выберите режим занятия
+                                    </label>
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                        <!-- Стандартная сессия -->
+                                        <button
+                                            type="button"
+                                            @click="sessionMode = 'standard'"
+                                            :class="[
+                                                'flex flex-col items-center justify-center p-4 rounded-lg border-2 transition-all',
+                                                sessionMode === 'standard'
+                                                    ? 'border-accent-500 bg-accent-50 ring-2 ring-accent-200 dark:border-accent-400 dark:bg-accent-900/20 dark:ring-accent-400'
+                                                    : 'border-neutral-200 bg-white hover:border-neutral-300 hover:bg-neutral-50 dark:border-neutral-600 dark:bg-neutral-800 dark:hover:border-neutral-500 dark:hover:bg-neutral-700'
+                                            ]"
+                                        >
+                                            <span class="text-3xl mb-2">📚</span>
+                                            <span class="font-semibold text-neutral-900 dark:text-neutral-100">Стандартная сессия</span>
+                                            <span class="text-xs text-neutral-500 dark:text-neutral-400 mt-1 text-center">
+                                                Добавьте упражнения вручную и настройте структуру
+                                            </span>
+                                        </button>
+
+                                        <!-- Pomodoro-сессия -->
+                                        <button
+                                            type="button"
+                                            @click="sessionMode = 'pomodoro'"
+                                            :class="[
+                                                'flex flex-col items-center justify-center p-4 rounded-lg border-2 transition-all',
+                                                sessionMode === 'pomodoro'
+                                                    ? 'border-danger-500 bg-danger-50 ring-2 ring-danger-200 dark:border-danger-400 dark:bg-danger-900/20 dark:ring-danger-400'
+                                                    : 'border-neutral-200 bg-white hover:border-neutral-300 hover:bg-neutral-50 dark:border-neutral-600 dark:bg-neutral-800 dark:hover:border-neutral-500 dark:hover:bg-neutral-700'
+                                            ]"
+                                        >
+                                            <span class="text-3xl mb-2">🍅</span>
+                                            <span class="font-semibold text-neutral-900 dark:text-neutral-100">Pomodoro-сессия</span>
+                                            <span class="text-xs text-neutral-500 dark:text-neutral-400 mt-1 text-center">
+                                                Автоматическое чередование работы и отдыха
+                                            </span>
+                                        </button>
+                                    </div>
+                                </div>
+
                                 <!-- Уведомление о добавленном упражнении -->
                                 <div v-if="exerciseData" class="mb-4 p-4 bg-primary-100 border border-primary-200 rounded-lg dark:bg-success-900/20 dark:border-success-800">
                                     <div class="flex items-center">
@@ -33,7 +77,7 @@
                                         </div>
                                     </div>
                                 </div>
-                                
+
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div>
                                         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-2">
@@ -48,6 +92,7 @@
                                                     🕐 <span class="hidden sm:inline">Дата и время</span><span class="sm:hidden">Дата</span>
                                                 </button>
                                                 <button
+                                                    v-if="sessionMode === 'standard'"
                                                     type="button"
                                                     @click="generateAutoTitle"
                                                     class="text-xs px-2 py-1.5 bg-accent-100 text-accent-600 rounded hover:bg-accent-200 transition-colors dark:bg-accent-900/50 dark:text-accent-300 dark:hover:bg-accent-800/50 whitespace-nowrap"
@@ -99,8 +144,8 @@
                                     <InputError class="mt-2" :message="form.errors.description" />
                                 </div>
 
-                                <!-- Автопереход между упражнениями -->
-                                <div class="mt-4">
+                                <!-- Автопереход между упражнениями (только для стандартного режима) -->
+                                <div v-if="sessionMode === 'standard'" class="mt-4">
                                     <label class="flex items-center">
                                         <input
                                             id="auto_advance"
@@ -119,8 +164,56 @@
                                 </div>
                             </div>
 
-                            <!-- Блоки упражнений -->
-                            <div class="mb-6">
+                            <!-- Настройки Pomodoro (только для Pomodoro режима) -->
+                            <div v-if="sessionMode === 'pomodoro'" class="mb-6">
+                                <h3 class="text-lg font-medium text-neutral-900 dark:text-neutral-100 mb-4">Настройки Pomodoro</h3>
+
+                                <div class="p-4 bg-danger-50 dark:bg-danger-900/20 border border-danger-200 dark:border-danger-800 rounded-lg">
+                                    <div class="flex items-start justify-between mb-4">
+                                        <div>
+                                            <h4 class="font-medium text-neutral-900 dark:text-neutral-100">Текущие настройки</h4>
+                                            <p class="text-sm text-neutral-600 dark:text-neutral-400 mt-1">
+                                                Количество циклов: {{ pomodoroSettings.totalCycles }} • Общая длительность: {{ pomodoro.calculateTotalMinutes(pomodoroSettings) }} минут
+                                            </p>
+                                            <p class="text-xs text-neutral-500 dark:text-neutral-400 mt-2">
+                                                {{ pomodoroPreview }}
+                                            </p>
+                                        </div>
+                                        <SecondaryButton
+                                            type="button"
+                                            @click="showPomodoroModal = true"
+                                            class="text-sm"
+                                        >
+                                            ⚙️ Настроить
+                                        </SecondaryButton>
+                                    </div>
+
+                                    <!-- Превью слотов -->
+                                    <div v-if="pomodoroSlots.length > 0" class="mt-4">
+                                        <p class="text-xs font-medium text-neutral-700 dark:text-neutral-300 mb-2">
+                                            Превью расписания ({{ pomodoroTotalCycles }} рабочих циклов):
+                                        </p>
+                                        <div class="flex flex-wrap gap-2">
+                                            <span
+                                                v-for="(slot, index) in pomodoroSlots.slice(0, 8)"
+                                                :key="index"
+                                                :class="[
+                                                    'text-xs px-2 py-1 rounded border',
+                                                    pomodoroGetSlotColorClass(slot.type)
+                                                ]"
+                                            >
+                                                {{ pomodoroGetSlotIcon(slot.type) }} {{ slot.duration }}м
+                                            </span>
+                                            <span v-if="pomodoroSlots.length > 8" class="text-xs text-neutral-500 dark:text-neutral-400 self-center">
+                                                +{{ pomodoroSlots.length - 8 }} еще...
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Блоки упражнений (только для стандартного режима) -->
+                            <div v-if="sessionMode === 'standard'" class="mb-6">
                                 <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 sm:gap-2 mb-4">
                                     <h3 class="text-base sm:text-lg font-medium text-neutral-900 dark:text-neutral-100">Упражнения</h3>
                                     <div class="flex flex-col sm:flex-row gap-2">
@@ -172,7 +265,7 @@
                                             </DangerButton>
                                         </div>
                                     </div>
-                                    
+
                                     <!-- Поиск и сортировка упражнений -->
                                     <div class="mb-4 space-y-3">
                                         <div class="flex flex-col sm:flex-row gap-3">
@@ -199,7 +292,7 @@
                                             Найдено: {{ filteredExercises.length }} из {{ previousExercises.length }} упражнений
                                         </p>
                                     </div>
-                                    
+
                                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 max-h-60 overflow-y-auto">
                                         <div
                                             v-for="exercise in filteredExercises"
@@ -387,6 +480,14 @@
                                 </PrimaryButton>
                             </div>
                         </form>
+
+                        <!-- Модальное окно настроек Pomodoro -->
+                        <PomodoroSettingsModal
+                            :show="showPomodoroModal"
+                            :settings="pomodoroSettings"
+                            @close="showPomodoroModal = false"
+                            @save="handlePomodoroSettingsSave"
+                        />
                     </div>
                 </div>
             </div>
@@ -405,6 +506,8 @@ import PrimaryButton from '@/Components/PrimaryButton.vue'
 import SecondaryButton from '@/Components/SecondaryButton.vue'
 import DangerButton from '@/Components/DangerButton.vue'
 import TextInput from '@/Components/TextInput.vue'
+import PomodoroSettingsModal from '@/Components/Session/PomodoroSettingsModal.vue'
+import { usePomodoro, type PomodoroSettings } from '@/composables/usePomodoro'
 
 interface Template {
     id: number
@@ -448,13 +551,40 @@ interface Props {
 
 const props = defineProps<Props>()
 
+// Режим сессии
+const sessionMode = ref<'standard' | 'pomodoro'>('standard')
+
 const form = useForm({
     title: '',
     description: '',
     template_id: null as number | null,
+    session_mode: 'standard' as 'standard' | 'pomodoro',
     auto_advance: false,
     blocks: [] as Block[],
 })
+
+// Pomodoro composable и состояние
+const pomodoro = usePomodoro()
+const showPomodoroModal = ref(false)
+const pomodoroSettings = ref<PomodoroSettings>({
+    totalCycles: 4,
+    workDuration: 25,
+    shortBreak: 5,
+    longBreak: 15,
+    cyclesBeforeLongBreak: 4,
+})
+
+// Вычисляемые свойства для Pomodoro
+const pomodoroSlots = computed(() => pomodoro.calculateSlots(pomodoroSettings.value))
+const pomodoroTotalCycles = computed(() => pomodoro.calculateTotalCycles(pomodoroSlots.value))
+const pomodoroPreview = computed(() => pomodoro.getShortPreview(pomodoroSlots.value))
+const pomodoroGetSlotIcon = (type: 'custom' | 'break') => pomodoro.getSlotIcon(type)
+const pomodoroGetSlotColorClass = (type: 'custom' | 'break') => pomodoro.getSlotColorClass(type)
+
+// Обработчик сохранения настроек Pomodoro
+const handlePomodoroSettingsSave = (settings: PomodoroSettings) => {
+    pomodoroSettings.value = { ...settings }
+}
 
 // Состояние для управления списком упражнений
 const showExercisesList = ref(false)
@@ -473,17 +603,17 @@ const totalDuration = computed(() => {
 // Фильтрация и сортировка упражнений
 const filteredExercises = computed(() => {
     let exercises = props.previousExercises
-    
+
     // Фильтрация по поисковому запросу
     if (exerciseSearchQuery.value.trim()) {
         const query = exerciseSearchQuery.value.toLowerCase()
-        exercises = exercises.filter(exercise => 
+        exercises = exercises.filter(exercise =>
             exercise.title.toLowerCase().includes(query) ||
             (exercise.description && exercise.description.toLowerCase().includes(query)) ||
             exercise.type.toLowerCase().includes(query)
         )
     }
-    
+
     // Сортировка
     return exercises.sort((a, b) => {
         switch (exerciseSortBy.value) {
@@ -506,7 +636,7 @@ const addBlock = () => {
         type: 'custom',
         duration: 5,
     })
-    
+
     // Автоматически генерируем название, если поле пустое
     if (!form.title.trim()) {
         generateSimpleTitle()
@@ -527,10 +657,10 @@ const toggleExerciseSelection = (exerciseTitle: string) => {
 }
 
 const addSelectedExercises = () => {
-    const exercisesToAdd = props.previousExercises.filter(exercise => 
+    const exercisesToAdd = props.previousExercises.filter(exercise =>
         selectedExercises.value.has(exercise.title)
     )
-    
+
     exercisesToAdd.forEach(exercise => {
         form.blocks.push({
             title: exercise.title,
@@ -539,12 +669,12 @@ const addSelectedExercises = () => {
             duration: typeof exercise.duration === 'string' ? parseInt(exercise.duration) : exercise.duration,
         })
     })
-    
+
     // Автоматически генерируем название, если поле пустое или содержит только дату
     if (!form.title.trim() || form.title.includes('Занятие') && !form.title.includes(' - ')) {
         generateAutoTitle()
     }
-    
+
     // Очищаем выбор и закрываем список
     selectedExercises.value.clear()
     showExercisesList.value = false
@@ -603,24 +733,24 @@ const formatDateTime = (date: Date) => {
 const generateAutoTitle = () => {
     const now = new Date()
     const dateTime = formatDateTime(now)
-    
+
     // Получаем упражнения, исключая разминку и перерывы
-    const nonWarmupExercises = form.blocks.filter(block => 
+    const nonWarmupExercises = form.blocks.filter(block =>
         block.type !== 'warmup' && block.type !== 'break' && block.title.trim()
     )
-    
+
     if (nonWarmupExercises.length === 0) {
         // Если нет основных упражнений, используем только дату и время
         form.title = `Занятие ${dateTime}`
         return
     }
-    
+
     // Берем первые 2-3 упражнения для названия
     const exerciseTitles = nonWarmupExercises
         .slice(0, 3)
         .map(block => block.title)
         .join(', ')
-    
+
     // Формируем название
     if (nonWarmupExercises.length <= 3) {
         form.title = `${exerciseTitles} - ${dateTime}`
@@ -637,11 +767,32 @@ const generateSimpleTitle = () => {
 }
 
 const submit = () => {
-    form.post(route('sessions.store'), {
-        onSuccess: () => {
-            // Успешно создано
-        },
-    })
+    if (sessionMode.value === 'pomodoro') {
+        // Для Pomodoro отправляем специальные поля
+        const pomodoroForm = useForm({
+            session_mode: 'pomodoro',
+            title: form.title,
+            description: form.description,
+            pomodoro_total_minutes: pomodoro.calculateTotalMinutes(pomodoroSettings.value),
+            pomodoro_work_duration: pomodoroSettings.value.workDuration,
+            pomodoro_short_break: pomodoroSettings.value.shortBreak,
+            pomodoro_long_break: pomodoroSettings.value.longBreak,
+            pomodoro_cycles_before_long_break: pomodoroSettings.value.cyclesBeforeLongBreak,
+        })
+
+        pomodoroForm.post(route('sessions.store'), {
+            onSuccess: () => {
+                // Успешно создано
+            },
+        })
+    } else {
+        // Стандартная сессия
+        form.post(route('sessions.store'), {
+            onSuccess: () => {
+                // Успешно создано
+            },
+        })
+    }
 }
 
 // Загрузить шаблон при выборе
@@ -672,6 +823,11 @@ const templateId = computed({
     }
 })
 
+// Синхронизация session_mode в форме с выбранным режимом
+watch(sessionMode, (newMode) => {
+    form.session_mode = newMode
+})
+
 // Автоматическое обновление названия при изменении упражнений
 watch(() => form.blocks, () => {
     // Автоматически обновляем название, если оно было сгенерировано автоматически
@@ -688,7 +844,7 @@ if (props.exerciseData) {
         type: props.exerciseData.type,
         duration: typeof props.exerciseData.duration === 'string' ? parseInt(props.exerciseData.duration) : props.exerciseData.duration,
     })
-    
+
     // Автоматически генерируем название
     if (!form.title.trim()) {
         generateAutoTitle()

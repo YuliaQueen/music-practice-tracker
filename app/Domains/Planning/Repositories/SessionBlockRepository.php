@@ -65,9 +65,22 @@ class SessionBlockRepository implements SessionBlockRepositoryInterface
      */
     public function update(SessionBlock $block, array $data): SessionBlock
     {
-        $block->update($data);
+        \Illuminate\Support\Facades\Log::info('Обновление блока в репозитории', [
+            'block_id' => $block->id,
+            'old_status' => $block->status,
+            'new_data' => $data,
+        ]);
 
-        return $block->fresh(['session', 'templateBlock']);
+        $block->update($data);
+        $block->refresh();
+
+        \Illuminate\Support\Facades\Log::info('Блок обновлен в репозитории', [
+            'block_id' => $block->id,
+            'status_after_refresh' => $block->status,
+            'all_attributes' => $block->getAttributes(),
+        ]);
+
+        return $block;
     }
 
     /**

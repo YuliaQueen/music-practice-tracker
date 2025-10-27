@@ -24,10 +24,29 @@ class StoreSessionRequest extends FormRequest
      */
     public function rules(): array
     {
+        $sessionMode = $this->input('session_mode', 'standard');
+
+        // Для Pomodoro блоки не требуются
+        if ($sessionMode === 'pomodoro') {
+            return [
+                'title'          => 'required|string|max:255',
+                'description'    => 'nullable|string',
+                'session_mode'   => 'required|string|in:standard,pomodoro',
+                'pomodoro_total_minutes' => 'required|integer|min:1',
+                'pomodoro_work_duration' => 'required|integer|min:1',
+                'pomodoro_short_break'   => 'required|integer|min:0',
+                'pomodoro_long_break'    => 'required|integer|min:0',
+                'pomodoro_cycles_before_long_break' => 'required|integer|min:1',
+            ];
+        }
+
+        // Для стандартной сессии блоки обязательны
         return [
             'title'          => 'required|string|max:255',
             'description'    => 'nullable|string',
             'template_id'    => 'nullable|exists:practice_templates,id',
+            'session_mode'   => 'nullable|string|in:standard,pomodoro',
+            'auto_advance'   => 'nullable|boolean',
             'blocks'         => 'required|array|min:1',
             'blocks.*.title' => 'required|string|max:255',
             'blocks.*.description' => 'nullable|string',
