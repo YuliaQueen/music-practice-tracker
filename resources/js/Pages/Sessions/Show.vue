@@ -210,8 +210,7 @@ const startTimer = () => {
   } else {
     const elapsed = Math.floor((Date.now() - startTime.value) / 1000)
     const plannedSeconds = currentBlock.value.planned_duration * 60
-    const remaining = Math.max(0, plannedSeconds - elapsed)
-    currentBlockTime.value = remaining
+    currentBlockTime.value = Math.max(0, plannedSeconds - elapsed)
     playStartSound()
   }
 
@@ -428,13 +427,9 @@ const completeCurrentBlock = () => {
 
 const showExtensionNotification = (minutes: number, blockTitle?: string, action?: string) => {
   const title = blockTitle ? ` для "${blockTitle}"` : ''
-  let message = ''
-
-  if (action === 'Перезапущен') {
-    message = `Таймер перезапущен${title}`
-  } else {
-    message = `Время продлено на ${minutes} минут${title}`
-  }
+  const message = action === 'Перезапущен'
+    ? `Таймер перезапущен${title}`
+    : `Время продлено на ${minutes} минут${title}`
 
   extensionNotification.value = {
     show: true,

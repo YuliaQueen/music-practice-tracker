@@ -30,15 +30,6 @@ const NOTES = {
     G6: 1567.98,
 } as const
 
-// Константы для звуков
-const VOLUME_MULTIPLIER = 0.25
-const SUSTAIN_LEVEL = 0.7
-const MIN_GAIN = 0.001
-const DEFAULT_ATTACK = 0.01
-const DEFAULT_RELEASE = 0.1
-const CHORD_ATTACK = 0.02
-const CHORD_RELEASE = 0.15
-
 export function useTimerSounds() {
     const settings = ref<SoundSettings>({...defaultSettings})
     const audioContext = ref<AudioContext | null>(null)
@@ -97,37 +88,37 @@ export function useTimerSounds() {
     const playStartSound = () => {
         if (!settings.value.startSound) return
         // Мягкий C мажорный аккорд с арпеджио
-        generateSound(523.25, 0.3, 'sine', 0.02, 0.2) // C5
-        setTimeout(() => generateSound(659.25, 0.3, 'sine', 0.02, 0.2), 50) // E5
-        setTimeout(() => generateSound(783.99, 0.35, 'sine', 0.02, 0.25), 100) // G5
+        generateSound(NOTES.C5, 0.3, 'sine', 0.02, 0.2)
+        setTimeout(() => generateSound(NOTES.E5, 0.3, 'sine', 0.02, 0.2), 50)
+        setTimeout(() => generateSound(NOTES.G5, 0.35, 'sine', 0.02, 0.25), 100)
     }
 
     // Звук паузы - нисходящий мягкий звук
     const playPauseSound = () => {
         if (!settings.value.pauseSound) return
         // Мягкое нисходящее движение
-        generateSound(880, 0.25, 'sine', 0.03, 0.18) // A5
-        setTimeout(() => generateSound(659.25, 0.3, 'sine', 0.03, 0.2), 80) // E5
+        generateSound(NOTES.A5, 0.25, 'sine', 0.03, 0.18)
+        setTimeout(() => generateSound(NOTES.E5, 0.3, 'sine', 0.03, 0.2), 80)
     }
 
     // Звук завершения блока - радостная мелодия
     const playCompleteSound = () => {
         if (!settings.value.completeSound) return
         // Позитивная восходящая мелодия (пентатоника)
-        generateSound(523.25, 0.15, 'sine', 0.01, 0.1) // C5
-        setTimeout(() => generateSound(659.25, 0.15, 'sine', 0.01, 0.1), 100) // E5
-        setTimeout(() => generateSound(783.99, 0.15, 'sine', 0.01, 0.1), 200) // G5
-        setTimeout(() => generateSound(1046.50, 0.25, 'sine', 0.02, 0.15), 300) // C6
+        generateSound(NOTES.C5, 0.15, 'sine', 0.01, 0.1)
+        setTimeout(() => generateSound(NOTES.E5, 0.15, 'sine', 0.01, 0.1), 100)
+        setTimeout(() => generateSound(NOTES.G5, 0.15, 'sine', 0.01, 0.1), 200)
+        setTimeout(() => generateSound(NOTES.C6, 0.25, 'sine', 0.02, 0.15), 300)
     }
 
     // Звук предупреждения - мягкое колокольчик-напоминание
     const playWarningSound = () => {
         if (!settings.value.warningSound) return
         // Мягкий колокольный звук
-        generateSound(880, 0.2, 'sine', 0.01, 0.15) // A5
+        generateSound(NOTES.A5, 0.2, 'sine', 0.01, 0.15)
         setTimeout(() => {
-            generateSound(880, 0.2, 'sine', 0.01, 0.15)
-            generateSound(1108.73, 0.2, 'sine', 0.01, 0.15) // C#6 (терция)
+            generateSound(NOTES.A5, 0.2, 'sine', 0.01, 0.15)
+            generateSound(NOTES.Cs6, 0.2, 'sine', 0.01, 0.15)
         }, 250)
     }
 
@@ -135,9 +126,9 @@ export function useTimerSounds() {
     const playTimeUpSound = () => {
         if (!settings.value.completeSound) return
         // Финальный аккорд C мажор с октавой
-        generateChord([523.25, 659.25, 783.99], 0.4, 'sine') // C5-E5-G5
+        generateChord([NOTES.C5, NOTES.E5, NOTES.G5], 0.4, 'sine')
         setTimeout(() => {
-            generateChord([1046.50, 1318.51, 1567.98], 0.5, 'sine') // C6-E6-G6
+            generateChord([NOTES.C6, NOTES.E6, NOTES.G6], 0.5, 'sine')
         }, 200)
     }
 
@@ -145,8 +136,8 @@ export function useTimerSounds() {
     const playBlockSwitchSound = () => {
         if (!settings.value.startSound) return
         // Быстрый восходящий звук перехода
-        generateSound(783.99, 0.12, 'sine', 0.01, 0.08) // G5
-        setTimeout(() => generateSound(1046.50, 0.15, 'sine', 0.01, 0.1), 80) // C6
+        generateSound(NOTES.G5, 0.12, 'sine', 0.01, 0.08)
+        setTimeout(() => generateSound(NOTES.C6, 0.15, 'sine', 0.01, 0.1), 80)
     }
 
     // Обновление настроек
