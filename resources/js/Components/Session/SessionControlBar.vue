@@ -66,12 +66,12 @@
                         v-if="session.status === 'active'"
                         @click="$emit('pause')"
                         :disabled="processing"
-                        class="inline-flex items-center gap-1.5 px-4 sm:px-6 py-2 sm:py-2.5 bg-warning-500 hover:bg-warning-600 text-white font-semibold rounded-lg shadow-md hover:shadow-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base"
+                        class="inline-flex items-center gap-1.5 px-3 sm:px-6 py-2 sm:py-2.5 bg-warning-500 hover:bg-warning-600 text-white font-semibold rounded-lg shadow-md hover:shadow-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base"
                     >
                         <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                             <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zM7 8a1 1 0 012 0v4a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v4a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
                         </svg>
-                        <span>Пауза</span>
+                        <span class="hidden xs:inline">Пауза</span>
                     </button>
 
                     <!-- Кнопка "Завершить" -->
