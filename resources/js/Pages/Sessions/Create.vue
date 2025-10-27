@@ -557,6 +557,7 @@ const form = useForm({
     title: '',
     description: '',
     template_id: null as number | null,
+    session_mode: 'standard' as 'standard' | 'pomodoro',
     auto_advance: false,
     blocks: [] as Block[],
 })
@@ -819,6 +820,11 @@ const templateId = computed({
         form.template_id = value
         loadTemplate(value)
     }
+})
+
+// Синхронизация session_mode в форме с выбранным режимом
+watch(sessionMode, (newMode) => {
+    form.session_mode = newMode
 })
 
 // Автоматическое обновление названия при изменении упражнений

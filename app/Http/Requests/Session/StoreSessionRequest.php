@@ -45,6 +45,8 @@ class StoreSessionRequest extends FormRequest
             'title'          => 'required|string|max:255',
             'description'    => 'nullable|string',
             'template_id'    => 'nullable|exists:practice_templates,id',
+            'session_mode'   => 'nullable|string|in:standard,pomodoro',
+            'auto_advance'   => 'nullable|boolean',
             'blocks'         => 'required|array|min:1',
             'blocks.*.title' => 'required|string|max:255',
             'blocks.*.description' => 'nullable|string',
