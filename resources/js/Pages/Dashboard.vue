@@ -66,25 +66,25 @@ const getStatusBadgeClass = (status: string): string => {
             </h2>
         </template>
 
-        <div class="py-12">
-            <div class="mx-auto max-w-7xl sm:px-6 lg:px-8">
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div class="py-6 sm:py-12">
+            <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                     <!-- Создать занятие -->
-                    <div class="bg-primary-50 overflow-hidden shadow-sm sm:rounded-lg dark:bg-neutral-800 dark:shadow-neutral-900/20">
-                        <div class="p-6">
-                            <div class="flex items-center">
+                    <div class="bg-primary-50 overflow-hidden shadow-sm rounded-lg dark:bg-neutral-800 dark:shadow-neutral-900/20">
+                        <div class="p-4 sm:p-6">
+                            <div class="flex items-start sm:items-center">
                                 <div class="flex-shrink-0">
-                                    <svg class="h-8 w-8 text-primary-600 dark:text-accent-400" fill="currentColor" viewBox="0 0 20 20">
+                                    <svg class="h-6 w-6 sm:h-8 sm:w-8 text-primary-600 dark:text-accent-400" fill="currentColor" viewBox="0 0 20 20">
                                         <path d="M18 3a1 1 0 00-1.196-.98l-10 2A1 1 0 006 5v9.114A4.369 4.369 0 005 14c-1.657 0-3 .895-3 2s1.343 2 3 2 3-.895 3-2V7.82l8-1.6v5.894A4.369 4.369 0 0015 12c-1.657 0-3 .895-3 2s1.343 2 3 2 3-.895 3-2V3z"/>
                                     </svg>
                                 </div>
-                                <div class="ml-4">
-                                    <h3 class="text-lg font-medium text-primary-900 dark:text-neutral-100">Создать занятие</h3>
-                                    <p class="text-sm text-primary-600 dark:text-neutral-400">Начните новое музыкальное занятие</p>
+                                <div class="ml-3 sm:ml-4 flex-1">
+                                    <h3 class="text-base sm:text-lg font-medium text-primary-900 dark:text-neutral-100">Создать занятие</h3>
+                                    <p class="text-xs sm:text-sm text-primary-600 dark:text-neutral-400 mt-1">Начните новое музыкальное занятие</p>
                                 </div>
                             </div>
-                            <div class="mt-4">
-                                <PrimaryButton @click="router.visit('/sessions/create')" class="w-full">
+                            <div class="mt-3 sm:mt-4">
+                                <PrimaryButton @click="router.visit('/sessions/create')" class="w-full text-sm sm:text-base py-2">
                                     Создать занятие
                                 </PrimaryButton>
                             </div>
@@ -92,21 +92,21 @@ const getStatusBadgeClass = (status: string): string => {
                     </div>
 
                     <!-- Мои занятия -->
-                    <div class="bg-danger-50 overflow-hidden shadow-sm sm:rounded-lg dark:bg-neutral-800 dark:shadow-neutral-900/20">
-                        <div class="p-6">
-                            <div class="flex items-center">
+                    <div class="bg-danger-50 overflow-hidden shadow-sm rounded-lg dark:bg-neutral-800 dark:shadow-neutral-900/20">
+                        <div class="p-4 sm:p-6">
+                            <div class="flex items-start sm:items-center">
                                 <div class="flex-shrink-0">
-                                    <svg class="h-8 w-8 text-danger-600 dark:text-success-400" fill="currentColor" viewBox="0 0 20 20">
+                                    <svg class="h-6 w-6 sm:h-8 sm:w-8 text-danger-600 dark:text-success-400" fill="currentColor" viewBox="0 0 20 20">
                                         <path d="M18 3a1 1 0 00-1.196-.98l-10 2A1 1 0 006 5v9.114A4.369 4.369 0 005 14c-1.657 0-3 .895-3 2s1.343 2 3 2 3-.895 3-2V7.82l8-1.6v5.894A4.369 4.369 0 0015 12c-1.657 0-3 .895-3 2s1.343 2 3 2 3-.895 3-2V3z"/>
                                     </svg>
                                 </div>
-                                <div class="ml-4">
-                                    <h3 class="text-lg font-medium text-primary-900 dark:text-neutral-100">Мои занятия</h3>
-                                    <p class="text-sm text-primary-600 dark:text-neutral-400">Просмотр и управление занятиями</p>
+                                <div class="ml-3 sm:ml-4 flex-1">
+                                    <h3 class="text-base sm:text-lg font-medium text-primary-900 dark:text-neutral-100">Мои занятия</h3>
+                                    <p class="text-xs sm:text-sm text-primary-600 dark:text-neutral-400 mt-1">Просмотр и управление занятиями</p>
                                 </div>
                             </div>
-                            <div class="mt-4">
-                                <PrimaryButton @click="router.visit('/sessions')" class="w-full">
+                            <div class="mt-3 sm:mt-4">
+                                <PrimaryButton @click="router.visit('/sessions')" class="w-full text-sm sm:text-base py-2">
                                     Открыть занятия
                                 </PrimaryButton>
                             </div>
@@ -114,21 +114,21 @@ const getStatusBadgeClass = (status: string): string => {
                     </div>
 
                     <!-- Статистика -->
-                    <div class="bg-warning-50 overflow-hidden shadow-sm sm:rounded-lg dark:bg-neutral-800 dark:shadow-neutral-900/20">
-                        <div class="p-6">
-                            <div class="flex items-center">
+                    <div class="bg-warning-50 overflow-hidden shadow-sm rounded-lg dark:bg-neutral-800 dark:shadow-neutral-900/20">
+                        <div class="p-4 sm:p-6">
+                            <div class="flex items-start sm:items-center">
                                 <div class="flex-shrink-0">
-                                    <svg class="h-8 w-8 text-warning-600 dark:text-accent-400" fill="currentColor" viewBox="0 0 20 20">
+                                    <svg class="h-6 w-6 sm:h-8 sm:w-8 text-warning-600 dark:text-accent-400" fill="currentColor" viewBox="0 0 20 20">
                                         <path d="M18 3a1 1 0 00-1.196-.98l-10 2A1 1 0 006 5v9.114A4.369 4.369 0 005 14c-1.657 0-3 .895-3 2s1.343 2 3 2 3-.895 3-2V7.82l8-1.6v5.894A4.369 4.369 0 0015 12c-1.657 0-3 .895-3 2s1.343 2 3 2 3-.895 3-2V3z"/>
                                     </svg>
                                 </div>
-                                <div class="ml-4">
-                                    <h3 class="text-lg font-medium text-primary-900 dark:text-neutral-100">Статистика</h3>
-                                    <p class="text-sm text-primary-600 dark:text-neutral-400">Ваш прогресс в обучении</p>
+                                <div class="ml-3 sm:ml-4 flex-1">
+                                    <h3 class="text-base sm:text-lg font-medium text-primary-900 dark:text-neutral-100">Статистика</h3>
+                                    <p class="text-xs sm:text-sm text-primary-600 dark:text-neutral-400 mt-1">Ваш прогресс в обучении</p>
                                 </div>
                             </div>
-                            <div class="mt-4">
-                                <PrimaryButton @click="router.visit('/statistics')" class="w-full">
+                            <div class="mt-3 sm:mt-4">
+                                <PrimaryButton @click="router.visit('/statistics')" class="w-full text-sm sm:text-base py-2">
                                     Открыть статистику
                                 </PrimaryButton>
                             </div>
@@ -142,16 +142,16 @@ const getStatusBadgeClass = (status: string): string => {
                 </div>
 
                 <!-- Упражнения -->
-                <div class="mt-8 bg-white overflow-hidden shadow-sm sm:rounded-lg dark:bg-neutral-800 dark:shadow-neutral-900/20">
-                    <div class="p-6">
-                        <div class="flex justify-between items-center mb-4">
-                            <h3 class="text-lg font-medium text-neutral-900 dark:text-neutral-100">Мои упражнения</h3>
-                            <div class="flex space-x-2">
-                                <PrimaryButton @click="router.visit('/exercises')" size="sm">
+                <div class="mt-4 sm:mt-8 bg-white overflow-hidden shadow-sm rounded-lg dark:bg-neutral-800 dark:shadow-neutral-900/20">
+                    <div class="p-4 sm:p-6">
+                        <div class="flex flex-col sm:flex-row justify-between sm:items-center mb-4 gap-3">
+                            <h3 class="text-base sm:text-lg font-medium text-neutral-900 dark:text-neutral-100">Мои упражнения</h3>
+                            <div class="flex flex-col sm:flex-row gap-2">
+                                <PrimaryButton @click="router.visit('/exercises')" size="sm" class="text-xs sm:text-sm">
                                     Все упражнения
                                 </PrimaryButton>
-                                <PrimaryButton @click="router.visit('/exercises/create')" size="sm">
-                                    + Добавить упражнение
+                                <PrimaryButton @click="router.visit('/exercises/create')" size="sm" class="text-xs sm:text-sm">
+                                    + Добавить
                                 </PrimaryButton>
                             </div>
                         </div>
@@ -169,24 +169,21 @@ const getStatusBadgeClass = (status: string): string => {
                             </PrimaryButton>
                         </div>
                         
-                        <div v-else class="space-y-3">
-                            <div v-for="exercise in exercises.slice(0, 5)" :key="exercise.id" class="flex items-center justify-between p-3 bg-neutral-50 dark:bg-neutral-700 rounded-lg">
-                                <div class="flex items-center space-x-3">
-                                    <span class="text-2xl">{{ getTypeIcon(exercise.type) }}</span>
-                                    <div>
-                                        <h4 class="font-medium text-neutral-900 dark:text-neutral-100">{{ exercise.title }}</h4>
-                                        <div class="flex items-center space-x-2 text-sm text-neutral-500 dark:text-neutral-400">
-                                            <span>{{ exercise.type_label }}</span>
-                                            <span>•</span>
-                                            <span>{{ exercise.planned_duration }} мин</span>
-                                            <span class="px-2 py-1 text-xs font-medium rounded-full bg-neutral-100 text-neutral-800 dark:bg-neutral-600 dark:text-neutral-200">
-                                                Готово к использованию
-                                            </span>
+                        <div v-else class="space-y-2 sm:space-y-3">
+                            <div v-for="exercise in exercises.slice(0, 5)" :key="exercise.id" class="flex flex-col sm:flex-row sm:items-center sm:justify-between p-3 bg-neutral-50 dark:bg-neutral-700 rounded-lg gap-3">
+                                <div class="flex items-start sm:items-center space-x-3 flex-1 min-w-0">
+                                    <span class="text-xl sm:text-2xl flex-shrink-0">{{ getTypeIcon(exercise.type) }}</span>
+                                    <div class="min-w-0 flex-1">
+                                        <h4 class="font-medium text-sm sm:text-base text-neutral-900 dark:text-neutral-100 truncate">{{ exercise.title }}</h4>
+                                        <div class="flex flex-wrap items-center gap-1 sm:gap-2 text-xs sm:text-sm text-neutral-500 dark:text-neutral-400 mt-1">
+                                            <span class="whitespace-nowrap">{{ exercise.type_label }}</span>
+                                            <span class="hidden sm:inline">•</span>
+                                            <span class="whitespace-nowrap">{{ exercise.planned_duration }} мин</span>
                                         </div>
                                     </div>
                                 </div>
-                                <div class="flex space-x-2">
-                                    <PrimaryButton @click="router.visit('/exercises')" size="sm">
+                                <div class="flex space-x-2 sm:flex-shrink-0">
+                                    <PrimaryButton @click="router.visit('/exercises')" size="sm" class="text-xs sm:text-sm flex-1 sm:flex-initial">
                                         Управлять
                                     </PrimaryButton>
                                 </div>
@@ -202,15 +199,15 @@ const getStatusBadgeClass = (status: string): string => {
                 </div>
 
                 <!-- Добро пожаловать -->
-                <div class="mt-8 bg-white overflow-hidden shadow-sm sm:rounded-lg dark:bg-neutral-800 dark:shadow-neutral-900/20">
-                    <div class="p-6">
-                        <h3 class="text-lg font-medium text-neutral-900 dark:text-neutral-100 mb-4">{{ t('dashboard.welcome') }}</h3>
-                        <p class="text-neutral-600 dark:text-neutral-300 mb-4">
+                <div class="mt-4 sm:mt-8 bg-white overflow-hidden shadow-sm rounded-lg dark:bg-neutral-800 dark:shadow-neutral-900/20">
+                    <div class="p-4 sm:p-6">
+                        <h3 class="text-base sm:text-lg font-medium text-neutral-900 dark:text-neutral-100 mb-3 sm:mb-4">{{ t('dashboard.welcome') }}</h3>
+                        <p class="text-sm sm:text-base text-neutral-600 dark:text-neutral-300 mb-3 sm:mb-4">
                             {{ t('dashboard.description') }}
                         </p>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-neutral-500 dark:text-neutral-400">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs sm:text-sm text-neutral-500 dark:text-neutral-400">
                             <div>
-                                <h4 class="font-medium text-neutral-900 dark:text-neutral-100 mb-2">{{ t('dashboard.features') }}:</h4>
+                                <h4 class="font-medium text-sm sm:text-base text-neutral-900 dark:text-neutral-100 mb-2">{{ t('dashboard.features') }}:</h4>
                                 <ul class="space-y-1">
                                     <li>• {{ t('dashboard.feature1') }}</li>
                                     <li>• {{ t('dashboard.feature2') }}</li>
@@ -219,7 +216,7 @@ const getStatusBadgeClass = (status: string): string => {
                                 </ul>
                             </div>
                             <div>
-                                <h4 class="font-medium text-neutral-900 dark:text-neutral-100 mb-2">{{ t('dashboard.howToStart') }}:</h4>
+                                <h4 class="font-medium text-sm sm:text-base text-neutral-900 dark:text-neutral-100 mb-2">{{ t('dashboard.howToStart') }}:</h4>
                                 <ul class="space-y-1">
                                     <li>• {{ t('dashboard.step1') }}</li>
                                     <li>• {{ t('dashboard.step2') }}</li>
