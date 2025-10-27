@@ -75,41 +75,41 @@
                              :class="getBlockProgressClass(block.status)">
                         </div>
 
-                        <div class="flex items-center justify-between">
-                            <div class="flex items-center space-x-3 flex-1 min-w-0">
+                        <div class="flex flex-wrap sm:flex-nowrap items-center justify-between gap-2">
+                            <div class="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
                                 <!-- Drag handle - иконка для визуального указания -->
-                                <div 
+                                <div
                                     v-if="canReorder"
                                     class="flex-shrink-0 text-primary-400 dark:text-neutral-500 group-hover:text-accent-500 dark:group-hover:text-accent-400 transition-all group-hover:scale-110"
                                     title="Зажмите и перетащите"
                                 >
-                                    <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <svg class="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 8h16M4 16h16" />
                                     </svg>
                                 </div>
-                                
+
                                 <!-- Номер упражнения -->
-                                <div 
-                                    class="flex-shrink-0 w-6 h-6 sm:w-8 sm:h-8 rounded-full flex items-center justify-center transition-all"
+                                <div
+                                    class="flex-shrink-0 w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 rounded-full flex items-center justify-center transition-all"
                                     :class="canReorder ? 'bg-accent-100 dark:bg-accent-900/30' : 'bg-primary-100 dark:bg-neutral-700'"
                                 >
-                                    <span 
+                                    <span
                                         class="text-xs sm:text-sm font-bold transition-colors"
                                         :class="canReorder ? 'text-accent-600 dark:text-accent-400' : 'text-primary-600 dark:text-neutral-300'"
                                     >
                                         {{ block.sort_order }}
                                     </span>
                                 </div>
-                                
-                                <div class="flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 rounded-lg"
+
+                                <div class="flex items-center justify-center w-7 h-7 sm:w-8 sm:h-8 md:w-10 md:h-10 rounded-lg flex-shrink-0"
                                      :class="getBlockIconBgClass(block.status)">
-                                    <span class="text-lg sm:text-xl">{{ getTypeIcon(block.type) }}</span>
+                                    <span class="text-base sm:text-lg md:text-xl">{{ getTypeIcon(block.type) }}</span>
                                 </div>
                                 <div class="flex-1 min-w-0">
                                     <h4 class="text-sm sm:text-base font-semibold text-primary-800 dark:text-neutral-100 truncate">
                                         {{ block.title }}
                                     </h4>
-                                    <div class="flex items-center space-x-2 mt-1">
+                                    <div class="flex flex-wrap items-center gap-x-2 gap-y-1 mt-1">
                                         <span :class="getBlockBadgeClass(block.status)">
                                             {{ getStatusLabel(block.status) }}
                                         </span>
@@ -120,8 +120,8 @@
                                             ({{ block.actual_duration }} мин)
                                         </span>
                                         <!-- Счетчик записей -->
-                                        <span 
-                                            v-if="block.audioRecordings && block.audioRecordings.length > 0" 
+                                        <span
+                                            v-if="block.audioRecordings && block.audioRecordings.length > 0"
                                             class="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 rounded-full"
                                             :title="`Записей: ${block.audioRecordings.length}`"
                                         >
@@ -135,7 +135,7 @@
                             <button
                                 v-if="(block.status === 'planned' || block.status === 'paused') && !props.autoAdvance"
                                 @click="startBlock(block.id)"
-                                class="ml-2 px-3 py-1.5 sm:px-4 sm:py-2 bg-accent-500 hover:bg-accent-600 text-white text-xs sm:text-sm font-medium rounded-lg transition-colors duration-200 flex items-center space-x-1"
+                                class="px-3 py-1.5 sm:px-4 sm:py-2 bg-accent-500 hover:bg-accent-600 text-white text-xs sm:text-sm font-medium rounded-lg transition-colors duration-200 flex items-center gap-1 flex-shrink-0"
                                 :disabled="isStarting"
                             >
                                 <svg class="w-3 h-3 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

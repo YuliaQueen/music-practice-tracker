@@ -1,12 +1,13 @@
 <template>
     <AuthenticatedLayout>
         <template #header>
-            <div class="flex justify-between items-center">
+            <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
                 <h2 class="font-semibold text-xl text-primary-800 dark:text-neutral-200 leading-tight">
                     Мои упражнения
                 </h2>
-                <PrimaryButton @click="router.visit('/exercises/create')">
-                    + Создать упражнение
+                <PrimaryButton @click="router.visit('/exercises/create')" class="w-full sm:w-auto">
+                    <span class="hidden sm:inline">+ Создать упражнение</span>
+                    <span class="sm:hidden">+ Новое</span>
                 </PrimaryButton>
             </div>
         </template>
@@ -83,39 +84,42 @@
 
                         <div v-else class="space-y-4">
                             <div v-for="exercise in exercises.data" :key="exercise.id" class="border border-primary-200 dark:border-neutral-700 rounded-lg p-4 hover:bg-primary-50 dark:hover:bg-neutral-700 transition-colors">
-                                <div class="flex items-center justify-between">
-                                    <div class="flex items-center space-x-4">
-                                        <span class="text-3xl">{{ getTypeIcon(exercise.type) }}</span>
-                                        <div>
-                                            <h3 class="text-lg font-medium text-primary-900 dark:text-neutral-100">{{ exercise.title }}</h3>
-                                            <p v-if="exercise.description" class="text-sm text-primary-700 dark:text-neutral-300 mt-1">{{ exercise.description }}</p>
-                                            <div class="flex items-center space-x-3 mt-2">
-                                                <span class="text-sm text-primary-600 dark:text-neutral-400">{{ exercise.type_label }}</span>
-                                                <span class="text-sm text-primary-600 dark:text-neutral-400">•</span>
-                                                <span class="text-sm text-primary-600 dark:text-neutral-400">{{ exercise.planned_duration }} мин</span>
+                                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                                    <div class="flex items-start sm:items-center gap-3 sm:gap-4 min-w-0 flex-1">
+                                        <span class="text-2xl sm:text-3xl flex-shrink-0">{{ getTypeIcon(exercise.type) }}</span>
+                                        <div class="min-w-0 flex-1">
+                                            <h3 class="text-base sm:text-lg font-medium text-primary-900 dark:text-neutral-100 truncate">{{ exercise.title }}</h3>
+                                            <p v-if="exercise.description" class="text-xs sm:text-sm text-primary-700 dark:text-neutral-300 mt-1 line-clamp-2">{{ exercise.description }}</p>
+                                            <div class="flex flex-wrap items-center gap-x-2 gap-y-1 mt-2">
+                                                <span class="text-xs sm:text-sm text-primary-600 dark:text-neutral-400">{{ exercise.type_label }}</span>
+                                                <span class="text-xs sm:text-sm text-primary-600 dark:text-neutral-400">•</span>
+                                                <span class="text-xs sm:text-sm text-primary-600 dark:text-neutral-400">{{ exercise.planned_duration }} мин</span>
                                                 <span :class="getStatusBadgeClass(exercise.status)">{{ exercise.status_label }}</span>
                                             </div>
                                         </div>
                                     </div>
-                                    
-                                    <div class="flex space-x-2">
+
+                                    <div class="flex flex-wrap sm:flex-nowrap gap-2 sm:flex-shrink-0">
                                         <PrimaryButton
                                             @click="router.visit('/exercises/' + exercise.id)"
                                             size="sm"
+                                            class="flex-1 sm:flex-initial"
                                         >
                                             Открыть
                                         </PrimaryButton>
-                                        
+
                                         <SecondaryButton
                                             @click="addToSession(exercise)"
                                             size="sm"
+                                            class="flex-1 sm:flex-initial whitespace-nowrap"
                                         >
                                             + В занятие
                                         </SecondaryButton>
-                                        
+
                                         <DangerButton
                                             @click="deleteExercise(exercise)"
                                             size="sm"
+                                            class="sm:flex-initial"
                                         >
                                             🗑️
                                         </DangerButton>
