@@ -2,9 +2,17 @@
     <AuthenticatedLayout>
         <template #header>
             <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
-                <h2 class="font-semibold text-xl text-primary-800 dark:text-neutral-200 leading-tight">
-                    Мои упражнения
-                </h2>
+                <div class="flex items-center gap-4">
+                    <h2 class="font-semibold text-xl text-primary-800 dark:text-neutral-200 leading-tight">
+                        Мои упражнения
+                    </h2>
+                    <button
+                        @click="router.visit('/exercises-archived')"
+                        class="text-sm text-accent-600 dark:text-accent-400 hover:text-accent-800 dark:hover:text-accent-300 whitespace-nowrap"
+                    >
+                        📦 Архив
+                    </button>
+                </div>
                 <PrimaryButton @click="router.visit('/exercises/create')" class="w-full sm:w-auto">
                     <span class="hidden sm:inline">+ Создать упражнение</span>
                     <span class="sm:hidden">+ Новое</span>
@@ -114,6 +122,15 @@
                                             class="flex-1 sm:flex-initial whitespace-nowrap"
                                         >
                                             + В занятие
+                                        </SecondaryButton>
+
+                                        <SecondaryButton
+                                            @click="archiveExercise(exercise)"
+                                            size="sm"
+                                            class="sm:flex-initial whitespace-nowrap"
+                                            title="Отметить как изученное и переместить в архив"
+                                        >
+                                            ✓ Изучено
                                         </SecondaryButton>
 
                                         <DangerButton
@@ -293,7 +310,6 @@ const getStatusBadgeClass = (status: string): string => {
 }
 
 const addToSession = (exercise: Exercise) => {
-    // Переходим к созданию сессии с предзаполненным упражнением
     router.visit('/sessions/create', {
         data: {
             exercise_id: exercise.id,
@@ -303,6 +319,20 @@ const addToSession = (exercise: Exercise) => {
             exercise_description: exercise.description
         }
     })
+}
+
+const archiveExercise = (exercise: Exercise) => {
+    if (confirm(`Отметить упражнение "${exercise.title}" как изученное и переместить в архив?`)) {
+        router.post(`/exercises/${exercise.id}/archive`, {}, {
+            preserveScroll: true,
+            onSuccess: () => {
+                // Успешно архивировано
+            },
+            onError: () => {
+                alert('Ошибка при архивировании упражнения')
+            }
+        })
+    }
 }
 
 const deleteExercise = (exercise: Exercise) => {

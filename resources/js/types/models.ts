@@ -4,6 +4,46 @@
  */
 
 /**
+ * Упражнение
+ */
+export interface Exercise {
+    id: number
+    user_id: number
+    title: string
+    description: string | null
+    type: string
+    planned_duration: number
+    actual_duration: number | null
+    status: string
+    scheduled_for: string | null
+    started_at: string | null
+    completed_at: string | null
+    metadata: Record<string, any> | null
+    is_archived: boolean
+    archived_at: string | null
+    started_learning_at: string | null
+    completed_learning_at: string | null
+    created_at: string
+    updated_at: string
+    sessions_count?: number
+    total_practice_time?: number
+    average_practice_time?: number
+    learning_days?: number | null
+}
+
+/**
+ * Статистика изучения упражнения
+ */
+export interface ExerciseStatistics {
+    sessions_count: number
+    total_practice_time: number
+    average_practice_time: number
+    learning_days: number | null
+    started_at: string | null
+    completed_at: string | null
+}
+
+/**
  * Аудио запись исполнения
  */
 export interface AudioRecording {

@@ -20,10 +20,11 @@ Route::get('/', function () {
 
 Route::get('/dashboard', function () {
     $exercises = \App\Domains\Planning\Models\Exercise::forUser(auth()->id())
+        ->notArchived()
         ->orderBy('created_at', 'desc')
         ->limit(10)
         ->get();
-        
+
     return Inertia::render('Dashboard', [
         'exercises' => $exercises,
     ]);
@@ -48,7 +49,10 @@ Route::middleware('auth')->group(function () {
     
     // Упражнения
     Route::resource('exercises', ExerciseController::class);
-    
+    Route::get('/exercises-archived', [ExerciseController::class, 'archived'])->name('exercises.archived');
+    Route::post('/exercises/{exercise}/archive', [ExerciseController::class, 'archive'])->name('exercises.archive');
+    Route::post('/exercises/{exercise}/restore', [ExerciseController::class, 'restore'])->name('exercises.restore');
+
     // Цели
     Route::resource('goals', GoalController::class);
     Route::patch('/goals/{goal}/progress', [GoalController::class, 'updateProgress'])->name('goals.progress');

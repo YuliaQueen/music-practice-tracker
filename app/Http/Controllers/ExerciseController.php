@@ -7,6 +7,7 @@ namespace App\Http\Controllers;
 use Inertia\Inertia;
 use Inertia\Response;
 use Illuminate\Http\Request;
+use App\Services\ExerciseService;
 use Illuminate\Http\RedirectResponse;
 use App\Domains\Planning\Models\Exercise;
 use App\DTOs\Exercises\CreateExerciseDTO;
@@ -21,8 +22,12 @@ class ExerciseController extends Controller
      */
     private const EXERCISES_PER_PAGE = 10;
 
+    public function __construct(
+        private ExerciseService $exerciseService
+    ) {}
+
     /**
-     * Показать список упражнений пользователя
+     * Показать список активных упражнений пользователя
      */
     public function index(Request $request): Response
     {
@@ -31,20 +36,11 @@ class ExerciseController extends Controller
             'type'   => $request->input('type'),
         ];
 
-        $query = Exercise::forUser(auth()->id());
-
-        // Фильтр по названию
-        if (!empty($filters['search'])) {
-            $query->where('title', 'like', '%' . $filters['search'] . '%');
-        }
-
-        // Фильтр по типу
-        if (!empty($filters['type'])) {
-            $query->where('type', $filters['type']);
-        }
-
-        $exercises = $query->orderBy('created_at', 'desc')
-            ->paginate(self::EXERCISES_PER_PAGE);
+        $exercises = $this->exerciseService->getActiveExercises(
+            auth()->user(),
+            self::EXERCISES_PER_PAGE,
+            $filters
+        );
 
         return Inertia::render('Exercises/Index', [
             'exercises' => $exercises,
@@ -127,6 +123,55 @@ class ExerciseController extends Controller
 
         return redirect()->route('exercises.index')
             ->with('success', 'Упражнение успешно удалено');
+    }
+
+    /**
+     * Показать список архивных упражнений
+     */
+    public function archived(): Response
+    {
+        $exercises = $this->exerciseService->getArchivedExercises(
+            auth()->user(),
+            self::EXERCISES_PER_PAGE
+        );
+
+        return Inertia::render('Exercises/Archived', [
+            'exercises' => $exercises,
+        ]);
+    }
+
+    /**
+     * Архивировать упражнение
+     */
+    public function archive(Exercise $exercise): RedirectResponse
+    {
+        $this->authorize('archive', $exercise);
+
+        $result = $this->exerciseService->archiveExercise($exercise);
+
+        if (!$result['success']) {
+            return back()->with('error', $result['message']);
+        }
+
+        return redirect()->route('exercises.index')
+            ->with('success', $result['message']);
+    }
+
+    /**
+     * Восстановить упражнение из архива
+     */
+    public function restore(Exercise $exercise): RedirectResponse
+    {
+        $this->authorize('restore', $exercise);
+
+        $result = $this->exerciseService->restoreExercise($exercise);
+
+        if (!$result['success']) {
+            return back()->with('error', $result['message']);
+        }
+
+        return redirect()->route('exercises.archived')
+            ->with('success', $result['message']);
     }
 
 }

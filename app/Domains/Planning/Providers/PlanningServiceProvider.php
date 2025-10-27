@@ -6,8 +6,10 @@ namespace App\Domains\Planning\Providers;
 
 use Illuminate\Support\ServiceProvider;
 use App\Domains\Planning\Repositories\SessionRepository;
+use App\Domains\Planning\Repositories\ExerciseRepository;
 use App\Domains\Planning\Repositories\SessionBlockRepository;
 use App\Domains\Planning\Contracts\SessionRepositoryInterface;
+use App\Domains\Planning\Contracts\ExerciseRepositoryInterface;
 use App\Domains\Planning\Contracts\SessionBlockRepositoryInterface;
 
 /**
@@ -24,6 +26,12 @@ class PlanningServiceProvider extends ServiceProvider
         $this->app->bind(
             SessionRepositoryInterface::class,
             SessionRepository::class
+        );
+
+        // Регистрация репозитория упражнений
+        $this->app->bind(
+            ExerciseRepositoryInterface::class,
+            ExerciseRepository::class
         );
 
         // Регистрация репозитория блоков сессий

@@ -183,8 +183,8 @@ class SessionService
      */
     public function getPreviousExercises(int $userId): Collection
     {
-        // Получаем все упражнения пользователя
         $exercises = Exercise::where('user_id', $userId)
+            ->notArchived()
             ->select('title', 'description', 'type', 'planned_duration')
             ->orderBy('title')
             ->get();
