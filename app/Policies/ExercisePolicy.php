@@ -32,4 +32,20 @@ class ExercisePolicy
     {
         return $user->id === $exercise->user_id;
     }
+
+    /**
+     * Определить, может ли пользователь архивировать упражнение
+     */
+    public function archive(User $user, Exercise $exercise): bool
+    {
+        return $user->id === $exercise->user_id && !$exercise->is_archived;
+    }
+
+    /**
+     * Определить, может ли пользователь восстановить упражнение из архива
+     */
+    public function restore(User $user, Exercise $exercise): bool
+    {
+        return $user->id === $exercise->user_id && $exercise->is_archived;
+    }
 }
